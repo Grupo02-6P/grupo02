@@ -6,12 +6,12 @@ services:
       POSTGRES_USER: meu_user
       POSTGRES_PASSWORD: minha_senha
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U meu_user -d meu_banco"]
+      test: ['CMD-SHELL', 'pg_isready -U meu_user -d meu_banco']
       interval: 5s
       timeout: 5s
       retries: 5
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   web:
     build: .
@@ -19,7 +19,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       db:
         condition: service_healthy
