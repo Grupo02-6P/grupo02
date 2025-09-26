@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import Login from '../pages/Login';
 import Home from '../pages/Home';
 import About from '../pages/About';
+import Config from '../pages/Config';
 
 
 export interface RouteConfig {
@@ -31,6 +32,12 @@ export const routes: RouteConfig[] = [
     path: '/about', 
     element: About, 
     label: 'About',
+    isProtected: true // 👈 Se quiser que About seja pública
+  },
+  { 
+    path: '/config', 
+    element: Config, 
+    label: 'Configurações',
     isProtected: true // 👈 Se quiser que About seja pública
   },
 ];

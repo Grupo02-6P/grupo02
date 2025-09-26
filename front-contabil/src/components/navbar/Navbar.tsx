@@ -17,10 +17,11 @@ const Navbar: React.FC = () => {
   }
 
   const navigationItems: NavigationItem[] = [
-    { path: '/users', label: 'Usuários' },
     { path: '/accounting', label: 'Plano de Contas' },
     { path: '/financial', label: 'Lançamentos' },
-    { path: '/reports', label: 'Relatórios' }
+    { path: '/reports', label: 'Relatórios' },
+    { path: '/partners', label: 'Parceiros' },
+    { path: '/config', label: 'Configurações' }
   ];
 
   const isActivePath = (path: string): boolean => {
