@@ -11,7 +11,8 @@ export interface RouteConfig {
   path: string;
   element: ComponentType;
   label?: string;
-  isProtected?: boolean; // 👈 Nova propriedade
+  isProtected?: boolean;
+  requiresPermission?: boolean; // Se a rota precisa verificar permissões
 }
 
 export const routes: RouteConfig[] = [
@@ -38,6 +39,7 @@ export const routes: RouteConfig[] = [
     path: '/config', 
     element: Config, 
     label: 'Configurações',
-    isProtected: true // 👈 Se quiser que About seja pública
+    isProtected: true,
+    requiresPermission: true // 👈 Rota que precisa verificar permissões
   },
 ];

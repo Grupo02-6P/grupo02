@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import Input from "../input/Input";
 import Button from "../button/Button";
 import { ConfirmModal } from "../modal/ConfirmModal";
+import { useRoutePermissions } from "../../context/PermissionContext";
 import type { Empresa, EmpresaFormData } from "../../types/Empresa";
 
 const EmpresaConfig: React.FC = () => {
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
   const [empresaToDelete, setEmpresaToDelete] = useState<Empresa | null>(null);
+  
+  // Obter permissões para a rota /config
+  const { canView, canEdit, canCreate, canDelete } = useRoutePermissions('/config');
   const [form, setForm] = useState<EmpresaFormData>({
     nome: "",
     cnpj: "",
@@ -240,18 +244,22 @@ const EmpresaConfig: React.FC = () => {
           <h2 className="text-2xl font-semibold text-gray-800">Empresas Cadastradas</h2>
           <p className="text-gray-600 mt-1">Gerencie as empresas do sistema</p>
         </div>
-        <Button onClick={handleNewEmpresa} className="px-6 py-2">
-          + Nova Empresa
-        </Button>
+        {canCreate && (
+          <Button onClick={handleNewEmpresa} className="px-6 py-2">
+            + Nova Empresa
+          </Button>
+        )}
       </div>
       
       <div className="p-8">
         {empresas.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg mb-4">Nenhuma empresa cadastrada</p>
-            <Button onClick={handleNewEmpresa} className="px-6 py-2">
-              Cadastrar Primeira Empresa
-            </Button>
+{canCreate && (
+              <Button onClick={handleNewEmpresa} className="px-6 py-2">
+                Cadastrar Primeira Empresa
+              </Button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -289,18 +297,25 @@ const EmpresaConfig: React.FC = () => {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(empresa)}
-                          className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 rounded hover:bg-blue-50"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(empresa)}
-                          className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 rounded hover:bg-red-50"
-                        >
-                          Excluir
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => handleEdit(empresa)}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 rounded hover:bg-blue-50"
+                          >
+                            Editar
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(empresa)}
+                            className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 rounded hover:bg-red-50"
+                          >
+                            Excluir
+                          </button>
+                        )}
+                        {!canEdit && !canDelete && (
+                          <span className="text-gray-400 text-sm">Sem permissões</span>
+                        )}
                       </div>
                     </td>
                   </tr>

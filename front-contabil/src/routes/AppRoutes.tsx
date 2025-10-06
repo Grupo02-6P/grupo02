@@ -1,11 +1,17 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePermissions } from '../context/PermissionContext';
 import { routes } from './routesConfig';
 import type { JSX } from 'react';
 
 // Componente para rotas protegidas
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ 
+  children: React.ReactNode;
+  requiresPermission?: boolean;
+  routePath?: string;
+}> = ({ children, requiresPermission, routePath }) => {
   const { isAuthenticated, loading } = useAuth();
+  const { hasPermission } = usePermissions();
 
   if (loading) {
     return (
@@ -17,6 +23,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Verificar permissões se necessário
+  if (requiresPermission && routePath && !hasPermission(routePath, 'canView')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-6xl font-bold text-gray-900">403</h1>
+          <p className="text-xl text-gray-600 mt-4">Acesso negado</p>
+          <p className="text-gray-500 mt-2">Você não tem permissão para acessar esta página</p>
+          <button 
+            onClick={() => window.history.back()}
+            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Voltar
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
@@ -45,13 +70,13 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 function AppRoutes(): JSX.Element {
   return (
     <Routes>
-      {routes.map(({ path, element: Element, isProtected }) => (
+      {routes.map(({ path, element: Element, isProtected, requiresPermission }) => (
         <Route 
           key={path} 
           path={path} 
           element={
             isProtected ? (
-              <ProtectedRoute>
+              <ProtectedRoute requiresPermission={requiresPermission} routePath={path}>
                 <Element />
               </ProtectedRoute>
             ) : (
