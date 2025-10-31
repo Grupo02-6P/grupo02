@@ -4,11 +4,17 @@ from django.db import models
 class CustomUser(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    company = models.CharField(max_length=255)
+    company = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.username
-    
+
     class Meta:
-        verbose_name = 'Usuário'
-        verbose_name_plural = 'Usuários'
+        verbose_name = "Usuário"
+        verbose_name_plural = "Usuários"
+        permissions = [
+            ("access_tela1", "Pode acessar Tela 1"),
+            ("access_tela2", "Pode acessar Tela 2"),
+            ("access_tela3", "Pode acessar Tela 3"),
+            ("access_suport", "Pode acessar suporte"),
+        ]

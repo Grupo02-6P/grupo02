@@ -1,4 +1,5 @@
 from django.db import models
+from accounts.models import CustomUser
 
 
 # =========================
@@ -21,22 +22,6 @@ class GrupoPermissao(models.Model):
 
     def __str__(self):
         return self.nome
-
-
-class Usuario(models.Model):
-    empresa = models.ForeignKey(
-        Empresa, on_delete=models.CASCADE, related_name="usuarios"
-    )
-    login = models.CharField(max_length=100)
-    senha = models.CharField(max_length=255)  # será criptografada
-    ativo = models.BooleanField(default=True)
-    grupos = models.ManyToManyField(GrupoPermissao, related_name="usuarios", blank=True)
-
-    class Meta:
-        unique_together = ("empresa", "login")
-
-    def __str__(self):
-        return f"{self.login} ({self.empresa.nome})"
 
 
 # =========================
@@ -191,7 +176,7 @@ class Auditoria(models.Model):
     empresa = models.ForeignKey(
         Empresa, on_delete=models.CASCADE, related_name="auditorias"
     )
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    usuario = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     entidade = models.CharField(max_length=100)
     operacao = models.CharField(max_length=20)
     registro_id = models.IntegerField()

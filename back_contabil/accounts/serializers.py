@@ -4,9 +4,14 @@ from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
 
 class UserSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField()  # ← ADICIONE ESTA LINHA
+    
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'permissions']  # ← ADICIONE 'permissions' aqui
+
+    def get_permissions(self, obj):
+        return list(obj.get_all_permissions())
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()

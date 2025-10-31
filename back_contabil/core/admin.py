@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Auditoria, Empresa, TipoLancamento
 
-# Register your models here.
+admin.site.register(Auditoria)
+admin.site.register(TipoLancamento)
+admin.site.register(Empresa)
