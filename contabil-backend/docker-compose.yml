@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest_app_foods
+    restart: unless-stopped
+    ports:
+      - "${PORT}:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    command: >
+      sh -c "npx prisma migrate deploy && node dist/main.js"
+
+
+  postgres:
+    image: postgres
+    container_name: postgres_db_foods
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: foods
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

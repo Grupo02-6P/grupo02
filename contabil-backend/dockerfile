@@ -1,0 +1,47 @@
+# =========================
+# 1️⃣ Etapa de build
+# =========================
+FROM node:22.21-alpine3.21 AS builder
+
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Copia apenas os arquivos de dependência primeiro (para melhor cache)
+COPY package*.json ./
+
+# Instala as dependências (sem as dev para otimizar a imagem)
+RUN npm ci
+
+# Copia o restante do código
+COPY . .
+
+RUN npx prisma generate
+
+# Realiza o build da aplicação NestJS
+RUN npm run build
+
+# =========================
+# 2️⃣ Etapa final (produção)
+# =========================
+FROM node:22.21-alpine3.21 AS production
+
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Copia apenas os arquivos necessários para rodar
+COPY package*.json ./
+
+# Instala somente dependências de produção
+RUN npm ci --omit=dev
+
+# Copia os arquivos compilados da etapa de build
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma  
+
+RUN npx prisma generate
+
+# Expõe a porta padrão do Nest (ajuste se necessário)
+EXPOSE 3000
+
+# Comando para iniciar a aplicação
+CMD ["node", "dist/main.js"]

@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: react_app_foods
+    env_file:
+      - .env
+    ports:
+      - "4000:80"
+    restart: unless-stopped

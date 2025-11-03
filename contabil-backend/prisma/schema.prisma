@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  status   StatusUsers @default(ACTIVE)
+  password String
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  permissions Permission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  action      PermAction
+  fields      Json?
+  conditions  Json?
+  resourceId  String
+  resource    Resource         @relation(fields: [resourceId], references: [id])
+  roles       RolePermission[]
+}
+
+model Role {
+  id           String           @id @default(uuid())
+  name         String           @unique
+  description  String?
+  isDefault    Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime?         @updatedAt
+  rolePermissions RolePermission[]
+  users        User[]
+}
+
+model RolePermission {
+  id            String       @id @default(uuid())
+  roleId        String
+  permissionId  String
+  role          Role         @relation(fields: [roleId], references: [id])
+  permission    Permission   @relation(fields: [permissionId], references: [id])
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  cnpj      String   @unique
+  
+  status    Status @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String    @id @default(uuid())
+  code              String    @unique
+  name              String
+  description       String?
+  level             Int
+  acceptsPosting    Boolean   @default(false)
+  active            Status   @default(ACTIVE)
+  
+  parentAccountId   String?
+  parentAccount     Account?  @relation("ChildAccounts", fields: [parentAccountId], references: [id])
+  childAccounts     Account[] @relation("ChildAccounts")
+  
+  typeMovementAsCredit  typeMovement[] @relation("CreditAccount")
+  typeMovementAsDebit   typeMovement[] @relation("DebitAccount")
+
+  typeEntryAsCleared    typeEntry[]     @relation("ClearedAccount")
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model typeMovement {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  description String?
+
+  creditAccountId  String
+  debitAccountId   String
+  creditAccount   Account  @relation("CreditAccount", fields: [creditAccountId], references: [id])
+  debitAccount    Account  @relation("DebitAccount", fields: [debitAccountId], references: [id])
+
+  status    Status @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model typeEntry {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+
+  accountClearedId  String
+  accountCleared   Account  @relation("ClearedAccount", fields: [accountClearedId], references: [id])
+
+  status        Status       @default(ACTIVE)
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum PermAction {
+  manage
+  create
+  read
+  update
+  delete
+}
+
+enum StatusUsers {
+  ACTIVE
+  INACTIVE
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
