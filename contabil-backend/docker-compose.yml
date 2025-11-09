@@ -14,19 +14,17 @@ services:
     command: >
       sh -c "npx prisma migrate deploy && node dist/main.js"
 
-
   postgres:
     image: postgres
-    container_name: postgres_db_foods
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: foods
+      POSTGRES_DB: contabilize
     ports:
       - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:

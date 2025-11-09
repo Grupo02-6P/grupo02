@@ -11,10 +11,13 @@ import { PartnerModule } from './partner/partner.module';
 import { AccountModule } from './account/account.module';
 import { TypeMovementModule } from './type-movement/type-movement.module';
 import { TypeEntryModule } from './type-entry/type-entry.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     PrismaModule,
     AuthModule,
     CaslModule,
@@ -24,8 +27,18 @@ import { TypeEntryModule } from './type-entry/type-entry.module';
     AccountModule,
     TypeMovementModule,
     TypeEntryModule,
+    ThrottlerModule.forRoot({
+      ttl: 60,   // Tempo em segundos
+      limit: 10, // Limite de requisições por TTL para cada IP
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule { }
