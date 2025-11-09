@@ -28,10 +28,12 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     AccountModule,
     TypeMovementModule,
     TypeEntryModule,
-    ThrottlerModule.forRoot({
-      ttl: 60,   // Tempo em segundos
-      limit: 10, // Limite de requisições por TTL para cada IP
-    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 segundos = 60000 milissegundos
+        limit: 10,  // Limite de requisições por TTL para cada IP
+      }
+    ]),
     PrometheusModule.register(),
   ],
   controllers: [AppController],

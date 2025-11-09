@@ -1,3 +1,5 @@
+version: '3.8' # Adicionando a versão por boa prática
+
 services:
   app:
     build:
@@ -13,6 +15,8 @@ services:
       - .env
     command: >
       sh -c "npx prisma migrate deploy && node dist/main.js"
+    networks:
+      - app-network
 
   postgres:
     image: postgres
@@ -25,6 +29,34 @@ services:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090" 
+    networks: 
+      - app-network
+    depends_on:
+      - app 
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000" 
+    networks: # <-- ADICIONADO
+      - app-network
+    depends_on:
+      - prometheus
 
 volumes:
-  postgres_data:
+  postgres_data: # (Você já tinha este)
+
+networks:
+  app-network:
+    driver: bridge
