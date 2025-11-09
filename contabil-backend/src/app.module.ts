@@ -13,6 +13,7 @@ import { TypeMovementModule } from './type-movement/type-movement.module';
 import { TypeEntryModule } from './type-entry/type-entry.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 
 @Module({
@@ -31,6 +32,7 @@ import { APP_GUARD } from '@nestjs/core';
       ttl: 60,   // Tempo em segundos
       limit: 10, // Limite de requisições por TTL para cada IP
     }),
+    PrometheusModule.register(),
   ],
   controllers: [AppController],
   providers: [
