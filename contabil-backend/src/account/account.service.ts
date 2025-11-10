@@ -11,9 +11,9 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 @Injectable()
 export class AccountService {
   constructor(
-      private prisma: PrismaService,
-      private abilityService: CaslAbilityService
-    ) {}
+    private prisma: PrismaService,
+    private abilityService: CaslAbilityService
+  ) { }
 
   async create(createAccountDto: CreateAccountDto) {
     const ability = this.abilityService.ability;
@@ -21,15 +21,15 @@ export class AccountService {
     if (!ability.can('create', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
-    
+
     console.log('CreateAccountDto:', createAccountDto);
-    
+
     // Validar se a conta pai existe quando parentAccountId é fornecido
     if (createAccountDto.parentAccountId) {
       const parentExists = await this.prisma.account.findUnique({
         where: { id: createAccountDto.parentAccountId },
       });
-      
+
       if (!parentExists) {
         throw new NotFoundException('Conta pai não encontrada');
       }
@@ -40,7 +40,7 @@ export class AccountService {
       // Definir explicitamente como null se não fornecido
       createAccountDto.parentAccountId = null;
     }
-    
+
     return this.prisma.account.create({
       data: createAccountDto,
       select: {
@@ -73,16 +73,16 @@ export class AccountService {
 
   async findAll(filterDto: FilterAccountDto): Promise<PaginatedResponse<any>> {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('read', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy, 
+    var {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
       sortOrder = 'desc',
       name,
       description,
@@ -125,15 +125,15 @@ export class AccountService {
     if (name) {
       where.name = { contains: name, mode: 'insensitive' };
     }
-    
+
     if (description) {
       where.description = { contains: description, mode: 'insensitive' };
     }
-    
+
     if (level !== undefined) {
       where.level = level;
     }
-    
+
     if (acceptsPosting !== undefined) {
       where.acceptsPosting = acceptsPosting == 'true' ? true : false;
     }
@@ -269,4 +269,29 @@ export class AccountService {
       data: { active: Status.INACTIVE }
     });
   }
+
+  async getAccountBalance(accountId: string) {
+    const debitSum = await this.prisma.journalLine.aggregate({
+      where: { accountId, type: 'DEBIT' },
+      _sum: { amount: true },
+    });
+
+    const creditSum = await this.prisma.journalLine.aggregate({
+      where: { accountId, type: 'CREDIT' },
+      _sum: { amount: true },
+    });
+
+    const totalDebit = debitSum._sum.amount ?? 0;
+    const totalCredit = creditSum._sum.amount ?? 0;
+    const balance = totalDebit - totalCredit;
+
+    return {
+      accountId,
+      totalDebit,
+      totalCredit,
+      balance,
+      type: balance >= 0 ? 'DEBIT' : 'CREDIT',
+    };
+  }
 }
+

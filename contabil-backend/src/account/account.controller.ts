@@ -1,3 +1,4 @@
+// account.controller.ts
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -39,4 +40,10 @@ export class AccountController {
   inactive(@Param('id') id: string) {
     return this.accountService.inactivate(id);
   }
+
+  @Get(':id/balance')
+  getBalance(@Param('id') id: string) {
+    return this.accountService.getAccountBalance(id);
+  }
+
 }
