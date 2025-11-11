@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FaArrowRight, FaUsers, FaHandshake } from "react-icons/fa";
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Receipt } from 'lucide-react';
 import { MdOutlineAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
 
 const Home: React.FC = () => {
@@ -61,6 +61,16 @@ const Home: React.FC = () => {
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
       permission: { resource: 'TypeEntry', action: 'read' }
+    },
+    {
+      title: 'Visualizar Lançamentos',
+      description: 'Gerenciar lançamentos financeiros',
+      icon: <Receipt size={24} />,
+      href: '/lancamentos/visualizar',
+      borderColor: 'border-orange-400',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600',
+      permission: { resource: 'Entry', action: 'read' }
     },
   ]
 
