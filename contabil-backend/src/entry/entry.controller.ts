@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { EntryService } from './entry.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
+import { BaseFilterDto } from 'src/common/dto/base-filter.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('entry')
 export class EntryController {
   constructor(private readonly entryService: EntryService) {}
@@ -13,8 +16,8 @@ export class EntryController {
   }
 
   @Get()
-  findAll() {
-    return this.entryService.findAll();
+  findAll(@Query() filterDto: BaseFilterDto) {
+    return this.entryService.findAll(filterDto);
   }
 
   @Get(':id')
