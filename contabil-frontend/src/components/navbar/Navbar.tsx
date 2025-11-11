@@ -8,7 +8,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Receipt
 } from 'lucide-react';
 import { FaUsers, FaHandshake } from "react-icons/fa";
 import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
@@ -141,6 +142,18 @@ const Navbar: React.FC = () => {
           path: '/tipo-entrada/cadastrar', 
           label: 'Cadastrar Tipo de Entrada',
           permission: { resource: 'TypeEntry', action: 'create' }
+        },
+      ]
+    },
+    { 
+      label: 'Lançamentos', 
+      icon: <Receipt  size={20} />,
+      permission: { resource: 'Entry', action: 'read' },
+      subItems: [
+        { 
+          path: '/lancamentos/visualizar', 
+          label: 'Visualizar Lançamentos',
+          permission: { resource: 'Entry', action: 'read' }
         },
       ]
     },
