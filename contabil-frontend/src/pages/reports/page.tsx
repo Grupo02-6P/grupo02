@@ -1,13 +1,15 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@/components/button/Button';
+import { useDebounce } from '@/hooks/useDebounce';
 
 import {
   generateReport,
   type CreateReportDto,
 } from '@/services/apiReport';
+import { type Account, getAccounts } from '@/services/apiAccount';
 
 export default function ReportsPage() {
   const [reportType, setReportType] =
@@ -16,8 +18,39 @@ export default function ReportsPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [showAccounts, setShowAccounts] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      fetchAccounts(debouncedSearchTerm);
+    } else {
+      setAccounts([]);
+      setShowAccounts(false);
+    }
+  }, [debouncedSearchTerm]);
+
+  const fetchAccounts = async (search: string) => {
+    try {
+      const response = await getAccounts({ name: search, page: 1, perPage: 10 });
+      setAccounts(response.data);
+      setShowAccounts(true);
+    } catch (err) {
+      console.error(err);
+      setError('Falha ao buscar contas.');
+    }
+  };
+
+  const handleAccountSelect = (account: Account) => {
+    setAccountId(account.id);
+    setSearchTerm(account.name);
+    setShowAccounts(false);
+  };
 
   const handleGenerateReport = async () => {
     if (!startDate || !endDate) {
@@ -96,18 +129,32 @@ export default function ReportsPage() {
         </div>
 
         {reportType === 'LEDGER' && (
-          <div>
+          <div className="relative">
             <label htmlFor="accountId" className="block text-sm font-medium text-gray-800 mb-1">
-              ID da Conta (para Livro Razão)
+              Conta (para Livro Razão)
             </label>
             <input
               id="accountId"
               type="text"
-              value={accountId}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setAccountId(e.target.value)}
-              placeholder="Insira o UUID da conta"
+              value={searchTerm}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+              onFocus={() => searchTerm && setShowAccounts(true)}
+              placeholder="Pesquisar conta por nome"
               className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             />
+            {showAccounts && accounts.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-auto">
+                {accounts.map(account => (
+                  <li
+                    key={account.id}
+                    onClick={() => handleAccountSelect(account)}
+                    className="p-3 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {account.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
