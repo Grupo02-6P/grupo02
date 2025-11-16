@@ -1,4 +1,5 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,143 +10,113 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 
 @Injectable()
 export class EntryService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly abilityService: CaslAbilityService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createEntryDto: CreateEntryDto) {
-    return 'This action adds a new entry';
-  }
+  async create(data: CreateEntryDto) {
+    const entryType = await this.prisma.typeEntry.findUnique({
+      where: { id: data.entryTypeId },
+      include: { accountCleared: true },
+    });
 
-  /**
-   * Busca os lançamentos com filtros, paginação e regras de CASL
-   */
-  async findAll(filterDto: BaseFilterDto): Promise<PaginatedResponse<any>> {
-    const ability = this.abilityService.ability;
-
-    if (!ability.can('read', 'Entry')) {
-      throw new UnauthorizedException('Ação não permitida');
+    if (!entryType) {
+      throw new NotFoundException('Tipo de entrada não encontrado');
     }
 
-    let {
-      page = 1,
-      limit = 10,
-      search,
-      sortBy,
-      sortOrder = 'desc',
-      dateFrom,
-      dateTo,
-      status,
-    } = filterDto;
-
-    // filtros específicos para Entry
-    const { tittleId, entryTypeId } = filterDto as any;
-
-    // support -1 to fetch all
-    const getAllRecords = limit === -1;
-    const skip = getAllRecords ? 0 : (page - 1) * limit;
-    const take = getAllRecords ? undefined : limit;
-
-    const where: any = {
-      AND: [accessibleBy(ability, 'read').Entry],
-    };
-
-    // busca geral
-    if (search) {
-      where.OR = [
-        { code: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { tittle: { code: { contains: search, mode: 'insensitive' } } },
-      ];
-    }
-
-    if (status) {
-      where.status = status;
-    }
-
-    if (tittleId) {
-      where.tittleId = tittleId;
-    }
-
-    if (entryTypeId) {
-      where.entryTypeId = entryTypeId;
-    }
-
-    if (!sortBy) sortBy = 'createdAt';
-
-    if (dateFrom || dateTo) {
-      where.date = {} as any;
-      if (dateFrom) where.date.gte = new Date(dateFrom);
-      if (dateTo) where.date.lte = new Date(dateTo);
-    }
-
-    const [data, total] = await Promise.all([
-      this.prisma.entry.findMany({
-        where,
-        skip,
-        ...(take !== undefined && { take }),
-        select: {
-          id: true,
-          code: true,
-          description: true,
-          date: true,
-          value: true,
-          status: true,
-          tittle: {
-            select: { id: true, code: true, description: true, value: true },
+    // Busca o título vinculado
+    const tittle = await this.prisma.tittle.findUnique({
+      where: { id: data.tittleId },
+      include: {
+        movement: {
+          include: {
+            debitAccount: true,
+            creditAccount: true,
           },
-          entryType: {
-            select: { id: true, name: true, description: true },
-          },
-          createdAt: true,
-          updatedAt: true,
         },
-        orderBy: {
-          [sortBy]: sortOrder as any,
-        },
-      }),
-      this.prisma.entry.count({ where }),
-    ]);
-
-    if (getAllRecords) {
-      return {
-        data,
-        pagination: {
-          page: 1,
-          limit: total,
-          total,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      };
-    }
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
       },
-    };
+    });
+
+    if (!tittle) {
+      throw new NotFoundException('Título não encontrado');
+    }
+
+    // Cria o registro da entrada
+    const entry = await this.prisma.entry.create({
+      data: {
+        code: data.code,
+        description: data.description,
+        date: data.date ? new Date(data.date) : new Date(),
+        value: data.value,
+        status: data.status ?? 'ACTIVE',
+        tittleId: data.tittleId,
+        entryTypeId: data.entryTypeId,
+      },
+    });
+
+    // Cria o lançamento contábil (JournalEntry)
+    const journal = await this.prisma.journalEntry.create({
+      data: {
+        originType: 'ENTRY',
+        originId: entry.id,
+        date: new Date(),
+        tittleId: tittle.id,
+        lines: {
+          create: [
+            {
+              // Débito na conta de compensação
+              accountId: entryType.accountClearedId,
+              type: 'DEBIT',
+              amount: data.value,
+            },
+            {
+              // Crédito na conta de destino (ex: banco, cliente etc.)
+              accountId: tittle.movement.debitAccountId,
+              type: 'CREDIT',
+              amount: data.value,
+            },
+          ],
+        },
+      },
+      include: {
+        lines: { include: { account: true } },
+      },
+    });
+
+    return { ...entry, journal };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} entry`;
+  async findAll() {
+    return this.prisma.entry.findMany({
+      include: {
+        entryType: true,
+        tittle: {
+          include: { movement: true },
+        },
+      },
+      orderBy: { date: 'desc' },
+    });
   }
 
-  update(id: number, updateEntryDto: UpdateEntryDto) {
-    return `This action updates a #${id} entry`;
+  async findOne(id: string) {
+    return this.prisma.entry.findUnique({
+      where: { id },
+      include: {
+        entryType: true,
+        tittle: {
+          include: { movement: true },
+        },
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} entry`;
+  async update(id: string, data: UpdateEntryDto) {
+    return this.prisma.entry.update({
+      where: { id },
+      data,
+      include: { entryType: true, tittle: true },
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.entry.delete({ where: { id } });
   }
 }

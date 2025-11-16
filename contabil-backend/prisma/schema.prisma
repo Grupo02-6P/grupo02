@@ -175,11 +175,19 @@ model Tittle {
 model JournalEntry {
   id          String        @id @default(uuid())
   date        DateTime      @default(now())
-  tittleId    String
-  tittle      Tittle        @relation(fields: [tittleId], references: [id])
+  originType  JournalOrigin?
+  originId    String?
+
+  tittleId    String?
+  tittle      Tittle?        @relation(fields: [tittleId], references: [id])
+
+  entryId     String?
+  entry       Entry?         @relation(fields: [entryId], references: [id])
+
   lines       JournalLine[]
   createdAt   DateTime      @default(now())
 }
+
 
 model JournalLine {
   id             String       @id @default(uuid())
@@ -208,6 +216,8 @@ model Entry {
 
   entryTypeId  String
   entryType    typeEntry   @relation(fields: [entryTypeId], references: [id])
+
+  journalEntries JournalEntry[]
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -238,4 +248,11 @@ enum Status {
 enum LineType {
   DEBIT
   CREDIT
+}
+
+enum JournalOrigin {
+  TITTLE     // lançamento principal
+  ENTRY      // baixa, liquidação
+  ADJUSTMENT // ajuste contábil manual
+  TRANSFER   // transferência interna
 }

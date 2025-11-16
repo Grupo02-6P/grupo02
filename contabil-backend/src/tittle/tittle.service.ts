@@ -33,9 +33,12 @@ export class TittleService {
       },
     });
 
-    //Cria o lançamento contábil (JournalEntry + Lines)
+    // 📘 Cria o lançamento contábil (JournalEntry + Lines)
     const journal = await this.prisma.journalEntry.create({
       data: {
+        originType: 'TITTLE',
+        originId: tittle.id,
+        date: new Date(),
         tittleId: tittle.id,
         lines: {
           create: [
@@ -52,7 +55,9 @@ export class TittleService {
           ],
         },
       },
-      include: { lines: { include: { account: true } } },
+      include: {
+        lines: { include: { account: true } },
+      },
     });
 
     return { ...tittle, journal };
@@ -64,6 +69,7 @@ export class TittleService {
         movement: true,
         partner: true,
         journalEntries: {
+          where: { originType: 'TITTLE' },
           include: { lines: { include: { account: true } } },
         },
       },
@@ -78,6 +84,7 @@ export class TittleService {
         movement: true,
         partner: true,
         journalEntries: {
+          where: { originType: 'TITTLE' },
           include: { lines: { include: { account: true } } },
         },
       },
@@ -93,6 +100,10 @@ export class TittleService {
   }
 
   async remove(id: string) {
+    await this.prisma.journalEntry.deleteMany({
+      where: { originId: id, originType: 'TITTLE' },
+    });
+
     return this.prisma.tittle.delete({ where: { id } });
   }
 }
