@@ -1,45 +1,44 @@
-export interface Entry {
+export interface Title {
   id: string;
   code: string;
   description?: string;
   date: string;
   value: number;
   status: 'ACTIVE' | 'INACTIVE';
-  titleId: string;
-  entryTypeId: string;
+  movementId: string;
+  partnerId?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface EntryResponse extends Entry {
-  title?: {
-    id: string;
-    code: string;
-    description?: string;
-    value: number;
-  };
-  entryType?: {
+export interface TitleResponse extends Title {
+  movement?: {
     id: string;
     name: string;
     description?: string;
   };
+  partner?: {
+    id: string;
+    name: string;
+    cnpj: string;
+  };
 }
 
-export interface CreateEntryDto {
+export interface CreateTitleDto {
   code: string;
   description?: string;
   date: string;
   value: number;
-  titleId: string;
-  entryTypeId: string;
+  movementId: string;
+  partnerId?: string;
 }
 
-export interface UpdateEntryDto {
+export interface UpdateTitleDto {
   code?: string;
   description?: string;
   date?: string;
   value?: number;
-  titleId?: string;
-  entryTypeId?: string;
+  movementId?: string;
+  partnerId?: string;
   status?: 'ACTIVE' | 'INACTIVE';
 }

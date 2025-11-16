@@ -20,7 +20,9 @@ import EditarTypeMovement from '../pages/type-movement/EditarTypeMovement';
 import CadastrarTypeEntry from '../pages/type-entry/CadastrarTypeEntry';
 import VisualizarTypeEntry from '../pages/type-entry/VisualizarTypeEntry';
 import EditarTypeEntry from '../pages/type-entry/EditarTypeEntry';
-import VisualizarEntry from '../pages/entry/VisualizarEntry';
+import VisualizarTitle from '../pages/title/VisualizarTitle';
+import CadastrarTitle from '../pages/title/CadastrarTitle';
+import EditarTitle from '../pages/title/EditarTitle';
 
 export interface RouteConfig {
   path: string;
@@ -193,12 +195,30 @@ export const routes: RouteConfig[] = [
     action: 'update'
   },
   { 
-    path: '/lancamentos/visualizar', 
-    element: VisualizarEntry, 
-    label: 'Visualizar Lançamentos',
+    path: '/titulo/visualizar', 
+    element: VisualizarTitle, 
+    label: 'Visualizar Lançamentos de Título',
     isProtected: true,
     requiresPermission: true,
-    resource: 'Entry',
+    resource: 'Title',
     action: 'read'
+  },
+  { 
+    path: '/titulo/cadastrar', 
+    element: CadastrarTitle, 
+    label: 'Cadastrar Lançamento de Título',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Title',
+    action: 'create'
+  },
+  { 
+    path: '/titulo/editar/:id', 
+    element: EditarTitle, 
+    label: 'Editar Lançamento de Título',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Title',
+    action: 'update'
   },
 ];

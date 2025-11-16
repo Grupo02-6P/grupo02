@@ -63,14 +63,14 @@ const Home: React.FC = () => {
       permission: { resource: 'TypeEntry', action: 'read' }
     },
     {
-      title: 'Visualizar Lançamentos',
-      description: 'Gerenciar lançamentos financeiros',
+      title: 'Visualizar Lançamentos de Título',
+      description: 'Gerenciar lançamentos de título',
       icon: <Receipt size={24} />,
-      href: '/lancamentos/visualizar',
+      href: '/titulo/visualizar',
       borderColor: 'border-orange-400',
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-600',
-      permission: { resource: 'Entry', action: 'read' }
+      permission: { resource: 'Title', action: 'read' }
     },
   ]
 

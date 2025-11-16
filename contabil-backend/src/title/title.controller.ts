@@ -1,16 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { TitleService } from './title.service';
 import { CreateTitleDto } from './dto/create-title.dto';
 import { UpdateTitleDto } from './dto/update-title.dto';
+import { BaseFilterDto } from 'src/common/dto/base-filter.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('title')
 export class TitleController {
   constructor(private readonly titleService: TitleService) {}
@@ -21,8 +16,8 @@ export class TitleController {
   }
 
   @Get()
-  findAll() {
-    return this.titleService.findAll();
+  findAll(@Query() filterDto: BaseFilterDto) {
+    return this.titleService.findAll(filterDto);
   }
 
   @Get(':id')

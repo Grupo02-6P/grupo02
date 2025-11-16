@@ -1,11 +1,11 @@
 import api from './api';
-import type { EntryResponse, CreateEntryDto, UpdateEntryDto } from '../types/Entry';
+import type { TitleResponse, CreateTitleDto, UpdateTitleDto } from '../types/Title';
 
-export const entryService = {
-  // Buscar todos os lançamentos
+export const titleService = {
+  // Buscar todos os títulos
   findAll: async (params?: Record<string, string | number | undefined>) => {
     try {
-      const response = await api.get<EntryResponse[]>('/entry', { params });
+      const response = await api.get<TitleResponse[]>('/title', { params });
       
       // Simula paginação se a API não retornar
       const data = response.data;
@@ -21,62 +21,62 @@ export const entryService = {
         }
       };
     } catch (error) {
-      console.error('Erro ao buscar lançamentos:', error);
+      console.error('Erro ao buscar títulos:', error);
       throw error;
     }
   },
 
-  // Buscar um lançamento por ID
+  // Buscar um título por ID
   findOne: async (id: string) => {
     try {
-      const response = await api.get<EntryResponse>(`/entry/${id}`);
+      const response = await api.get<TitleResponse>(`/title/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Erro ao buscar lançamento:', error);
+      console.error('Erro ao buscar título:', error);
       throw error;
     }
   },
 
-  // Criar um novo lançamento
-  create: async (data: CreateEntryDto) => {
+  // Criar um novo título
+  create: async (data: CreateTitleDto) => {
     try {
-      const response = await api.post<EntryResponse>('/entry', data);
+      const response = await api.post<TitleResponse>('/title', data);
       return response.data;
     } catch (error) {
-      console.error('Erro ao criar lançamento:', error);
+      console.error('Erro ao criar título:', error);
       throw error;
     }
   },
 
-  // Atualizar um lançamento
-  update: async (id: string, data: UpdateEntryDto) => {
+  // Atualizar um título
+  update: async (id: string, data: UpdateTitleDto) => {
     try {
-      const response = await api.patch<EntryResponse>(`/entry/${id}`, data);
+      const response = await api.patch<TitleResponse>(`/title/${id}`, data);
       return response.data;
     } catch (error) {
-      console.error('Erro ao atualizar lançamento:', error);
+      console.error('Erro ao atualizar título:', error);
       throw error;
     }
   },
 
-  // Remover um lançamento
+  // Remover um título
   remove: async (id: string) => {
     try {
-      const response = await api.delete(`/entry/${id}`);
+      const response = await api.delete(`/title/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Erro ao remover lançamento:', error);
+      console.error('Erro ao remover título:', error);
       throw error;
     }
   },
 
-  // Inativar um lançamento
+  // Inativar um título
   inactive: async (id: string) => {
     try {
-      const response = await api.patch<EntryResponse>(`/entry/${id}`, { status: 'INACTIVE' });
+      const response = await api.patch<TitleResponse>(`/title/${id}`, { status: 'INACTIVE' });
       return response.data;
     } catch (error) {
-      console.error('Erro ao inativar lançamento:', error);
+      console.error('Erro ao inativar título:', error);
       throw error;
     }
   }

@@ -146,14 +146,14 @@ const Navbar: React.FC = () => {
       ]
     },
     { 
-      label: 'Lançamentos', 
+      label: 'Lançamentos de Título', 
       icon: <Receipt  size={20} />,
-      permission: { resource: 'Entry', action: 'read' },
+      permission: { resource: 'Title', action: 'read' },
       subItems: [
         { 
-          path: '/lancamentos/visualizar', 
-          label: 'Visualizar Lançamentos',
-          permission: { resource: 'Entry', action: 'read' }
+          path: '/titulo/visualizar', 
+          label: 'Visualizar Lançamentos de Título',
+          permission: { resource: 'Title', action: 'read' }
         },
       ]
     },

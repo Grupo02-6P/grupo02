@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Edit, X, Receipt } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
-import { entryService } from '../../services/entry';
-import type { EntryResponse } from '../../types/Entry';
+import { titleService } from '../../services/title';
+import type { TitleResponse } from '../../types/Title';
 import { DataTable } from '../../components/table/DataTable';
 import { ConfirmModal } from '../../components/modal/ConfirmModal';
 import { InfoModal } from '../../components/modal/InfoModal';
@@ -11,9 +11,9 @@ import { ActionsColumn, useDefaultActions } from '../../components/table/Actions
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
 
-const VisualizarEntry: React.FC = () => {
+const VisualizarTitle: React.FC = () => {
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
-  const entryPermissions = useResourcePermissions('Entry');
+  const titlePermissions = useResourcePermissions('Title');
 
   const navigate = useNavigate();
   const {
@@ -29,7 +29,7 @@ const VisualizarEntry: React.FC = () => {
     ['search']
   );
 
-  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState(false);
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
@@ -40,12 +40,12 @@ const VisualizarEntry: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [detailsModal, setDetailsModal] = useState({
     isOpen: false,
-    entry: null as EntryResponse | null,
+    title: null as TitleResponse | null,
     isLoading: false,
   });
 
   // Colunas da tabela
-  const columns: ColumnDef<EntryResponse>[] = [
+  const columns: ColumnDef<TitleResponse>[] = [
     {
       accessorKey: 'code',
       header: 'Código',
@@ -70,16 +70,16 @@ const VisualizarEntry: React.FC = () => {
       cell: ({ row }) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.original.value),
     },
     {
-      accessorKey: 'title.code',
-      header: 'Título',
+      accessorKey: 'movement.name',
+      header: 'Tipo de Movimento',
       enableSorting: false,
-      cell: ({ row }) => row.original.title?.code || '-',
+      cell: ({ row }) => row.original.movement?.name || '-',
     },
     {
-      accessorKey: 'entryType.name',
-      header: 'Tipo de Entrada',
+      accessorKey: 'partner.name',
+      header: 'Parceiro',
       enableSorting: false,
-      cell: ({ row }) => row.original.entryType?.name || '-',
+      cell: ({ row }) => row.original.partner?.name || '-',
     },
     {
       accessorKey: 'status',
@@ -100,10 +100,10 @@ const VisualizarEntry: React.FC = () => {
       cell: ({ row }) => {
         const actions = [
           createViewAction(() => handleViewDetails(row.original.id)),
-          createEditAction(() => handleEditClick(row.original.id), entryPermissions.canUpdate),
+          createEditAction(() => handleEditClick(row.original.id), titlePermissions.canUpdate),
           createDeleteAction(
             () => handleRemoveClick(row.original.id),
-            entryPermissions.canDelete,
+            titlePermissions.canDelete,
             row.original.status !== 'INACTIVE'
           ),
         ];
@@ -113,9 +113,9 @@ const VisualizarEntry: React.FC = () => {
     },
   ];
 
-  // Buscar lançamentos (integração com API)
-  const fetchEntries = async (params: Record<string, string | number | undefined>) => {
-    const response = await entryService.findAll(params);
+  // Buscar títulos (integração com API)
+  const fetchTitles = async (params: Record<string, string | number | undefined>) => {
+    const response = await titleService.findAll(params);
 
     return {
       data: response.data,
@@ -125,14 +125,14 @@ const VisualizarEntry: React.FC = () => {
 
   // Handlers
   const handleViewDetails = async (id: string) => {
-    setDetailsModal({ isOpen: true, entry: null, isLoading: true });
+    setDetailsModal({ isOpen: true, title: null, isLoading: true });
 
     try {
-      const response = await entryService.findOne(id);
-      setDetailsModal({ isOpen: true, entry: response, isLoading: false });
+      const response = await titleService.findOne(id);
+      setDetailsModal({ isOpen: true, title: response, isLoading: false });
     } catch {
-      setDetailsModal({ isOpen: false, entry: null, isLoading: false });
-      setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do lançamento', type: 'error' });
+      setDetailsModal({ isOpen: false, title: null, isLoading: false });
+      setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do título', type: 'error' });
     }
   };
 
@@ -141,23 +141,23 @@ const VisualizarEntry: React.FC = () => {
   };
 
   const handleRemoveClick = (id: string) => {
-    setSelectedEntryId(id);
+    setSelectedTitleId(id);
     setConfirmModal(true);
   };
 
   const handleRemoveConfirm = async () => {
-    if (!selectedEntryId) return;
+    if (!selectedTitleId) return;
     try {
-      await entryService.remove(selectedEntryId);
+      await titleService.remove(selectedTitleId);
       setConfirmModal(false);
-      setSelectedEntryId(null);
+      setSelectedTitleId(null);
       setRefreshKey(prev => prev + 1);
-      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Lançamento removido com sucesso!', type: 'success' });
+      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Título removido com sucesso!', type: 'success' });
     } catch (err: unknown) {
       setConfirmModal(false);
       const errorMessage = err instanceof Error && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao remover lançamento'
-        : 'Erro ao remover lançamento';
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao remover título'
+        : 'Erro ao remover título';
       setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
     }
   };
@@ -187,17 +187,17 @@ const VisualizarEntry: React.FC = () => {
             <div className='flex mr-4 items-center'>
               <Receipt size={44} className="text-[#0c4c6e] mr-3"/>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">Lançamentos</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os lançamentos financeiros do sistema</p>
+                <h1 className="text-3xl font-bold text-gray-800">Lançamentos de Título</h1>
+                <p className="text-gray-600 mt-1">Gerencie todos os lançamentos de título do sistema</p>
               </div>
             </div>
-            {entryPermissions.canCreate && (
+            {titlePermissions.canCreate && (
               <button
                 onClick={() => navigate('/lancamentos/cadastrar')}
                 className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
               >
                 <Plus size={20} />
-                <span>Novo Lançamento</span>
+                <span>Novo Lançamento de Título</span>
               </button>
             )}
           </div>
@@ -207,9 +207,9 @@ const VisualizarEntry: React.FC = () => {
         <DataTable
           key={refreshKey}
           columns={columns}
-          fetchData={fetchEntries}
-          emptyMessage="Nenhum lançamento encontrado"
-          emptyDescription="Tente ajustar os filtros de busca ou cadastre um novo lançamento"
+          fetchData={fetchTitles}
+          emptyMessage="Nenhum título encontrado"
+          emptyDescription="Tente ajustar os filtros de busca ou cadastre um novo lançamento de título"
           pageSize={10}
           enableFilters={true}
           filterInputs={FilterInputs}
@@ -220,10 +220,10 @@ const VisualizarEntry: React.FC = () => {
 
       <ConfirmModal
         isOpen={confirmModal}
-        onCancel={() => { setConfirmModal(false); setSelectedEntryId(null); }}
+        onCancel={() => { setConfirmModal(false); setSelectedTitleId(null); }}
         onConfirm={handleRemoveConfirm}
-        title="Tem certeza que deseja remover este lançamento?"
-        message="Esta ação não pode ser desfeita. Todos os dados do lançamento serão perdidos permanentemente."
+        title="Tem certeza que deseja remover este título?"
+        message="Esta ação não pode ser desfeita. Todos os dados do título serão perdidos permanentemente."
         confirmText="Sim, remover"
         cancelText="Cancelar"
         type="danger"
@@ -238,7 +238,7 @@ const VisualizarEntry: React.FC = () => {
         type={infoModal.type}
       />
 
-      {/* Modal de Detalhes do Lançamento */}
+      {/* Modal de Detalhes do Título */}
       {detailsModal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -246,12 +246,12 @@ const VisualizarEntry: React.FC = () => {
             <div className="bg-gradient-to-r from-[#0c4c6e] to-[#083f5d] text-white p-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  {detailsModal.isLoading ? 'Carregando...' : (detailsModal.entry?.code ? `Lançamento ${detailsModal.entry.code}` : 'Detalhes do Lançamento')}
+                  {detailsModal.isLoading ? 'Carregando...' : (detailsModal.title?.code ? `Título ${detailsModal.title.code}` : 'Detalhes do Título')}
                 </h2>
-                <p className="text-green-100 text-sm mt-1">Visualize as informações do lançamento</p>
+                <p className="text-green-100 text-sm mt-1">Visualize as informações do título</p>
               </div>
               <button
-                onClick={() => setDetailsModal({ isOpen: false, entry: null, isLoading: false })}
+                onClick={() => setDetailsModal({ isOpen: false, title: null, isLoading: false })}
                 className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
               >
                 <X className="w-6 h-6" />
@@ -267,50 +267,50 @@ const VisualizarEntry: React.FC = () => {
                     <p className="text-gray-600">Carregando informações...</p>
                   </div>
                 </div>
-              ) : detailsModal.entry ? (
+              ) : detailsModal.title ? (
                 <div className="space-y-6">
                   <div className="bg-gray-50 rounded-xl p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                       <Receipt className="w-5 h-5 mr-2 text-[#0c4c6e]" />
-                      Informações do Lançamento
+                      Informações do Título
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="text-sm font-medium text-gray-600">Código:</label>
-                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.entry.code}</p>
+                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.title.code}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Data:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.entry.date).toLocaleDateString('pt-BR')}</p>
+                        <p className="text-gray-900 mt-1">{new Date(detailsModal.title.date).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Valor:</label>
                         <p className="text-gray-900 mt-1 font-bold text-lg">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detailsModal.entry.value)}
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detailsModal.title.value)}
                         </p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Status:</label>
                         <div className="mt-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.entry.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {detailsModal.entry.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.title.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {detailsModal.title.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
                           </span>
                         </div>
                       </div>
                       <div className="md:col-span-2">
                         <label className="text-sm font-medium text-gray-600">Descrição:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.entry.description || '-'}</p>
+                        <p className="text-gray-900 mt-1">{detailsModal.title.description || '-'}</p>
                       </div>
-                      {detailsModal.entry.title && (
+                      {detailsModal.title.movement && (
                         <div>
-                          <label className="text-sm font-medium text-gray-600">Título:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.entry.title.code}</p>
+                          <label className="text-sm font-medium text-gray-600">Tipo de Movimento:</label>
+                          <p className="text-gray-900 mt-1">{detailsModal.title.movement.name}</p>
                         </div>
                       )}
-                      {detailsModal.entry.entryType && (
+                      {detailsModal.title.partner && (
                         <div>
-                          <label className="text-sm font-medium text-gray-600">Tipo de Entrada:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.entry.entryType.name}</p>
+                          <label className="text-sm font-medium text-gray-600">Parceiro:</label>
+                          <p className="text-gray-900 mt-1">{detailsModal.title.partner.name}</p>
                         </div>
                       )}
                     </div>
@@ -318,7 +318,7 @@ const VisualizarEntry: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-gray-600">Erro ao carregar informações do lançamento</p>
+                  <p className="text-gray-600">Erro ao carregar informações do título</p>
                 </div>
               )}
             </div>
@@ -326,16 +326,16 @@ const VisualizarEntry: React.FC = () => {
             {/* Footer do Modal */}
             <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
               <button
-                onClick={() => setDetailsModal({ isOpen: false, entry: null, isLoading: false })}
+                onClick={() => setDetailsModal({ isOpen: false, title: null, isLoading: false })}
                 className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors mr-3"
               >
                 Fechar
               </button>
-              {entryPermissions.canUpdate && (
+              {titlePermissions.canUpdate && (
                 <button
                   onClick={() => {
-                    setDetailsModal({ isOpen: false, entry: null, isLoading: false });
-                    handleEditClick(detailsModal.entry?.id || '');
+                    setDetailsModal({ isOpen: false, title: null, isLoading: false });
+                    handleEditClick(detailsModal.title?.id || '');
                   }}
                   className="px-6 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition-colors flex items-center space-x-2"
                 >
@@ -351,4 +351,4 @@ const VisualizarEntry: React.FC = () => {
   );
 };
 
-export default VisualizarEntry;
+export default VisualizarTitle;
