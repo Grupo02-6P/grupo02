@@ -56,6 +56,7 @@ export class DRECalculator implements IReportCalculator {
     return {
       title: 'Demonstração do Resultado',
       data: dreReport,
+      period,
     };
   }
 }

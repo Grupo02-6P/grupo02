@@ -11,7 +11,7 @@ const PDFDocumentWithTables = require('pdfkit-table');
 
 @Injectable()
 export class PdfFormatter implements IReportFormatter {
-  async format(data: ReportData): Promise<Buffer> {
+  async format(reportData: ReportData): Promise<Buffer> {
     const buildPdf = (
       reportData: ReportData,
       done: (buffer: Buffer) => void,
@@ -26,7 +26,17 @@ export class PdfFormatter implements IReportFormatter {
 
       // Adiciona o Título
       doc.fontSize(18).text(reportData.title, { align: 'center' });
-      doc.moveDown();
+      // Formata e adiciona o Período
+      const startDate = new Date(reportData.period.startDate).toLocaleDateString(
+        'pt-BR',
+      );
+      const endDate = new Date(reportData.period.endDate).toLocaleDateString(
+        'pt-BR',
+      );
+      doc
+        .fontSize(10)
+        .text(`Período: ${startDate} a ${endDate}`, { align: 'center' });
+      doc.moveDown(2); // Adiciona um espaço extra
 
       // Chama o desenhador específico
       switch (reportData.title) {
@@ -51,7 +61,7 @@ export class PdfFormatter implements IReportFormatter {
     };
 
     return new Promise(resolve => {
-      buildPdf(data, buffer => {
+      buildPdf(reportData, buffer => {
         resolve(buffer);
       });
     });

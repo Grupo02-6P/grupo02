@@ -83,6 +83,7 @@ export class BalancoCalculator implements IReportCalculator {
     return {
       title: 'Balanço Patrimonial',
       data: balanceSheetReport,
+      period,
     };
   }
 }

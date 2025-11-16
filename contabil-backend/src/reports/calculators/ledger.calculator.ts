@@ -66,6 +66,7 @@ export class LedgerCalculator implements IReportCalculator {
     return {
       title: 'Livro Razão',
       data: ledgerReportDto,
+      period,
     };
   }
 }

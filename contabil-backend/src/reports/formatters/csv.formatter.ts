@@ -9,12 +9,12 @@ import { TrialBalanceReportLineDto } from '../dto/trial-balance-report-line.dto'
 
 @Injectable()
 export class CsvFormatter implements IReportFormatter {
-  format(data: ReportData): Promise<Buffer> {
+  format(reportData: ReportData): Promise<Buffer> {
     let dataToParse: any[];
 
-    switch (data.title) {
+    switch (reportData.title) {
       case 'Balancete de Verificação':
-        const trialBalanceData = data.data as TrialBalanceReportLineDto[];
+        const trialBalanceData = reportData.data as TrialBalanceReportLineDto[];
         dataToParse = trialBalanceData.map(l => ({
           'Código': l.accountCode,
           'Conta': l.accountName,
@@ -25,10 +25,10 @@ export class CsvFormatter implements IReportFormatter {
         }));
         break;
       case 'Livro Razão':
-        dataToParse = (data.data as LedgerReportDto).lines;
+        dataToParse = (reportData.data as LedgerReportDto).lines;
         break;
       case 'Demonstração do Resultado':
-        const dreData = data.data as DREReportDto;
+        const dreData = reportData.data as DREReportDto;
         dataToParse = [
           ['Grupo', 'Valor'],
           ['Total Receitas', dreData.totalReceitas],
@@ -43,7 +43,7 @@ export class CsvFormatter implements IReportFormatter {
         ];
         break;
       case 'Balanço Patrimonial':
-        const bsData = data.data as BalanceSheetReportDto;
+        const bsData = reportData.data as BalanceSheetReportDto;
         dataToParse = [
             ['Grupo', 'Valor'],
             ['Total Ativo', bsData.totalAtivo],
@@ -62,8 +62,16 @@ export class CsvFormatter implements IReportFormatter {
         break;
       default:
         // Fallback for simple array data
-        dataToParse = Array.isArray(data.data) ? data.data : [[data.data]];
+        dataToParse = Array.isArray(reportData.data) ? reportData.data : [[reportData.data]];
     }
+
+    const startDate = new Date(reportData.period.startDate).toLocaleDateString(
+      'pt-BR',
+    );
+    const endDate = new Date(reportData.period.endDate).toLocaleDateString('pt-BR');
+    dataToParse.unshift(['Período:', `${startDate} a ${endDate}`]);
+    dataToParse.unshift(['Relatório:', reportData.title]);
+    dataToParse.push([]); // Linha em branco
 
     const csvString = unparse(dataToParse);
     return Promise.resolve(Buffer.from(csvString, 'utf-8'));

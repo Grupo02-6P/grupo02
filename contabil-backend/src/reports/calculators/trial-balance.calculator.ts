@@ -61,6 +61,7 @@ export class TrialBalanceCalculator implements IReportCalculator {
     return {
       title: 'Balancete de Verificação',
       data: dadosTratados,
+      period,
     };
   }
 }
