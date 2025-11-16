@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { FaUsers, FaHandshake } from "react-icons/fa";
 import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { TbReport } from "react-icons/tb";
 
 interface NavigationSubItem {
   path?: string;
@@ -98,9 +99,15 @@ const Navbar: React.FC = () => {
         },
       ]
     },
+    {
+      label: 'Relatórios',
+      icon: <TbReport size={20} />,
+      path: '/relatorios',
+      permission: { resource: 'Report', action: 'read' },
+    },
     { 
       label: 'Contas', 
-      icon: <MdAccountBalance  size={20} />,
+      icon: <MdAccountBalance size={20} />,
       permission: { resource: 'Account', action: 'read' },
       subItems: [
         { 
