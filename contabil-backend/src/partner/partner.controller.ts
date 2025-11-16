@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { UpdatePartnerDto } from './dto/update-partner.dto';
@@ -17,18 +28,18 @@ export class PartnerController {
 
   @Get()
   findAll(@Query() filterDto: FilterPartnerDto, @Req() req) {
-    const user = req.user
-    const companyId = user.companyId
+    const user = req.user;
+    const companyId = user.companyId;
     if (companyId && user.role.name !== 'ADMIN') {
-      filterDto.companyId = companyId
+      filterDto.companyId = companyId;
     }
     return this.partnerService.findAll(filterDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req) {
-    const user = req.user
-    const companyId = user.companyId
+    const user = req.user;
+    const companyId = user.companyId;
     if (companyId && user.role.name !== 'ADMIN') {
       return this.partnerService.findOne(id, companyId);
     }
@@ -42,8 +53,8 @@ export class PartnerController {
 
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req) {
-    const user = req.user
-    const companyId = user.companyId
+    const user = req.user;
+    const companyId = user.companyId;
     if (companyId && user.role.name !== 'ADMIN') {
       return this.partnerService.remove(id, companyId);
     }

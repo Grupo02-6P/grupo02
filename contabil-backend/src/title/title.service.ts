@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTittleDto } from './dto/create-tittle.dto';
-import { UpdateTittleDto } from './dto/update-tittle.dto';
+import { CreateTitleDto } from './dto/create-title.dto';
+import { UpdateTitleDto } from './dto/update-title.dto';
 
 @Injectable()
-export class TittleService {
+export class TitleService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateTittleDto) {
+  async create(data: CreateTitleDto) {
     const movement = await this.prisma.typeMovement.findUnique({
       where: { id: data.movementId },
       include: {
@@ -21,7 +21,7 @@ export class TittleService {
     }
 
     //Cria o título
-    const tittle = await this.prisma.tittle.create({
+    const title = await this.prisma.title.create({
       data: {
         code: data.code,
         description: data.description,
@@ -36,10 +36,10 @@ export class TittleService {
     // 📘 Cria o lançamento contábil (JournalEntry + Lines)
     const journal = await this.prisma.journalEntry.create({
       data: {
-        originType: 'TITTLE',
-        originId: tittle.id,
+        originType: 'TITLE',
+        originId: title.id,
         date: new Date(),
-        tittleId: tittle.id,
+        titleId: title.id,
         lines: {
           create: [
             {
@@ -60,16 +60,16 @@ export class TittleService {
       },
     });
 
-    return { ...tittle, journal };
+    return { ...title, journal };
   }
 
   async findAll() {
-    return this.prisma.tittle.findMany({
+    return this.prisma.title.findMany({
       include: {
         movement: true,
         partner: true,
         journalEntries: {
-          where: { originType: 'TITTLE' },
+          where: { originType: 'TITLE' },
           include: { lines: { include: { account: true } } },
         },
       },
@@ -78,21 +78,21 @@ export class TittleService {
   }
 
   async findOne(id: string) {
-    return this.prisma.tittle.findUnique({
+    return this.prisma.title.findUnique({
       where: { id },
       include: {
         movement: true,
         partner: true,
         journalEntries: {
-          where: { originType: 'TITTLE' },
+          where: { originType: 'TITLE' },
           include: { lines: { include: { account: true } } },
         },
       },
     });
   }
 
-  async update(id: string, data: UpdateTittleDto) {
-    return this.prisma.tittle.update({
+  async update(id: string, data: UpdateTitleDto) {
+    return this.prisma.title.update({
       where: { id },
       data,
       include: { movement: true, partner: true },
@@ -101,9 +101,9 @@ export class TittleService {
 
   async remove(id: string) {
     await this.prisma.journalEntry.deleteMany({
-      where: { originId: id, originType: 'TITTLE' },
+      where: { originId: id, originType: 'TITLE' },
     });
 
-    return this.prisma.tittle.delete({ where: { id } });
+    return this.prisma.title.delete({ where: { id } });
   }
 }

@@ -70,10 +70,10 @@ const VisualizarEntry: React.FC = () => {
       cell: ({ row }) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.original.value),
     },
     {
-      accessorKey: 'tittle.code',
+      accessorKey: 'title.code',
       header: 'Título',
       enableSorting: false,
-      cell: ({ row }) => row.original.tittle?.code || '-',
+      cell: ({ row }) => row.original.title?.code || '-',
     },
     {
       accessorKey: 'entryType.name',
@@ -301,10 +301,10 @@ const VisualizarEntry: React.FC = () => {
                         <label className="text-sm font-medium text-gray-600">Descrição:</label>
                         <p className="text-gray-900 mt-1">{detailsModal.entry.description || '-'}</p>
                       </div>
-                      {detailsModal.entry.tittle && (
+                      {detailsModal.entry.title && (
                         <div>
                           <label className="text-sm font-medium text-gray-600">Título:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.entry.tittle.code}</p>
+                          <p className="text-gray-900 mt-1">{detailsModal.entry.title.code}</p>
                         </div>
                       )}
                       {detailsModal.entry.entryType && (

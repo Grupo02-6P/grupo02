@@ -4,20 +4,19 @@ import { Status } from '@prisma/client';
 
 export class FilterAccountDto extends BaseFilterDto {
   @IsString()
-      @IsOptional()
+  @IsOptional()
   name: string;
 
   @IsString()
   @IsOptional()
   description: string;
 
-      @IsOptional()
-      level: number;
+  @IsOptional()
+  level: number;
 
-      @IsOptional()
-      acceptsPosting: string;
+  @IsOptional()
+  acceptsPosting: string;
 
-      @IsOptional()
-      active: Status
-
+  @IsOptional()
+  active: Status;
 }

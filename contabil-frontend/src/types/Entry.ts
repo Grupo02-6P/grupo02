@@ -5,14 +5,14 @@ export interface Entry {
   date: string;
   value: number;
   status: 'ACTIVE' | 'INACTIVE';
-  tittleId: string;
+  titleId: string;
   entryTypeId: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface EntryResponse extends Entry {
-  tittle?: {
+  title?: {
     id: string;
     code: string;
     description?: string;
@@ -30,7 +30,7 @@ export interface CreateEntryDto {
   description?: string;
   date: string;
   value: number;
-  tittleId: string;
+  titleId: string;
   entryTypeId: string;
 }
 
@@ -39,7 +39,7 @@ export interface UpdateEntryDto {
   description?: string;
   date?: string;
   value?: number;
-  tittleId?: string;
+  titleId?: string;
   entryTypeId?: string;
   status?: 'ACTIVE' | 'INACTIVE';
 }

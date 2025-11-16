@@ -11,13 +11,13 @@ import { PartnerModule } from './partner/partner.module';
 import { AccountModule } from './account/account.module';
 import { TypeMovementModule } from './type-movement/type-movement.module';
 import { TypeEntryModule } from './type-entry/type-entry.module';
-import { TittleModule } from './tittle/tittle.module';
+import { TitleModule } from './title/title.module';
 import { EntryModule } from './entry/entry.module';
 import { JournalModule } from './journal/journal.module';
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     PrismaModule,
     AuthModule,
     CaslModule,
@@ -27,7 +27,7 @@ import { JournalModule } from './journal/journal.module';
     AccountModule,
     TypeMovementModule,
     TypeEntryModule,
-    TittleModule,
+    TitleModule,
     EntryModule,
     JournalModule,
   ],

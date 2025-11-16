@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "database": "contabilize",
+            "username": "postgres",
+            "password": "password",
+            "name": "PI",
+            "group": "BPK"
+        }
+    ]
+}

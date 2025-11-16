@@ -23,8 +23,8 @@ export class EntryService {
     }
 
     // Busca o título vinculado
-    const tittle = await this.prisma.tittle.findUnique({
-      where: { id: data.tittleId },
+    const title = await this.prisma.title.findUnique({
+      where: { id: data.titleId },
       include: {
         movement: {
           include: {
@@ -35,7 +35,7 @@ export class EntryService {
       },
     });
 
-    if (!tittle) {
+    if (!title) {
       throw new NotFoundException('Título não encontrado');
     }
 
@@ -47,7 +47,7 @@ export class EntryService {
         date: data.date ? new Date(data.date) : new Date(),
         value: data.value,
         status: data.status ?? 'ACTIVE',
-        tittleId: data.tittleId,
+        titleId: data.titleId,
         entryTypeId: data.entryTypeId,
       },
     });
@@ -58,7 +58,7 @@ export class EntryService {
         originType: 'ENTRY',
         originId: entry.id,
         date: new Date(),
-        tittleId: tittle.id,
+        titleId: title.id,
         lines: {
           create: [
             {
@@ -69,7 +69,7 @@ export class EntryService {
             },
             {
               // Crédito na conta de destino (ex: banco, cliente etc.)
-              accountId: tittle.movement.debitAccountId,
+              accountId: title.movement.debitAccountId,
               type: 'CREDIT',
               amount: data.value,
             },
@@ -88,7 +88,7 @@ export class EntryService {
     return this.prisma.entry.findMany({
       include: {
         entryType: true,
-        tittle: {
+        title: {
           include: { movement: true },
         },
       },
@@ -101,7 +101,7 @@ export class EntryService {
       where: { id },
       include: {
         entryType: true,
-        tittle: {
+        title: {
           include: { movement: true },
         },
       },
@@ -112,7 +112,7 @@ export class EntryService {
     return this.prisma.entry.update({
       where: { id },
       data,
-      include: { entryType: true, tittle: true },
+      include: { entryType: true, title: true },
     });
   }
 

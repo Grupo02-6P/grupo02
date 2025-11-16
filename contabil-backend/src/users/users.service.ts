@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
@@ -14,9 +19,9 @@ import { URLSearchParams } from 'node:url';
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
-  
+
   async create(createUserDto: CreateUserDto) {
     const ability = this.abilityService.ability;
 
@@ -25,13 +30,13 @@ export class UsersService {
     }
 
     if (createUserDto.email) {
-      const userExists =  await this.findByEmail(createUserDto.email);
+      const userExists = await this.findByEmail(createUserDto.email);
       if (userExists) {
         throw new BadRequestException('Email já está em uso');
       }
     }
 
-    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10); 
+    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
     return this.prisma.user.create({
       data: createUserDto,
       select: {
@@ -52,18 +57,18 @@ export class UsersService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy, 
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
       sortOrder,
       name,
       email,
       roleId,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -73,14 +78,14 @@ export class UsersService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').User]
+      AND: [accessibleBy(ability, 'read').User],
     };
 
     // Filtro de busca geral
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
+        { email: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -129,10 +134,10 @@ export class UsersService {
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.user.count({ where })
+      this.prisma.user.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -145,8 +150,8 @@ export class UsersService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -160,8 +165,8 @@ export class UsersService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -174,7 +179,7 @@ export class UsersService {
     }
     const users = await this.prisma.user.findMany({
       where: {
-        role: { name: role }
+        role: { name: role },
       },
       select: {
         id: true,
@@ -185,7 +190,7 @@ export class UsersService {
         updatedAt: true,
       },
     });
-    return {data: users};
+    return { data: users };
   }
 
   findOne(id: string) {
@@ -196,9 +201,9 @@ export class UsersService {
     }
 
     return this.prisma.user.findUnique({
-      where: { 
+      where: {
         id,
-        AND: [accessibleBy(ability, 'read').User] 
+        AND: [accessibleBy(ability, 'read').User],
       },
       select: {
         id: true,
@@ -222,10 +227,10 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     const ability = this.abilityService.ability;
 
-    const user = await this.prisma.user.findUnique({ 
-      where: { 
+    const user = await this.prisma.user.findUnique({
+      where: {
         id,
-        AND: [accessibleBy(ability, 'update').User] 
+        AND: [accessibleBy(ability, 'update').User],
       },
       select: {
         id: true,
@@ -245,7 +250,7 @@ export class UsersService {
     }
 
     if (updateUserDto.email) {
-      const userExists =  await this.findByEmail(updateUserDto.email);
+      const userExists = await this.findByEmail(updateUserDto.email);
       if (userExists && userExists.id !== id) {
         throw new BadRequestException('Email já está em uso');
       }
@@ -294,7 +299,7 @@ export class UsersService {
     }
     return this.prisma.user.update({
       where: { id },
-      data: { status: StatusUsers.INACTIVE }
+      data: { status: StatusUsers.INACTIVE },
     });
   }
 }

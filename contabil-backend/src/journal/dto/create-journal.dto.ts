@@ -15,7 +15,7 @@ export class CreateJournalDto {
 
   @IsOptional()
   @IsString()
-  tittleId?: string;
+  titleId?: string;
 
   @IsOptional()
   @IsString()

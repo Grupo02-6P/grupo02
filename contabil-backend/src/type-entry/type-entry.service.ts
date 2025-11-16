@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateTypeEntryDto } from './dto/create-type-entry.dto';
 import { UpdateTypeEntryDto } from './dto/update-type-entry.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,16 +16,16 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 export class TypeEntryService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
 
   create(createTypeEntryDto: CreateTypeEntryDto) {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('create', 'TypeEntry')) {
       throw new UnauthorizedException('Ação não permitida');
     }
-    
+
     return this.prisma.typeEntry.create({
       data: createTypeEntryDto,
       select: {
@@ -33,8 +37,8 @@ export class TypeEntryService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -42,25 +46,27 @@ export class TypeEntryService {
     });
   }
 
-  async findAll(filterDto: FilterTypeEntryDto): Promise<PaginatedResponse<any>> {
+  async findAll(
+    filterDto: FilterTypeEntryDto,
+  ): Promise<PaginatedResponse<any>> {
     const ability = this.abilityService.ability;
 
     if (!ability.can('read', 'TypeEntry')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy, 
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
       sortOrder = 'desc',
       name,
       description,
       accountClearedId,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -70,14 +76,14 @@ export class TypeEntryService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').typeEntry]
+      AND: [accessibleBy(ability, 'read').typeEntry],
     };
 
     // Filtro de busca geral
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -89,11 +95,11 @@ export class TypeEntryService {
     if (name) {
       where.name = { contains: name, mode: 'insensitive' };
     }
-    
+
     if (description) {
       where.description = { contains: description, mode: 'insensitive' };
     }
-    
+
     if (accountClearedId) {
       where.accountClearedId = accountClearedId;
     }
@@ -128,17 +134,17 @@ export class TypeEntryService {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           createdAt: true,
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.typeEntry.count({ where })
+      this.prisma.typeEntry.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -151,8 +157,8 @@ export class TypeEntryService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -166,21 +172,21 @@ export class TypeEntryService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
   findOne(id: string) {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('read', 'TypeEntry')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
     return this.prisma.typeEntry.findUnique({
-      where: { 
-        id
+      where: {
+        id,
       },
       select: {
         id: true,
@@ -192,8 +198,8 @@ export class TypeEntryService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -203,10 +209,10 @@ export class TypeEntryService {
 
   async update(id: string, updateTypeEntryDto: UpdateTypeEntryDto) {
     const ability = this.abilityService.ability;
-    
-    const typeEntry = await this.prisma.typeEntry.findUnique({ 
-      where: { 
-        id
+
+    const typeEntry = await this.prisma.typeEntry.findUnique({
+      where: {
+        id,
       },
       select: {
         id: true,
@@ -223,7 +229,7 @@ export class TypeEntryService {
         delete updateTypeEntryDto[field as keyof UpdateTypeEntryDto];
       }
     }
-    
+
     return this.prisma.typeEntry.update({
       where: { id },
       data: updateTypeEntryDto,
@@ -237,8 +243,8 @@ export class TypeEntryService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -256,7 +262,7 @@ export class TypeEntryService {
     // Verificar se o tipo de entrada existe e se o usuário tem acesso
     const typeEntry = await this.prisma.typeEntry.findUnique({
       where: {
-        id
+        id,
       },
     });
 
@@ -271,7 +277,7 @@ export class TypeEntryService {
 
   async inactivate(id: string) {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('delete', 'TypeEntry')) {
       throw new UnauthorizedException('Ação não permitida');
     }
@@ -279,7 +285,7 @@ export class TypeEntryService {
     // Verificar se o tipo de entrada existe e se o usuário tem acesso
     const typeEntry = await this.prisma.typeEntry.findUnique({
       where: {
-        id
+        id,
       },
     });
 
@@ -289,7 +295,7 @@ export class TypeEntryService {
 
     return this.prisma.typeEntry.update({
       where: { id },
-      data: { status: Status.INACTIVE }
+      data: { status: Status.INACTIVE },
     });
   }
 }

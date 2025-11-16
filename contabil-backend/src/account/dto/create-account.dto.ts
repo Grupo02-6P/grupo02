@@ -1,27 +1,27 @@
-import { Status } from "@prisma/client"
-import { IsNotEmpty, IsString } from "class-validator"
+import { Status } from '@prisma/client';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAccountDto {
-    @IsString()
-    @IsNotEmpty()
-    code: string
+  @IsString()
+  @IsNotEmpty()
+  code: string;
 
-    @IsString()
-    @IsNotEmpty()
-    name: string
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    description: string
+  @IsString()
+  description: string;
 
-    @IsNotEmpty()
-    level: number
+  @IsNotEmpty()
+  level: number;
 
-    @IsNotEmpty()
-    acceptsPosting: boolean
+  @IsNotEmpty()
+  acceptsPosting: boolean;
 
-    @IsNotEmpty()
-    active: Status
+  @IsNotEmpty()
+  active: Status;
 
-    @IsString()
-    parentAccountId: string | null
+  @IsString()
+  parentAccountId: string | null;
 }

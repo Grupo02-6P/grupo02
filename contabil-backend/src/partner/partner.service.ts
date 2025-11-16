@@ -11,7 +11,7 @@ import { Status } from '@prisma/client';
 export class PartnerService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
   create(createPartnerDto: CreatePartnerDto) {
     const ability = this.abilityService.ability;
@@ -32,11 +32,11 @@ export class PartnerService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    const { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy = 'createdAt', 
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy = 'createdAt',
       sortOrder = 'desc',
       name,
       address,
@@ -44,7 +44,7 @@ export class PartnerService {
       companyId,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -58,7 +58,7 @@ export class PartnerService {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
-        { cnpj: { contains: search, mode: 'insensitive' } }
+        { cnpj: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -70,15 +70,15 @@ export class PartnerService {
     if (name) {
       where.name = { contains: name, mode: 'insensitive' };
     }
-    
+
     if (address) {
       where.address = { contains: address, mode: 'insensitive' };
     }
-    
+
     if (cnpj) {
       where.cnpj = { contains: cnpj, mode: 'insensitive' };
     }
-    
+
     if (companyId) {
       where.companyId = companyId;
     }
@@ -110,10 +110,10 @@ export class PartnerService {
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.partner.count({ where })
+      this.prisma.partner.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -126,8 +126,8 @@ export class PartnerService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -141,8 +141,8 @@ export class PartnerService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -187,13 +187,13 @@ export class PartnerService {
   }
 
   inactivate(id: string) {
-  const ability = this.abilityService.ability;
-  if (!ability.can('delete', 'Partner')) {
-    throw new UnauthorizedException('Ação não permitida');
+    const ability = this.abilityService.ability;
+    if (!ability.can('delete', 'Partner')) {
+      throw new UnauthorizedException('Ação não permitida');
+    }
+    return this.prisma.partner.update({
+      where: { id },
+      data: { status: Status.INACTIVE },
+    });
   }
-  return this.prisma.partner.update({
-    where: { id },
-    data: { status: Status.INACTIVE }
-  });
-}
 }

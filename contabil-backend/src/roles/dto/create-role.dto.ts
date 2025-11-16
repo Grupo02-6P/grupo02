@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsString } from 'class-validator';
 
 export type permissionsType = {
   resource: string;
@@ -11,12 +11,12 @@ export class CreateRoleDto {
   @IsString()
   name: string;
 
-    @IsString()
-    description: string;
+  @IsString()
+  description: string;
 
-    @IsBoolean()
-    isDefault: boolean;
+  @IsBoolean()
+  isDefault: boolean;
 
-    @IsArray()
-    permissions: permissionsType[];
+  @IsArray()
+  permissions: permissionsType[];
 }
