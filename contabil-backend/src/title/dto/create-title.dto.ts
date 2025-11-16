@@ -1,6 +1,6 @@
 import { IsString, IsOptional, IsNumber, IsDateString, IsUUID } from 'class-validator';
 
-export class CreateTittleDto {
+export class CreateTitleDto {
   @IsString()
   code: string;
 

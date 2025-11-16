@@ -13,7 +13,7 @@ export class JournalService {
             account: true,
           },
         },
-        tittle: true,
+        title: true,
         entry: true,
       },
       orderBy: { date: 'desc' },
@@ -27,7 +27,7 @@ export class JournalService {
         lines: {
           include: { account: true },
         },
-        tittle: true,
+        title: true,
         entry: true,
       },
     });

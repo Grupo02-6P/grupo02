@@ -1,6 +1,6 @@
 # 📘 Funcionamento dos Lançamentos Contábeis — Títulos e Entradas
 
-Este documento explica, com base no schema Prisma, como funcionam os **lançamentos automáticos** de **Títulos (Tittle)** e **Entradas (Entry)** dentro do sistema de **contabilidade de dupla entrada**.
+Este documento explica, com base no schema Prisma, como funcionam os **lançamentos automáticos** de **Títulos (Title)** e **Entradas (Entry)** dentro do sistema de **contabilidade de dupla entrada**.
 
 ---
 
@@ -18,11 +18,11 @@ Cada evento financeiro (um título ou uma entrada) **gera automaticamente** seus
 
 ---
 
-## 🧱 2. Lançamento de Título (`Tittle`)
+## 🧱 2. Lançamento de Título (`Title`)
 
 ### 📄 O que é um Título
 
-Um **Tittle** representa o **lançamento principal** de uma operação financeira, como:
+Um **Title** representa o **lançamento principal** de uma operação financeira, como:
 - Venda de mercadoria
 - Compra de insumos
 - Despesa com energia
@@ -34,7 +34,7 @@ Cada título está vinculado a um **tipo de movimento (`typeMovement`)**, que de
 
 ### ⚙️ Estrutura relevante
 
-model Tittle {
+model Title {
   id          String   @id @default(uuid())
   code        String   @unique
   description String?
@@ -100,7 +100,7 @@ Uma **Entry** representa a **baixa (liquidação)** de um título.
 Exemplo: pagamento de um fornecedor ou recebimento de um cliente.
 
 Cada entrada está associada a um:
-- **Título (`tittleId`)**
+- **Título (`titleId`)**
 - **Tipo de entrada (`typeEntry`)**, que define a **conta de compensação (baixa)**.
 
 ---
@@ -111,9 +111,9 @@ model Entry {
   id           String     @id @default(uuid())
   code         String     @unique
   value        Float
-  tittleId     String
+  titleId     String
   entryTypeId  String
-  tittle       Tittle     @relation(fields: [tittleId], references: [id])
+  title       Title     @relation(fields: [titleId], references: [id])
   entryType    typeEntry  @relation(fields: [entryTypeId], references: [id])
   journalEntries JournalEntry[]
 }
@@ -168,8 +168,8 @@ Cada operação (título ou entrada) gera um **`JournalEntry`** — o registro c
 model JournalEntry {
   id          String      @id @default(uuid())
   date        DateTime    @default(now())
-  originType  JournalOrigin? // TITTLE ou ENTRY
-  tittleId    String?
+  originType  JournalOrigin? // TITLE ou ENTRY
+  titleId    String?
   entryId     String?
   lines       JournalLine[]
 }
@@ -206,7 +206,7 @@ Cada conta (`Account`) acumula lançamentos de débito e crédito a partir das `
 
 | Etapa | Operação | Conta Débito | Conta Crédito | Valor | Origem |
 |-------|-----------|---------------|----------------|--------|----------|
-| 1 | Lançamento de Título | Despesa de Energia | Fornecedores | 2.500 | TITTLE |
+| 1 | Lançamento de Título | Despesa de Energia | Fornecedores | 2.500 | TITLE |
 | 2 | Lançamento de Entrada | Fornecedores | Caixa | 2.500 | ENTRY |
 
 📊 **Saldos finais:**
@@ -220,7 +220,7 @@ Cada conta (`Account`) acumula lançamentos de débito e crédito a partir das `
 
 | Entidade | Papel | Gera lançamento contábil? | Impacto |
 |-----------|--------|----------------------------|----------|
-| **Tittle** | Lançamento principal (compra/venda/despesa) | ✅ Sim | Cria lançamento de origem `TITTLE` |
+| **Title** | Lançamento principal (compra/venda/despesa) | ✅ Sim | Cria lançamento de origem `TITLE` |
 | **Entry** | Baixa ou liquidação do título | ✅ Sim | Cria lançamento de origem `ENTRY` |
 | **JournalEntry** | Registro contábil (livro razão) | ✅ Sim | Agrupa as linhas contábeis |
 | **JournalLine** | Linha do lançamento (conta + tipo + valor) | ✅ Sim | Atualiza saldo da conta |

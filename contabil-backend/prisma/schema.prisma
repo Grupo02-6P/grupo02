@@ -76,7 +76,7 @@ model Partner {
   cnpj      String   @unique
   status    Status   @default(ACTIVE)
 
-  tittles   Tittle[]
+  titles    Title[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,7 +125,7 @@ model typeMovement {
   creditAccount   Account   @relation("CreditAccount", fields: [creditAccountId], references: [id])
   debitAccount    Account   @relation("DebitAccount", fields: [debitAccountId], references: [id])
 
-  tittles         Tittle[]  
+  titles          Title[]  
 
   status          Status    @default(ACTIVE)
   createdAt       DateTime  @default(now())
@@ -151,7 +151,7 @@ model typeEntry {
 // LANÇAMENTO (TÍTULO) E ENTRADA (BAIXA)
 // ----------------------------------------
 
-model Tittle {
+model Title {
   id          String     @id @default(uuid())
   code        String     @unique
   description String?
@@ -178,8 +178,8 @@ model JournalEntry {
   originType  JournalOrigin?
   originId    String?
 
-  tittleId    String?
-  tittle      Tittle?        @relation(fields: [tittleId], references: [id])
+  titleId    String?
+  title      Title?        @relation(fields: [titleId], references: [id])
 
   entryId     String?
   entry       Entry?         @relation(fields: [entryId], references: [id])
@@ -211,8 +211,8 @@ model Entry {
   value        Float
   status       Status      @default(ACTIVE)
 
-  tittleId     String
-  tittle       Tittle      @relation(fields: [tittleId], references: [id])
+  titleId      String
+  title        Title       @relation(fields: [titleId], references: [id])
 
   entryTypeId  String
   entryType    typeEntry   @relation(fields: [entryTypeId], references: [id])
@@ -251,7 +251,7 @@ enum LineType {
 }
 
 enum JournalOrigin {
-  TITTLE     // lançamento principal
+  TITLE     // lançamento principal
   ENTRY      // baixa, liquidação
   ADJUSTMENT // ajuste contábil manual
   TRANSFER   // transferência interna

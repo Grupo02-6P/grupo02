@@ -21,7 +21,7 @@ export class CreateEntryDto {
   status?: Status;
 
   @IsString()
-  tittleId: string;
+  titleId: string;
 
   @IsString()
   entryTypeId: string;

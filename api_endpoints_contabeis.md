@@ -1,6 +1,6 @@
 # 📘 API de Lançamentos Contábeis — Títulos e Entradas
 
-Este documento descreve os **endpoints REST** disponíveis para gerenciar **Títulos (Tittles)** e **Entradas (Entries)**.
+Este documento descreve os **endpoints REST** disponíveis para gerenciar **Títulos (Titles)** e **Entradas (Entries)**.
 
 Cada lançamento gera automaticamente um **JournalEntry**, que representa o lançamento contábil de dupla entrada (débito e crédito).
 
@@ -12,10 +12,10 @@ http://localhost:3000
 
 ---
 
-# 🧾 TÍTULOS (`/tittles`)
+# 🧾 TÍTULOS (`/titles`)
 
 ## 1️⃣ Criar um novo Título
-### ➤ POST /tittles
+### ➤ POST /titles
 
 Cria um **Título** (lançamento principal) e **gera automaticamente o JournalEntry**.
 
@@ -34,22 +34,22 @@ Cria um **Título** (lançamento principal) e **gera automaticamente o JournalEn
 ---
 
 ## 2️⃣ Listar todos os Títulos
-### ➤ GET /tittles
+### ➤ GET /titles
 
 Retorna todos os títulos com seus movimentos, parceiros e lançamentos contábeis.
 
 ---
 
 ## 3️⃣ Buscar Título por ID
-### ➤ GET /tittles/:id
+### ➤ GET /titles/:id
 
 Exemplo:
-GET /tittles/{{id_do_titulo}}
+GET /titles/{{id_do_titulo}}
 
 ---
 
 ## 4️⃣ Atualizar um Título
-### ➤ PATCH /tittles/:id
+### ➤ PATCH /titles/:id
 
 Exemplo de corpo:
 {
@@ -60,10 +60,10 @@ Exemplo de corpo:
 ---
 
 ## 5️⃣ Remover um Título
-### ➤ DELETE /tittles/:id
+### ➤ DELETE /titles/:id
 
 Exemplo:
-DELETE /tittles/{{id_do_titulo}}
+DELETE /titles/{{id_do_titulo}}
 
 ---
 
@@ -86,7 +86,7 @@ Exemplo de corpo (JSON):
   "date": "2025-11-11T08:00:00.000Z",
   "value": 2500,
   "status": "ACTIVE",
-  "tittleId": "{{id_do_titulo}}",
+  "titleId": "{{id_do_titulo}}",
   "entryTypeId": "{{id_do_tipo_de_entrada}}"
 }
 
@@ -130,7 +130,7 @@ DELETE /entries/{{id_da_entrada}}
 
 | Etapa | Operação | Conta Débito | Conta Crédito | Valor | Origem |
 |-------|-----------|---------------|----------------|--------|----------|
-| 1 | Criação do Título | Despesa de Energia | Fornecedores | 2.500 | TITTLE |
+| 1 | Criação do Título | Despesa de Energia | Fornecedores | 2.500 | TITLE |
 | 2 | Criação da Entrada | Caixa | Despesa de Energia | 2.500 | ENTRY |
 
 📈 Resultado:
@@ -144,11 +144,11 @@ DELETE /entries/{{id_da_entrada}}
 
 | Entidade | Método | Rota | Descrição |
 |-----------|---------|------|------------|
-| Título | POST | /tittles | Cria um título e gera journal |
-|  | GET | /tittles | Lista todos |
-|  | GET | /tittles/:id | Busca por ID |
-|  | PATCH | /tittles/:id | Atualiza |
-|  | DELETE | /tittles/:id | Remove |
+| Título | POST | /titles | Cria um título e gera journal |
+|  | GET | /titles | Lista todos |
+|  | GET | /titles/:id | Busca por ID |
+|  | PATCH | /titles/:id | Atualiza |
+|  | DELETE | /titles/:id | Remove |
 | Entrada | POST | /entries | Cria uma entrada e gera journal |
 |  | GET | /entries | Lista todas |
 |  | GET | /entries/:id | Busca por ID |
