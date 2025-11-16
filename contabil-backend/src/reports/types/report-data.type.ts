@@ -1,4 +1,4 @@
 export type ReportData = {
   title: string;
-  data: any[];
+  data: any;
 };
