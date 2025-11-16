@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IAccountRepository } from '../abstractions/i-account-repository.abstract';
 import { TrialBalanceLineDto } from '../dto/trial-balance-line.dto';
+import { DateRange } from '../types/date-range.type';
+import { JournalLine } from '@prisma/client';
 
 @Injectable()
 export class PrismaAccountRepository implements IAccountRepository {
@@ -45,5 +47,84 @@ export class PrismaAccountRepository implements IAccountRepository {
     });
 
     return trialBalance;
+  }
+
+  async getAccountBalanceBefore(
+    accountId: string,
+    startDate: Date,
+  ): Promise<number> {
+    const debits = await this.prisma.journalLine.aggregate({
+      _sum: {
+        amount: true,
+      },
+      where: {
+        accountId,
+        type: 'DEBIT',
+        journalEntry: {
+          date: {
+            lt: startDate,
+          },
+        },
+      },
+    });
+
+    const credits = await this.prisma.journalLine.aggregate({
+      _sum: {
+        amount: true,
+      },
+      where: {
+        accountId,
+        type: 'CREDIT',
+        journalEntry: {
+          date: {
+            lt: startDate,
+          },
+        },
+      },
+    });
+
+    const totalDebit = debits._sum.amount || 0;
+    const totalCredit = credits._sum.amount || 0;
+
+    return totalDebit - totalCredit;
+  }
+
+  async getDetailedAccountLines(
+    accountId: string,
+    period: DateRange,
+  ): Promise<JournalLine[]> {
+    return this.prisma.journalLine.findMany({
+      where: {
+        accountId,
+        journalEntry: {
+          date: {
+            gte: period.startDate,
+            lte: period.endDate,
+          },
+        },
+      },
+      orderBy: {
+        journalEntry: {
+          date: 'asc',
+        },
+      },
+      include: {
+        account: true,
+        journalEntry: {
+          include: {
+            tittle: {
+              select: {
+                description: true,
+              },
+            },
+            entry: {
+              select: {
+                description: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }

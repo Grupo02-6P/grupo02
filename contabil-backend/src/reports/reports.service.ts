@@ -9,8 +9,12 @@ export class ReportsService {
     private readonly reportCalculatorFactory: ReportCalculatorFactory,
   ) {}
 
-  async generateReport(type: ReportType, period: DateRange) {
+  async generateReport(
+    type: ReportType,
+    period: DateRange,
+    options?: { accountId?: string },
+  ) {
     const calculator = this.reportCalculatorFactory.getCalculator(type);
-    return calculator.calculate(period);
+    return calculator.calculate(period, options);
   }
 }

@@ -9,7 +9,10 @@ import { DREReportDto, DRELineDto } from '../dto/dre-report.dto';
 export class DRECalculator implements IReportCalculator {
   constructor(private readonly accountRepo: IAccountRepository) {}
 
-  async calculate(period: DateRange): Promise<ReportData> {
+  async calculate(
+    period: DateRange,
+    options?: { accountId?: string },
+  ): Promise<ReportData> {
     // A DRE considera o resultado dentro de um período, mas a lógica pedida
     // usa o saldo final. Para uma DRE correta, precisaríamos dos saldos inicial e final.
     // Vou implementar conforme solicitado, usando o saldo final do balancete.

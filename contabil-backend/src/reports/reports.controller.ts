@@ -8,11 +8,12 @@ export class ReportsController {
 
   @Post()
   generateReport(@Body() generateReportDto: GenerateReportDto) {
-    const { type, startDate, endDate } = generateReportDto;
+    const { type, startDate, endDate, accountId } = generateReportDto;
     const period = {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
     };
-    return this.reportsService.generateReport(type, period);
+    const options = { accountId };
+    return this.reportsService.generateReport(type, period, options);
   }
 }

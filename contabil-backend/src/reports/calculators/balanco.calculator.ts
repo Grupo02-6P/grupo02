@@ -17,7 +17,10 @@ export class BalancoCalculator implements IReportCalculator {
     private readonly dreCalculator: DRECalculator,
   ) {}
 
-  async calculate(period: DateRange): Promise<ReportData> {
+  async calculate(
+    period: DateRange,
+    options?: { accountId?: string },
+  ): Promise<ReportData> {
     // 1. Calcular o resultado do período
     const dreReportData = await this.dreCalculator.calculate(period);
     const lucroPrejuizo = (dreReportData.data as DREReportDto).lucroPrejuizo;

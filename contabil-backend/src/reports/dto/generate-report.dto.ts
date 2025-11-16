@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsUUID } from 'class-validator';
 import { ReportType } from '../types/report-type.enum';
 
 export class GenerateReportDto {
@@ -10,4 +10,8 @@ export class GenerateReportDto {
 
   @IsDateString()
   endDate: string;
+
+  @IsOptional()
+  @IsUUID()
+  accountId?: string;
 }

@@ -7,6 +7,7 @@ import { IAccountRepository } from './abstractions/i-account-repository.abstract
 import { PrismaAccountRepository } from './repositories/prisma-account.repository';
 import { DRECalculator } from './calculators/dre.calculator';
 import { BalancoCalculator } from './calculators/balanco.calculator';
+import { LedgerCalculator } from './calculators/ledger.calculator';
 
 @Module({
   controllers: [ReportsController],
@@ -15,6 +16,7 @@ import { BalancoCalculator } from './calculators/balanco.calculator';
     TrialBalanceCalculator,
     DRECalculator,
     BalancoCalculator,
+    LedgerCalculator,
     ReportCalculatorFactory,
     {
       provide: IAccountRepository,

@@ -8,7 +8,10 @@ import { ReportData } from '../types/report-data.type';
 export class TrialBalanceCalculator implements IReportCalculator {
   constructor(private readonly accountRepo: IAccountRepository) {}
 
-  async calculate(period: DateRange): Promise<ReportData> {
+  async calculate(
+    period: DateRange,
+    options?: { accountId?: string },
+  ): Promise<ReportData> {
     const trialBalanceData = await this.accountRepo.getTrialBalanceData(
       period.endDate,
     );
