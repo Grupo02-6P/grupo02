@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IReportFormatter } from '../abstractions/i-report-formatter.abstract';
 import { ReportData } from '../types/report-data.type';
-import { TrialBalanceLineDto } from '../dto/trial-balance-line.dto';
+import { TrialBalanceReportLineDto } from '../dto/trial-balance-report-line.dto';
 import { DREReportDto } from '../dto/dre-report.dto';
 import { BalanceSheetReportDto } from '../dto/balance-sheet-report.dto';
 import { LedgerReportDto } from '../dto/ledger-report.dto';
@@ -57,24 +57,32 @@ export class PdfFormatter implements IReportFormatter {
     });
   }
 
-  private _drawBalancete(doc: any, data: TrialBalanceLineDto[]) {
+  private _drawBalancete(doc: any, data: TrialBalanceReportLineDto[]) {
     const formatBRL = (value: number) =>
       value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     const table = {
-      headers: ['Cód.', 'Conta', 'Débito', 'Crédito', 'Saldo'],
+      headers: [
+        'Cód.',
+        'Conta',
+        'Débito',
+        'Crédito',
+        'S. Devedor',
+        'S. Credor',
+      ],
       rows: data.map(linha => [
         linha.accountCode,
         linha.accountName,
         formatBRL(linha.totalDebit),
         formatBRL(linha.totalCredit),
-        formatBRL(linha.balance),
+        formatBRL(linha.saldoDevedor),
+        formatBRL(linha.saldoCredor),
       ]),
     };
 
     doc.table(table, {
       width: 550,
-      columnsSize: [60, 250, 80, 80, 80],
+      columnsSize: [60, 200, 70, 70, 70, 70],
       prepareHeader: () => doc.font('Helvetica-Bold'),
       prepareRow: (row, i) => doc.font('Helvetica').fontSize(10),
     });

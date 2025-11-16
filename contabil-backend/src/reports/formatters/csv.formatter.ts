@@ -5,6 +5,7 @@ import { unparse } from 'papaparse';
 import { BalanceSheetReportDto } from '../dto/balance-sheet-report.dto';
 import { DREReportDto } from '../dto/dre-report.dto';
 import { LedgerReportDto } from '../dto/ledger-report.dto';
+import { TrialBalanceReportLineDto } from '../dto/trial-balance-report-line.dto';
 
 @Injectable()
 export class CsvFormatter implements IReportFormatter {
@@ -13,7 +14,15 @@ export class CsvFormatter implements IReportFormatter {
 
     switch (data.title) {
       case 'Balancete de Verificação':
-        dataToParse = data.data;
+        const trialBalanceData = data.data as TrialBalanceReportLineDto[];
+        dataToParse = trialBalanceData.map(l => ({
+          'Código': l.accountCode,
+          'Conta': l.accountName,
+          'Débito': l.totalDebit,
+          'Crédito': l.totalCredit,
+          'S. Devedor': l.saldoDevedor,
+          'S. Credor': l.saldoCredor,
+        }));
         break;
       case 'Livro Razão':
         dataToParse = (data.data as LedgerReportDto).lines;
