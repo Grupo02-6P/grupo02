@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
 import { ArrowLeftRight } from 'lucide-react';
 import { MdOutlineAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
+import { TbReportAnalytics } from "react-icons/tb";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -61,6 +62,16 @@ const Home: React.FC = () => {
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
       permission: { resource: 'TypeEntry', action: 'read' }
+    },
+    {
+      title: 'Gerar Relatórios',
+      description: 'Gere relatórios gerenciais',
+      icon: <TbReportAnalytics size={24} />,
+      href: '/relatorios',
+      borderColor: 'border-yellow-400',
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-600',
+      permission: { resource: 'Report', action: 'read' }
     },
   ]
 
