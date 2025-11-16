@@ -17,7 +17,7 @@ import { JournalModule } from './journal/journal.module';
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     PrismaModule,
     AuthModule,
     CaslModule,

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { FilterRoleDto } from './dto/filter-role.dto';
@@ -11,9 +15,9 @@ import { UsersService } from 'src/users/users.service';
 export class RolesService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
-    
+
   async create(createRoleDto: CreateRoleDto) {
     const ability = this.abilityService.ability;
 
@@ -25,16 +29,20 @@ export class RolesService {
 
     // Verificar se já existe um role com esse nome
     const existingRole = await this.prisma.role.findUnique({
-      where: { name: roleData.name }
+      where: { name: roleData.name },
     });
 
     if (existingRole) {
-      throw new BadRequestException(`Role com nome '${roleData.name}' já existe`);
+      throw new BadRequestException(
+        `Role com nome '${roleData.name}' já existe`,
+      );
     }
 
     // Validar se há pelo menos uma permissão
     if (!permissions || permissions.length === 0) {
-      throw new BadRequestException('Um role deve ter pelo menos uma permissão');
+      throw new BadRequestException(
+        'Um role deve ter pelo menos uma permissão',
+      );
     }
 
     // Criar o role e suas permissões em uma transação
@@ -47,12 +55,14 @@ export class RolesService {
       // 2. Processar cada permissão
       for (const permissionData of permissions) {
         // Buscar o resource
-        let resource = await prisma.resource.findUnique({
-          where: { name: permissionData.resource }
+        const resource = await prisma.resource.findUnique({
+          where: { name: permissionData.resource },
         });
 
         if (!resource) {
-          throw new BadRequestException(`Recurso '${permissionData.resource}' não encontrado`);
+          throw new BadRequestException(
+            `Recurso '${permissionData.resource}' não encontrado`,
+          );
         }
 
         // Buscar ou criar a permission
@@ -60,9 +70,13 @@ export class RolesService {
           where: {
             action: permissionData.action as any,
             resourceId: resource.id,
-            fields: permissionData.fields ? { equals: permissionData.fields } : undefined,
-            conditions: permissionData.conditions ? { equals: permissionData.conditions } : undefined
-          }
+            fields: permissionData.fields
+              ? { equals: permissionData.fields }
+              : undefined,
+            conditions: permissionData.conditions
+              ? { equals: permissionData.conditions }
+              : undefined,
+          },
         });
 
         if (!permission) {
@@ -71,8 +85,8 @@ export class RolesService {
               action: permissionData.action as any,
               resourceId: resource.id,
               fields: permissionData.fields || undefined,
-              conditions: permissionData.conditions || undefined
-            }
+              conditions: permissionData.conditions || undefined,
+            },
           });
         }
 
@@ -80,8 +94,8 @@ export class RolesService {
         await prisma.rolePermission.create({
           data: {
             roleId: role.id,
-            permissionId: permission.id
-          }
+            permissionId: permission.id,
+          },
         });
       }
 
@@ -93,31 +107,31 @@ export class RolesService {
             include: {
               permission: {
                 include: {
-                  resource: true
-                }
-              }
-            }
-          }
-        }
+                  resource: true,
+                },
+              },
+            },
+          },
+        },
       });
     });
   }
 
   async findAll(filterDto: FilterRoleDto): Promise<PaginatedResponse<any>> {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('read', 'Role')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      sortBy, 
-      sortOrder, 
-      name, 
-      description, 
-      isDefault 
+    let {
+      page = 1,
+      limit = 10,
+      sortBy,
+      sortOrder,
+      name,
+      description,
+      isDefault,
     } = filterDto;
 
     // Construir filtro dinâmico
@@ -130,14 +144,14 @@ export class RolesService {
     if (name) {
       where.name = {
         contains: name,
-        mode: 'insensitive'
+        mode: 'insensitive',
       };
     }
 
     if (description) {
       where.description = {
         contains: description,
-        mode: 'insensitive'
+        mode: 'insensitive',
       };
     }
 
@@ -154,15 +168,15 @@ export class RolesService {
             include: {
               permission: {
                 include: {
-                  resource: true
-                }
-              }
-            }
-          }
+                  resource: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          [sortBy as string]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       });
 
       return {
@@ -173,8 +187,8 @@ export class RolesService {
           total: roles.length,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -189,19 +203,19 @@ export class RolesService {
             include: {
               permission: {
                 include: {
-                  resource: true
-                }
-              }
-            }
-          }
+                  resource: true,
+                },
+              },
+            },
+          },
         },
         skip,
         take: limit,
         orderBy: {
-          [sortBy as string]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.role.count({ where })
+      this.prisma.role.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -216,8 +230,8 @@ export class RolesService {
         total,
         totalPages,
         hasNextPage,
-        hasPreviousPage
-      }
+        hasPreviousPage,
+      },
     };
   }
 
@@ -235,12 +249,12 @@ export class RolesService {
           include: {
             permission: {
               include: {
-                resource: true
-              }
-            }
-          }
-        }
-      }
+                resource: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -257,17 +271,16 @@ export class RolesService {
       include: {
         rolePermissions: {
           include: {
-            permission: true
-          }
+            permission: true,
+          },
         },
-        users: true // Incluir usuários que usam este role
-      }
+        users: true, // Incluir usuários que usam este role
+      },
     });
 
     if (!existingRole) {
       throw new BadRequestException('Role não encontrado');
     }
-
 
     const { permissions, ...roleData } = updateRoleDto;
     if (roleData.isDefault) {
@@ -276,45 +289,51 @@ export class RolesService {
     // Se o nome está sendo alterado, verificar se já existe outro role com esse nome
     if (roleData.name && roleData.name !== existingRole.name) {
       const roleWithSameName = await this.prisma.role.findUnique({
-        where: { name: roleData.name }
+        where: { name: roleData.name },
       });
 
       if (roleWithSameName) {
-        throw new BadRequestException(`Role com nome '${roleData.name}' já existe`);
+        throw new BadRequestException(
+          `Role com nome '${roleData.name}' já existe`,
+        );
       }
     }
 
     // Se há usuários usando este role e permissões estão sendo alteradas, mostrar aviso
     if (permissions && existingRole.users.length > 0) {
-      console.log(`⚠️ Atualizando permissões do role '${existingRole.name}' que possui ${existingRole.users.length} usuário(s) associado(s)`);
+      console.log(
+        `⚠️ Atualizando permissões do role '${existingRole.name}' que possui ${existingRole.users.length} usuário(s) associado(s)`,
+      );
     }
 
     delete roleData.isDefault;
-    
+
     // Executar a atualização em uma transação
     return this.prisma.$transaction(async (prisma) => {
       // 1. Atualizar dados básicos do role
       const updatedRole = await prisma.role.update({
         where: { id },
-        data: roleData
+        data: roleData,
       });
 
       // 2. Se permissions foram fornecidas, atualizar as permissões
       if (permissions && permissions.length > 0) {
         // Remover todas as permissões existentes
         await prisma.rolePermission.deleteMany({
-          where: { roleId: id }
+          where: { roleId: id },
         });
 
         // Adicionar as novas permissões
         for (const permissionData of permissions) {
           // Buscar o resource
-          let resource = await prisma.resource.findUnique({
-            where: { name: permissionData.resource }
+          const resource = await prisma.resource.findUnique({
+            where: { name: permissionData.resource },
           });
 
           if (!resource) {
-            throw new BadRequestException(`Recurso '${permissionData.resource}' não encontrado`);
+            throw new BadRequestException(
+              `Recurso '${permissionData.resource}' não encontrado`,
+            );
           }
 
           // Buscar ou criar a permission
@@ -322,9 +341,13 @@ export class RolesService {
             where: {
               action: permissionData.action as any,
               resourceId: resource.id,
-              fields: permissionData.fields ? { equals: permissionData.fields } : undefined,
-              conditions: permissionData.conditions ? { equals: permissionData.conditions } : undefined
-            }
+              fields: permissionData.fields
+                ? { equals: permissionData.fields }
+                : undefined,
+              conditions: permissionData.conditions
+                ? { equals: permissionData.conditions }
+                : undefined,
+            },
           });
 
           if (!permission) {
@@ -333,8 +356,8 @@ export class RolesService {
                 action: permissionData.action as any,
                 resourceId: resource.id,
                 fields: permissionData.fields || undefined,
-                conditions: permissionData.conditions || undefined
-              }
+                conditions: permissionData.conditions || undefined,
+              },
             });
           }
 
@@ -342,13 +365,15 @@ export class RolesService {
           await prisma.rolePermission.create({
             data: {
               roleId: id,
-              permissionId: permission.id
-            }
+              permissionId: permission.id,
+            },
           });
         }
       } else if (permissions && permissions.length === 0) {
         // Se um array vazio foi fornecido, não permitir (role não pode ficar sem permissões)
-        throw new BadRequestException('Um role deve ter pelo menos uma permissão');
+        throw new BadRequestException(
+          'Um role deve ter pelo menos uma permissão',
+        );
       }
 
       // 3. Retornar o role atualizado com todas as informações
@@ -359,12 +384,12 @@ export class RolesService {
             include: {
               permission: {
                 include: {
-                  resource: true
-                }
-              }
-            }
-          }
-        }
+                  resource: true,
+                },
+              },
+            },
+          },
+        },
       });
     });
   }
@@ -377,7 +402,7 @@ export class RolesService {
 
     const role = await this.prisma.role.findUnique({
       where: { id },
-      include: { users: true }
+      include: { users: true },
     });
 
     if (!role) {
@@ -385,13 +410,15 @@ export class RolesService {
     }
 
     if (role.isDefault) {
-      throw new BadRequestException('Não é permitido deletar um role padrão do sistema');
+      throw new BadRequestException(
+        'Não é permitido deletar um role padrão do sistema',
+      );
     }
 
     await this.prisma.rolePermission.deleteMany({
       where: {
-        roleId: id
-      }
+        roleId: id,
+      },
     });
 
     return this.prisma.role.delete({

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TypeEntryService } from './type-entry.service';
 import { CreateTypeEntryDto } from './dto/create-type-entry.dto';
 import { UpdateTypeEntryDto } from './dto/update-type-entry.dto';
@@ -26,7 +36,10 @@ export class TypeEntryController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeEntryDto: UpdateTypeEntryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTypeEntryDto: UpdateTypeEntryDto,
+  ) {
     return this.typeEntryService.update(id, updateTypeEntryDto);
   }
 

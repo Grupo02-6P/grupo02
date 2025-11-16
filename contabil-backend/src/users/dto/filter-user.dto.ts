@@ -15,5 +15,4 @@ export class FilterUserDto extends BaseFilterDto {
   @IsOptional()
   @IsString()
   roleId?: string;
-
 }

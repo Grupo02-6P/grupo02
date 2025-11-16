@@ -8,9 +8,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ResourcesService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
-
 
   create(createResourceDto: CreateResourceDto) {
     const ability = this.abilityService.ability;
@@ -30,7 +29,7 @@ export class ResourcesService {
       throw new UnauthorizedException('Ação não permitida');
     }
     const resources = await this.prisma.resource.findMany();
-    return {data: resources};
+    return { data: resources };
   }
 
   async findOne(id: string) {

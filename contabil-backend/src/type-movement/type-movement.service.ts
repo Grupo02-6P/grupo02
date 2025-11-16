@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateTypeMovementDto } from './dto/create-type-movement.dto';
 import { UpdateTypeMovementDto } from './dto/update-type-movement.dto';
 import { FilterTypeMovementDto } from './dto/filter-type-movement.dto';
@@ -12,7 +17,7 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 export class TypeMovementService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
+    private abilityService: CaslAbilityService,
   ) {}
 
   create(createTypeMovementDto: CreateTypeMovementDto) {
@@ -22,10 +27,15 @@ export class TypeMovementService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    if (createTypeMovementDto.creditAccountId === createTypeMovementDto.debitAccountId) {
-      throw new BadRequestException('A conta de crédito e débito não podem ser iguais');
+    if (
+      createTypeMovementDto.creditAccountId ===
+      createTypeMovementDto.debitAccountId
+    ) {
+      throw new BadRequestException(
+        'A conta de crédito e débito não podem ser iguais',
+      );
     }
-    
+
     return this.prisma.typeMovement.create({
       data: createTypeMovementDto,
       select: {
@@ -37,15 +47,15 @@ export class TypeMovementService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         debitAccount: {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -53,18 +63,20 @@ export class TypeMovementService {
     });
   }
 
-  async findAll(filterDto: FilterTypeMovementDto): Promise<PaginatedResponse<any>> {
+  async findAll(
+    filterDto: FilterTypeMovementDto,
+  ): Promise<PaginatedResponse<any>> {
     const ability = this.abilityService.ability;
 
     if (!ability.can('read', 'TypeMovement')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy, 
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
       sortOrder = 'desc',
       name,
       description,
@@ -72,7 +84,7 @@ export class TypeMovementService {
       debitAccountId,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -82,14 +94,14 @@ export class TypeMovementService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').typeMovement]
+      AND: [accessibleBy(ability, 'read').typeMovement],
     };
 
     // Filtro de busca geral
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -101,15 +113,15 @@ export class TypeMovementService {
     if (name) {
       where.name = { contains: name, mode: 'insensitive' };
     }
-    
+
     if (description) {
       where.description = { contains: description, mode: 'insensitive' };
     }
-    
+
     if (creditAccountId) {
       where.creditAccountId = creditAccountId;
     }
-    
+
     if (debitAccountId) {
       where.debitAccountId = debitAccountId;
     }
@@ -144,24 +156,24 @@ export class TypeMovementService {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           debitAccount: {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           createdAt: true,
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.typeMovement.count({ where })
+      this.prisma.typeMovement.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -174,8 +186,8 @@ export class TypeMovementService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -189,8 +201,8 @@ export class TypeMovementService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -202,9 +214,9 @@ export class TypeMovementService {
     }
 
     return this.prisma.typeMovement.findUnique({
-      where: { 
+      where: {
         id,
-        AND: [accessibleBy(ability, 'read').typeMovement] 
+        AND: [accessibleBy(ability, 'read').typeMovement],
       },
       select: {
         id: true,
@@ -217,15 +229,15 @@ export class TypeMovementService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         debitAccount: {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -239,15 +251,21 @@ export class TypeMovementService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    if (updateTypeMovementDto.creditAccountId && updateTypeMovementDto.debitAccountId &&
-        updateTypeMovementDto.creditAccountId === updateTypeMovementDto.debitAccountId) {
-      throw new BadRequestException('A conta de crédito e débito não podem ser iguais');
+    if (
+      updateTypeMovementDto.creditAccountId &&
+      updateTypeMovementDto.debitAccountId &&
+      updateTypeMovementDto.creditAccountId ===
+        updateTypeMovementDto.debitAccountId
+    ) {
+      throw new BadRequestException(
+        'A conta de crédito e débito não podem ser iguais',
+      );
     }
-    
-    const typeMovement = await this.prisma.typeMovement.findUnique({ 
-      where: { 
+
+    const typeMovement = await this.prisma.typeMovement.findUnique({
+      where: {
         id,
-        AND: [accessibleBy(ability, 'update').typeMovement] 
+        AND: [accessibleBy(ability, 'update').typeMovement],
       },
       select: {
         id: true,
@@ -277,15 +295,15 @@ export class TypeMovementService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         debitAccount: {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -304,7 +322,7 @@ export class TypeMovementService {
     const typeMovement = await this.prisma.typeMovement.findUnique({
       where: {
         id,
-        AND: [accessibleBy(ability, 'delete').typeMovement]
+        AND: [accessibleBy(ability, 'delete').typeMovement],
       },
     });
 
@@ -324,7 +342,7 @@ export class TypeMovementService {
     }
     return this.prisma.typeMovement.update({
       where: { id },
-      data: { status: Status.INACTIVE }
+      data: { status: Status.INACTIVE },
     });
   }
 }

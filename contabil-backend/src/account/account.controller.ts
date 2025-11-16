@@ -1,5 +1,15 @@
 // account.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
@@ -45,5 +55,4 @@ export class AccountController {
   getBalance(@Param('id') id: string) {
     return this.accountService.getAccountBalance(id);
   }
-
 }
