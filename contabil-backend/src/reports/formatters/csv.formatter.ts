@@ -3,7 +3,7 @@ import { IReportFormatter } from '../abstractions/i-report-formatter.abstract';
 import { ReportData } from '../types/report-data.type';
 import { unparse } from 'papaparse';
 import { BalanceSheetReportDto } from '../dto/balance-sheet-report.dto';
-import { DREReportDto } from '../dto/dre-report.dto';
+import { DRELineDto, DREReportDto } from '../dto/dre-report.dto';
 import { LedgerReportDto } from '../dto/ledger-report.dto';
 import { TrialBalanceReportLineDto } from '../dto/trial-balance-report-line.dto';
 
@@ -29,17 +29,18 @@ export class CsvFormatter implements IReportFormatter {
         break;
       case 'Demonstração do Resultado':
         const dreData = reportData.data as DREReportDto;
+        const flatTree: any[] = [];
+        this._flattenDRETree(dreData.treeReceitas, 0, flatTree);
+        this._flattenDRETree(dreData.treeDespesas, 0, flatTree);
+
         dataToParse = [
           ['Grupo', 'Valor'],
           ['Total Receitas', dreData.totalReceitas],
           ['Total Despesas', dreData.totalDespesas],
           ['Lucro/Prejuízo', dreData.lucroPrejuizo],
           [],
-          ['--- Receitas ---'],
-          ...dreData.linhasReceita.map(l => [l.accountName, l.balance]),
-          [],
-          ['--- Despesas ---'],
-          ...dreData.linhasDespesa.map(l => [l.accountName, l.balance]),
+          ['Código', 'Conta', 'Saldo'],
+          ...flatTree,
         ];
         break;
       case 'Balanço Patrimonial':
@@ -75,5 +76,24 @@ export class CsvFormatter implements IReportFormatter {
 
     const csvString = unparse(dataToParse);
     return Promise.resolve(Buffer.from(csvString, 'utf-8'));
+  }
+
+  private _flattenDRETree(
+    node: DRELineDto,
+    indentLevel: number,
+    result: any[],
+  ) {
+    const indent = ' '.repeat(indentLevel * 2);
+    result.push([
+      `${indent}${node.accountCode}`,
+      `${indent}${node.accountName}`,
+      node.balance,
+    ]);
+
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(child =>
+        this._flattenDRETree(child, indentLevel + 1, result),
+      );
+    }
   }
 }

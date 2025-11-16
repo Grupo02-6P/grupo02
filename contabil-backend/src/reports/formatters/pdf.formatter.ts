@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IReportFormatter } from '../abstractions/i-report-formatter.abstract';
 import { ReportData } from '../types/report-data.type';
 import { TrialBalanceReportLineDto } from '../dto/trial-balance-report-line.dto';
-import { DREReportDto } from '../dto/dre-report.dto';
+import { DRELineDto, DREReportDto } from '../dto/dre-report.dto';
 import { BalanceSheetReportDto } from '../dto/balance-sheet-report.dto';
 import { LedgerReportDto } from '../dto/ledger-report.dto';
 
@@ -11,6 +11,14 @@ const PDFDocumentWithTables = require('pdfkit-table');
 
 @Injectable()
 export class PdfFormatter implements IReportFormatter {
+  private readonly tableX = 30;
+  private readonly tableWidth = 550;
+  private readonly colXCode = 40;
+  private readonly colXConta = 120; // Mais espaço para a conta
+  private readonly colXSaldo = 450; // Alinhado à direita
+  private readonly lineHeight = 20; // Aumenta a altura total da linha
+  private readonly rowPadding = 5; // Espaço entre o texto e a linha de cima
+
   async format(reportData: ReportData): Promise<Buffer> {
     const buildPdf = (
       reportData: ReportData,
@@ -101,43 +109,121 @@ export class PdfFormatter implements IReportFormatter {
     const formatBRL = (value: number) =>
       value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    const tableOptions = {
-      prepareHeader: () => doc.font('Helvetica-Bold'),
-      prepareRow: (row, i) => doc.font('Helvetica').fontSize(10),
-      width: 550,
-    };
+    // 1. Desenha os Cabeçalhos da tabela
+    const y = doc.y;
+    doc.font('Helvetica-Bold');
+    doc.text('Código', this.colXCode, y);
+    doc.text('Conta', this.colXConta, y);
+    doc.text('Saldo', this.colXSaldo, y, {
+      align: 'right',
+      width: this.tableWidth - this.colXSaldo,
+    });
+    doc.moveDown(0.5);
+    doc
+      .moveTo(this.tableX, doc.y)
+      .lineTo(this.tableX + this.tableWidth, doc.y)
+      .strokeColor('#000000')
+      .stroke();
 
-    // Resumo
-    doc.font('Helvetica-Bold').fontSize(12);
-    doc.text(`Total de Receitas: ${formatBRL(data.totalReceitas)}`);
-    doc.text(`Total de Despesas: ${formatBRL(data.totalDespesas)}`);
-    doc.text(`Lucro/Prejuízo do Período: ${formatBRL(data.lucroPrejuizo)}`);
-    doc.moveDown(2);
+    // 2. Chama a recursão para RECEITAS
+    this._drawDRENode(doc, data.treeReceitas, 0, formatBRL);
 
-    // Tabela de Receitas
-    const receitaTable = {
-      title: 'Receitas',
-      headers: ['Código', 'Conta', 'Saldo'],
-      rows: data.linhasReceita.map(linha => [
-        linha.accountCode,
-        linha.accountName,
-        formatBRL(linha.balance),
-      ]),
-    };
-    doc.table(receitaTable, tableOptions);
-    doc.moveDown();
+    // 3. Adiciona espaço
+    doc.moveDown(1);
 
-    // Tabela de Despesas
-    const despesaTable = {
-      title: 'Despesas',
-      headers: ['Código', 'Conta', 'Saldo'],
-      rows: data.linhasDespesa.map(linha => [
-        linha.accountCode,
-        linha.accountName,
-        formatBRL(linha.balance),
-      ]),
-    };
-    doc.table(despesaTable, tableOptions);
+    // 4. Chama a recursão para DESPESAS
+    this._drawDRENode(doc, data.treeDespesas, 0, formatBRL);
+
+    // 5. Adiciona o resumo no final
+    doc.moveDown(2); // Espaço antes do resumo final
+
+    const summaryX = 350; // Posição X para o texto do resumo (à direita)
+    doc.font('Helvetica-Bold');
+
+    let summaryY = doc.y;
+    doc.text('Total de Receitas:', this.tableX, summaryY, {
+      align: 'right',
+      width: summaryX,
+    });
+    doc.text(formatBRL(data.totalReceitas), summaryX + 10, summaryY, {
+      align: 'right',
+      width: 150,
+    });
+
+    summaryY = doc.y;
+    doc.text('Total de Despesas:', this.tableX, summaryY, {
+      align: 'right',
+      width: summaryX,
+    });
+    doc.text(formatBRL(data.totalDespesas), summaryX + 10, summaryY, {
+      align: 'right',
+      width: 150,
+    });
+
+    summaryY = doc.y;
+    doc.text('Lucro/Prejuízo do Período:', this.tableX, summaryY, {
+      align: 'right',
+      width: summaryX,
+    });
+    doc.text(formatBRL(data.lucroPrejuizo), summaryX + 10, summaryY, {
+      align: 'right',
+      width: 150,
+    });
+
+    doc.font('Helvetica'); // Reseta a fonte
+  }
+
+  private _drawDRENode(
+    doc: any,
+    node: DRELineDto,
+    indentLevel: number,
+    formatBRL: (value: number) => string,
+  ) {
+    const indentPx = indentLevel * 15;
+    const y = doc.y; // Este é o 'Y' da linha horizontal de CIMA
+
+    // Adicionamos o PADDING vertical
+    const textY = y + this.rowPadding;
+
+    // Define a fonte
+    if (node.isSynthetic) {
+      doc.font('Helvetica-Bold');
+    } else {
+      doc.font('Helvetica');
+    }
+
+    // Desenha o texto usando o 'textY' (com padding)
+    doc.text(node.accountCode, this.colXCode + indentPx, textY);
+    doc.text(node.accountName, this.colXConta + indentPx, textY, {
+      width: this.colXSaldo - (this.colXConta + indentPx) - 10,
+      lineGap: 0,
+      height: this.lineHeight - this.rowPadding, // Altura do texto
+    });
+
+    if (node.accountCode !== '4' && node.accountCode !== '5') {
+      doc.text(formatBRL(node.balance), this.colXSaldo, textY, {
+        align: 'right',
+        width: this.tableWidth - this.colXSaldo,
+        lineGap: 0,
+        height: this.lineHeight - this.rowPadding,
+      });
+    }
+
+    // Avança o Y para a próxima linha usando a altura total (lineHeight)
+    doc.y = y + this.lineHeight;
+
+    // Desenha a linha horizontal de BAIXO
+    doc
+      .moveTo(this.tableX, doc.y)
+      .lineTo(this.tableX + this.tableWidth, doc.y)
+      .strokeColor('#cccccc')
+      .stroke();
+
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(child =>
+        this._drawDRENode(doc, child, indentLevel + 1, formatBRL),
+      );
+    }
   }
   private _drawBalanco(doc: any, data: BalanceSheetReportDto) {
     const formatBRL = (value: number) =>

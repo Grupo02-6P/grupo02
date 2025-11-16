@@ -127,4 +127,20 @@ export class PrismaAccountRepository implements IAccountRepository {
       },
     });
   }
+
+  async getAllAccountsByRoot(rootCodes: string[]): Promise<any[]> {
+    const accounts = await this.prisma.account.findMany({
+      where: {
+        OR: rootCodes.map(code => ({
+          code: {
+            startsWith: code,
+          },
+        })),
+      },
+      orderBy: {
+        code: 'asc',
+      },
+    });
+    return accounts;
+  }
 }
