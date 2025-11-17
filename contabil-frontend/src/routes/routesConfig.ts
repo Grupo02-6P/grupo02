@@ -20,6 +20,7 @@ import EditarTypeMovement from '../pages/type-movement/EditarTypeMovement';
 import CadastrarTypeEntry from '../pages/type-entry/CadastrarTypeEntry';
 import VisualizarTypeEntry from '../pages/type-entry/VisualizarTypeEntry';
 import EditarTypeEntry from '../pages/type-entry/EditarTypeEntry';
+import ReportsPage from '../pages/reports/page';
 
 export interface RouteConfig {
   path: string;
@@ -99,6 +100,15 @@ export const routes: RouteConfig[] = [
     requiresPermission: true,
     resource: 'Role',
     action: 'update'
+  },
+  {
+    path: '/relatorios',
+    element: ReportsPage,
+    label: 'Relatórios',
+    isProtected: true,
+    requiresPermission: true, // Ou false, dependendo da sua regra
+    resource: 'Report', // Supondo que 'Report' seja o recurso
+    action: 'read',
   },
   { 
     path: '/parceiros/cadastrar', 

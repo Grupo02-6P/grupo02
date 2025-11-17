@@ -14,6 +14,7 @@ import { TypeEntryModule } from './type-entry/type-entry.module';
 import { TittleModule } from './tittle/tittle.module';
 import { EntryModule } from './entry/entry.module';
 import { JournalModule } from './journal/journal.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JournalModule } from './journal/journal.module';
     TittleModule,
     EntryModule,
     JournalModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

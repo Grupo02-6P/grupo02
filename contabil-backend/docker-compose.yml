@@ -6,11 +6,15 @@ services:
     container_name: nest_app_foods
     restart: unless-stopped
     ports:
-      - "${PORT}:3000"
+      - "${PORT:-3000}:3000"
     depends_on:
       - postgres
     env_file:
       - .env
+    environment:
+      # Garantir que a aplicação tenha as variáveis necessárias em runtime
+      PORT: ${PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:-postgres://postgres:password@postgres:5432/contabilize}
     command: >
       sh -c "npx prisma migrate deploy && node dist/main.js"
 
@@ -25,6 +29,30 @@ services:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+
+  db-seed:
+    image: postgres
+    restart: "no"
+    depends_on:
+      - postgres
+    volumes:
+      - ./backup.dump:/tmp/backup.dump:ro
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: contabilize
+    entrypoint: ["bash","-c"]
+    command: >
+      "echo 'Aguardando Postgres...'; \
+      until pg_isready -h postgres -U $POSTGRES_USER -d $POSTGRES_DB; do sleep 1; done; \
+      export PGPASSWORD=$POSTGRES_PASSWORD; \
+      COUNT=$(psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -tAc \"SELECT COUNT(*) FROM \"public\".\"Account\"\"); \
+      if [ \"$COUNT\" = \"0\" ]; then \
+        echo 'Banco vazio, restaurando dump inicial...'; \
+        (pg_restore -h postgres -U $POSTGRES_USER -d $POSTGRES_DB --clean --if-exists --no-owner --no-privileges /tmp/backup.dump || psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -f /tmp/backup.dump) && echo 'Restauração concluída.'; \
+      else \
+        echo 'Banco já possui dados (Account count='\"$COUNT\"'), ignorando restauração.'; \
+      fi"
 
 volumes:
   postgres_data:

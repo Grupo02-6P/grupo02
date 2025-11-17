@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -23,6 +23,12 @@ export class AccountService {
     }
 
     console.log('CreateAccountDto:', createAccountDto);
+
+    // Verificar se já existe conta com mesmo código para evitar erro P2002
+    const existingByCode = await this.prisma.account.findUnique({ where: { code: createAccountDto.code } });
+    if (existingByCode) {
+      throw new BadRequestException('Código de conta já existe');
+    }
 
     // Validar se a conta pai existe quando parentAccountId é fornecido
     if (createAccountDto.parentAccountId) {
@@ -234,17 +240,43 @@ export class AccountService {
     });
   }
 
-  update(id: string, updateAccountDto: UpdateAccountDto) {
+  async update(id: string, updateAccountDto: UpdateAccountDto) {
     const ability = this.abilityService.ability;
 
     if (!ability.can('update', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    return this.prisma.account.update({
-      where: { id },
-      data: updateAccountDto,
-    });
+    // Valida duplicidade de código caso esteja sendo alterado
+    if (updateAccountDto.code) {
+      const exists = await this.prisma.account.findUnique({ where: { code: updateAccountDto.code } });
+      if (exists && exists.id !== id) {
+        throw new BadRequestException('Código de conta já existe');
+      }
+    }
+
+    // Valida existência da conta pai, se informado
+    if (updateAccountDto.parentAccountId) {
+      if (updateAccountDto.parentAccountId === id) {
+        throw new BadRequestException('Conta pai não pode ser a própria conta');
+      }
+      const parent = await this.prisma.account.findUnique({ where: { id: updateAccountDto.parentAccountId } });
+      if (!parent) {
+        throw new NotFoundException('Conta pai não encontrada');
+      }
+    }
+
+    try {
+      return await this.prisma.account.update({
+        where: { id },
+        data: updateAccountDto,
+      });
+    } catch (err: any) {
+      if (err?.code === 'P2002' && Array.isArray(err?.meta?.target) && err.meta.target.includes('code')) {
+        throw new BadRequestException('Código de conta já existe');
+      }
+      throw err;
+    }
   }
 
   remove(id: string) {
