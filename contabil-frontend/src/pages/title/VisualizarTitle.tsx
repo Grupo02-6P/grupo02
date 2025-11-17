@@ -137,7 +137,7 @@ const VisualizarTitle: React.FC = () => {
   };
 
   const handleEditClick = (id: string) => {
-    navigate(`/lancamentos/editar/${id}`);
+    navigate(`/titulo/editar/${id}`);
   };
 
   const handleRemoveClick = (id: string) => {
@@ -193,7 +193,7 @@ const VisualizarTitle: React.FC = () => {
             </div>
             {titlePermissions.canCreate && (
               <button
-                onClick={() => navigate('/lancamentos/cadastrar')}
+                onClick={() => navigate('/titulo/cadastrar')}
                 className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
               >
                 <Plus size={20} />

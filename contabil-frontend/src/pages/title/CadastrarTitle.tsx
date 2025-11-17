@@ -288,7 +288,7 @@ const CadastrarTitle: React.FC = () => {
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
-                onClick={() => navigate('/lancamentos/visualizar')}
+                onClick={() => navigate('/titulo/visualizar')}
                 className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
               >
                 Cancelar
