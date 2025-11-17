@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeMovementService } from './type-movement.service';
 import { TypeMovementController } from './type-movement.controller';
-import { UsersService } from 'src/users/users.service';
+import { UsersModule } from '../users/users.module';
 
 @Module({
+  imports: [UsersModule],
   controllers: [TypeMovementController],
-  providers: [TypeMovementService, UsersService],
+  providers: [TypeMovementService],
 })
 export class TypeMovementModule {}
