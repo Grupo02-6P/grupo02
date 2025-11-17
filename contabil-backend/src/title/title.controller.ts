@@ -30,6 +30,11 @@ export class TitleController {
     return this.titleService.findAll(filterDto);
   }
 
+  @Patch(':id/inactivate')
+  inactive(@Param('id') id: string) {
+    return this.titleService.inactivate(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.titleService.findOne(id);

@@ -102,7 +102,7 @@ const VisualizarTitle: React.FC = () => {
           createViewAction(() => handleViewDetails(row.original.id)),
           createEditAction(() => handleEditClick(row.original.id), titlePermissions.canUpdate),
           createDeleteAction(
-            () => handleRemoveClick(row.original.id),
+            () => handleInactivateClick(row.original.id),
             titlePermissions.canDelete,
             row.original.status !== 'INACTIVE'
           ),
@@ -140,24 +140,24 @@ const VisualizarTitle: React.FC = () => {
     navigate(`/titulo/editar/${id}`);
   };
 
-  const handleRemoveClick = (id: string) => {
+  const handleInactivateClick = (id: string) => {
     setSelectedTitleId(id);
     setConfirmModal(true);
   };
 
-  const handleRemoveConfirm = async () => {
+  const handleInactivateConfirm = async () => {
     if (!selectedTitleId) return;
     try {
-      await titleService.remove(selectedTitleId);
+      await titleService.inactive(selectedTitleId);
       setConfirmModal(false);
       setSelectedTitleId(null);
       setRefreshKey(prev => prev + 1);
-      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Título removido com sucesso!', type: 'success' });
+      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Título inativado com sucesso!', type: 'success' });
     } catch (err: unknown) {
       setConfirmModal(false);
       const errorMessage = err instanceof Error && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao remover título'
-        : 'Erro ao remover título';
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao inativar título'
+        : 'Erro ao inativar título';
       setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
     }
   };
@@ -221,10 +221,10 @@ const VisualizarTitle: React.FC = () => {
       <ConfirmModal
         isOpen={confirmModal}
         onCancel={() => { setConfirmModal(false); setSelectedTitleId(null); }}
-        onConfirm={handleRemoveConfirm}
-        title="Tem certeza que deseja remover este título?"
-        message="Esta ação não pode ser desfeita. Todos os dados do título serão perdidos permanentemente."
-        confirmText="Sim, remover"
+        onConfirm={handleInactivateConfirm}
+        title="Tem certeza que deseja inativar este título?"
+        message="O título será marcado como inativo e não poderá mais ser utilizado."
+        confirmText="Sim, inativar"
         cancelText="Cancelar"
         type="danger"
       />

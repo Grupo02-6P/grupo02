@@ -220,4 +220,26 @@ export class TitleService {
 
     return this.prisma.title.delete({ where: { id } });
   }
+
+  async inactivate(id: string) {
+    const ability = this.abilityService.ability;
+
+    if (!ability.can('delete', 'Title')) {
+      throw new UnauthorizedException('Ação não permitida');
+    }
+
+    // Verificar se o título existe
+    const title = await this.prisma.title.findUnique({
+      where: { id },
+    });
+
+    if (!title) {
+      throw new NotFoundException('Título não encontrado');
+    }
+
+    return this.prisma.title.update({
+      where: { id },
+      data: { status: 'INACTIVE' },
+    });
+  }
 }
