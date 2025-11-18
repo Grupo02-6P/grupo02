@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTitleDto } from './dto/create-title.dto';
@@ -9,6 +10,7 @@ import { UpdateTitleDto } from './dto/update-title.dto';
 import { CaslAbilityService } from 'src/casl/casl-ability/casl-ability.service';
 import { BaseFilterDto } from 'src/common/dto/base-filter.dto';
 import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TitleService {
@@ -36,46 +38,55 @@ export class TitleService {
       throw new NotFoundException('Tipo de movimento não encontrado');
     }
 
-    //Cria o título
-    const title = await this.prisma.title.create({
-      data: {
-        code: data.code,
-        description: data.description,
-        date: data.date ? new Date(data.date) : new Date(),
-        value: data.value,
-        status: data.status ?? 'ACTIVE',
-        partnerId: data.partnerId,
-        movementId: data.movementId,
-      },
-    });
-
-    // 📘 Cria o lançamento contábil (JournalEntry + Lines)
-    const journal = await this.prisma.journalEntry.create({
-      data: {
-        titleId: title.id,
-        originType: 'TITLE',
-        originId: title.id,
-        lines: {
-          create: [
-            {
-              accountId: movement.debitAccountId,
-              type: 'DEBIT',
-              amount: data.value,
-            },
-            {
-              accountId: movement.creditAccountId,
-              type: 'CREDIT',
-              amount: data.value,
-            },
-          ],
+    try {
+      //Cria o título
+      const title = await this.prisma.title.create({
+        data: {
+          code: data.code,
+          description: data.description,
+          date: data.date ? new Date(data.date) : new Date(),
+          value: data.value,
+          status: data.status ?? 'ACTIVE',
+          partnerId: data.partnerId,
+          movementId: data.movementId,
         },
-      },
-      include: {
-        lines: { include: { account: true } },
-      },
-    });
+      });
 
-    return { ...title, journal };
+      // 📘 Cria o lançamento contábil (JournalEntry + Lines)
+      const journal = await this.prisma.journalEntry.create({
+        data: {
+          titleId: title.id,
+          originType: 'TITLE',
+          originId: title.id,
+          lines: {
+            create: [
+              {
+                accountId: movement.debitAccountId,
+                type: 'DEBIT',
+                amount: data.value,
+              },
+              {
+                accountId: movement.creditAccountId,
+                type: 'CREDIT',
+                amount: data.value,
+              },
+            ],
+          },
+        },
+        include: {
+          lines: { include: { account: true } },
+        },
+      });
+
+      return { ...title, journal };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Já existe um título com este código');
+        }
+      }
+      throw error;
+    }
   }
 
   async findAll(filterDto: BaseFilterDto): Promise<PaginatedResponse<any>> {
@@ -200,14 +211,23 @@ export class TitleService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    return this.prisma.title.update({
-      where: { id },
-      data: {
-        ...data,
-        date: data.date ? new Date(data.date) : undefined,
-      },
-      include: { movement: true, partner: true },
-    });
+    try {
+      return this.prisma.title.update({
+        where: { id },
+        data: {
+          ...data,
+          date: data.date ? new Date(data.date) : undefined,
+        },
+        include: { movement: true, partner: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Já existe um título com este código');
+        }
+      }
+      throw error;
+    }
   }
 
   async remove(id: string) {
