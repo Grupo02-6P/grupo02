@@ -53,6 +53,8 @@ export class TitleService {
     const journal = await this.prisma.journalEntry.create({
       data: {
         titleId: title.id,
+        originType: 'TITLE',
+        originId: title.id,
         lines: {
           create: [
             {
@@ -185,7 +187,6 @@ export class TitleService {
         movement: true,
         partner: true,
         journalEntries: {
-          where: { originType: 'TITLE' },
           include: { lines: { include: { account: true } } },
         },
       },
@@ -201,7 +202,10 @@ export class TitleService {
 
     return this.prisma.title.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        date: data.date ? new Date(data.date) : undefined,
+      },
       include: { movement: true, partner: true },
     });
   }

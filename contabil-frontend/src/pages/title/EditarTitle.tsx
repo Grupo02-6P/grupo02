@@ -48,11 +48,17 @@ const EditarTitle: React.FC = () => {
     onConfirm: () => setInfoModal(prev => ({ ...prev, isOpen: false }))
   });
 
-  // Buscar dados iniciais
   useEffect(() => {
     const fetchData = async () => {
       if (!id) {
-        navigate('/titulo/visualizar');
+        setInfoModal({
+          isOpen: true,
+          title: 'Erro',
+          message: 'ID do título não encontrado',
+          confirmText: 'Voltar',
+          type: 'danger',
+          onConfirm: () => navigate('/titulo/visualizar')
+        });
         return;
       }
 
@@ -92,7 +98,7 @@ const EditarTitle: React.FC = () => {
         setLoadingData(false);
       }
     };
-
+    
     fetchData();
   }, [id, navigate]);
 
@@ -192,7 +198,7 @@ const EditarTitle: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <Receipt size={44} className="text-white" />
+                <Receipt size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Título</h1>
                 <p className="text-white mt-1">Atualize as informações do lançamento de título</p>
@@ -276,7 +282,7 @@ const EditarTitle: React.FC = () => {
               <div className="md:col-span-2">
                 <Input
                   type="text"
-                  placeholder="Descrição do lançamento (opcional)"
+                  placeholder="Descrição do título (opcional)"
                   value={formData.description || ''}
                   onChange={e => handleInputChange('description', e.target.value)}
                   label="Descrição"
@@ -287,15 +293,15 @@ const EditarTitle: React.FC = () => {
                 <label htmlFor="status" className="text-sm font-medium text-gray-700">
                   Status
                 </label>
-                <select
+                  <select
                   id="status"
-                  value={formData.status}
-                  onChange={e => handleInputChange('status', e.target.value as 'ACTIVE' | 'INACTIVE')}
+                    value={formData.status}
+                    onChange={e => handleInputChange('status', e.target.value as 'ACTIVE' | 'INACTIVE')}
                   className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
-                >
-                  <option value="ACTIVE">Ativo</option>
-                  <option value="INACTIVE">Inativo</option>
-                </select>
+                  >
+                    <option value="ACTIVE">Ativo</option>
+                    <option value="INACTIVE">Inativo</option>
+                  </select>
               </div>
             </div>
 
