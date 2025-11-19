@@ -37,6 +37,7 @@ const CadastrarTitle: React.FC = () => {
   const [partners, setPartners] = useState<PartnerOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [infoModal, setInfoModal] = useState<ConfirmModalProps>({
     isOpen: false,
     title: '',
@@ -79,40 +80,40 @@ const CadastrarTitle: React.FC = () => {
 
   const handleInputChange = (field: keyof CreateTitleDto, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpar erro do campo quando o usuário começar a digitar
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
-  const validateForm = (): string[] => {
-    const errors: string[] = [];
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
 
     if (!formData.date) {
-      errors.push('Data é obrigatória');
+      newErrors.date = 'Data é obrigatória';
     }
 
     if (!formData.value || formData.value <= 0) {
-      errors.push('Valor deve ser maior que zero');
+      newErrors.value = 'Valor deve ser maior que zero';
     }
 
     if (!formData.movementId) {
-      errors.push('Tipo de movimento é obrigatório');
+      newErrors.movementId = 'Tipo de movimento é obrigatório';
     }
 
-    return errors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationErrors = validateForm();
-    if (validationErrors.length > 0) {
-      setInfoModal(prev => ({
-        ...prev,
-        isOpen: true,
-        title: 'Erro de Validação',
-        message: validationErrors.join(', '),
-        confirmText: 'Fechar',
-        type: 'danger',
-        onConfirm: () => setInfoModal(p => ({ ...p, isOpen: false }))
-      }));
+    const isValid = validateForm();
+    if (!isValid) {
       return;
     }
 
@@ -195,20 +196,34 @@ const CadastrarTitle: React.FC = () => {
                     value={formData.date}
                     onChange={e => handleInputChange('date', e.target.value)}
                     required
-                    className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
+                    className={`border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] ${
+                      errors.date ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
+                  {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={String(formData.value)}
-                  onChange={e => handleInputChange('value', parseFloat(e.target.value) || 0)}
-                  required
-                  label="Valor"
-                />
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="value" className="text-sm font-medium text-gray-700">
+                    Valor <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="value"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.00"
+                    value={String(formData.value || '')}
+                    onChange={e => handleInputChange('value', parseFloat(e.target.value) || 0)}
+                    required
+                    className={`border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] ${
+                      errors.value ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.value && <p className="text-red-500 text-sm mt-1">{errors.value}</p>}
+                </div>
 
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="movementId" className="text-sm font-medium text-gray-700">
@@ -218,7 +233,9 @@ const CadastrarTitle: React.FC = () => {
                     id="movementId"
                     value={formData.movementId}
                     onChange={e => handleInputChange('movementId', e.target.value)}
-                    className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
+                    className={`border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] ${
+                      errors.movementId ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   >
                     <option value="">Selecione um tipo de movimento</option>
@@ -228,6 +245,7 @@ const CadastrarTitle: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  {errors.movementId && <p className="text-red-500 text-sm mt-1">{errors.movementId}</p>}
                 </div>
               </div>
 
