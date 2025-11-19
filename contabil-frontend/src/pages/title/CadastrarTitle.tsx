@@ -25,7 +25,7 @@ const CadastrarTitle: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<CreateTitleDto>({
-    code: '',
+    code: `TITULO-${Date.now()}`,
     description: '',
     date: new Date().toISOString().split('T')[0],
     value: 0,
@@ -84,10 +84,6 @@ const CadastrarTitle: React.FC = () => {
   const validateForm = (): string[] => {
     const errors: string[] = [];
 
-    if (!formData.code || formData.code.trim().length < 2) {
-      errors.push('Código deve ter pelo menos 2 caracteres');
-    }
-
     if (!formData.date) {
       errors.push('Data é obrigatória');
     }
@@ -124,7 +120,7 @@ const CadastrarTitle: React.FC = () => {
 
     try {
       const dataToSend: CreateTitleDto = {
-        code: formData.code.trim(),
+        code: `TITULO-${Date.now()}`,
         description: formData.description?.trim() || undefined,
         date: formData.date,
         value: Number(formData.value),
@@ -189,15 +185,6 @@ const CadastrarTitle: React.FC = () => {
           <form onSubmit={handleSubmit} className="p-8">
             <div className="space-y-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  type="text"
-                  placeholder="Código do título"
-                  value={formData.code}
-                  onChange={e => handleInputChange('code', e.target.value)}
-                  required
-                  label="Código"
-                />
-
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="date" className="text-sm font-medium text-gray-700">
                     Data <span className="text-red-500">*</span>
@@ -277,11 +264,11 @@ const CadastrarTitle: React.FC = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">Informações Importantes</h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• O código do título deve ser único</li>
+                <li>• O código do título será gerado automaticamente</li>
                 <li>• O valor deve ser maior que zero</li>
                 <li>• Selecione o tipo de movimento que define as contas contábeis</li>
                 <li>• O parceiro é opcional mas recomendado para rastreabilidade</li>
-                <li>• A descrição é opcional mas ajuda na identificação do `título`</li>
+                <li>• A descrição é opcional mas ajuda na identificação do título</li>
               </ul>
             </div>
 
