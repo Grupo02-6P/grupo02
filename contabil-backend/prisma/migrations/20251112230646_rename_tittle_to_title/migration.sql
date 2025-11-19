@@ -29,3 +29,6 @@ ALTER TABLE "public"."Title" ADD CONSTRAINT "Title_movementId_fkey" FOREIGN KEY 
 ALTER TABLE "public"."Title" ADD CONSTRAINT "Title_partnerId_fkey" FOREIGN KEY ("partnerId") REFERENCES "public"."Partner"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "public"."JournalEntry" ADD CONSTRAINT "JournalEntry_titleId_fkey" FOREIGN KEY ("titleId") REFERENCES "public"."Title"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "public"."Entry" ADD CONSTRAINT "Entry_titleId_fkey" FOREIGN KEY ("titleId") REFERENCES "public"."Title"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Rename JournalOrigin enum: rename TITTLE to TITLE
+ALTER TYPE "JournalOrigin" RENAME VALUE 'TITTLE' TO 'TITLE';
