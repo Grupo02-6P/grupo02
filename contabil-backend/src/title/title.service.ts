@@ -226,7 +226,7 @@ export class TitleService {
     if( title.status === 'PAID') {
       throw new ConflictException('Títulos pagos não podem ser inativados');
     }
-    
+
     try {
       return this.prisma.title.update({
         where: { id },
@@ -350,7 +350,7 @@ export class TitleService {
 
     return this.prisma.title.update({
       where: { id },
-      data: { status: 'PAID' },
+      data: { status: 'PAID', paidAt: new Date() },
     });
   }
 }

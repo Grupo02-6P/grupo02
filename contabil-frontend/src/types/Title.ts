@@ -10,6 +10,7 @@ export interface Title {
   partnerId?: string;
   createdAt: string;
   updatedAt: string;
+  paidAt?: string;
 }
 
 export interface TitleResponse extends Title {

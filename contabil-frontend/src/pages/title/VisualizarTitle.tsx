@@ -118,6 +118,17 @@ const VisualizarTitle: React.FC = () => {
       },
     },
     {
+      accessorKey: 'paidAt',
+      header: 'Data de Pagamento',
+      enableSorting: true,
+      cell: ({ row }) => {
+        if (row.original.status === 'PAID' && row.original.paidAt) {
+          return new Date(row.original.paidAt).toLocaleDateString('pt-BR');
+        }
+        return '-';
+      },
+    },
+    {
       id: 'actions',
       header: 'Ações',
       cell: ({ row }) => {
@@ -386,6 +397,20 @@ const VisualizarTitle: React.FC = () => {
                           })()}
                         </div>
                       </div>
+                      {detailsModal.title.status === 'PAID' && detailsModal.title.paidAt && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Data de Pagamento:</label>
+                          <p className="text-gray-900 mt-1 font-medium text-green-700">
+                            {new Date(detailsModal.title.paidAt).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      )}
                       <div className="md:col-span-2">
                         <label className="text-sm font-medium text-gray-600">Descrição:</label>
                         <p className="text-gray-900 mt-1">{detailsModal.title.description || '-'}</p>
