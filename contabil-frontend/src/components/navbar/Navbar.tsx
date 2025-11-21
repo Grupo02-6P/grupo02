@@ -90,9 +90,14 @@ const Navbar: React.FC = () => {
       permission: { resource: 'Account', action: 'read' },
       subItems: [
         { 
+          path: '/contas/visualizar', 
+          label: 'Visualizar Contas',
+          permission: { resource: 'Account', action: 'read' }
+        },
+        { 
           path: '/contas/gerenciar', 
           label: 'Gerenciar Contas',
-          permission: { resource: 'Account', action: 'read' }
+          permission: { resource: 'Account', action: 'create' }
         },
       ]
     },

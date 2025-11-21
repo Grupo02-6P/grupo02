@@ -2,7 +2,8 @@ import type {
     AccountResponse,
     AccountListResponse,
     CreateAccountDto,
-    UpdateAccountDto
+    UpdateAccountDto,
+    AccountWithBalanceListResponse
 } from '../types/Account';
 import api from './api';
 
@@ -80,7 +81,43 @@ class AccountService {
         console.error('❌ Erro ao buscar parceiros:', error);
         throw this.handleError(error);
     }
+  }
+
+  async findAllWithBalance(params: PaginationParams): Promise<AccountWithBalanceListResponse> {
+    try {
+
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+        throw new Error('Token não encontrado');
+        }
+
+        const queryParams: any = {
+          page: params?.page || 1,
+          limit: params?.limit || 10,
+          ...params
+        };
+
+        // Remove undefined e vazio
+        Object.keys(queryParams).forEach(key => {
+          if (queryParams[key] === undefined || queryParams[key] === '') {
+            delete queryParams[key];
+          }
+        });
+
+        const response = await api.get(`${this.baseUrl}/with-balance`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+          },
+          params: queryParams
+        });
+
+        return response.data; // Retorna { data, pagination }
+
+    } catch (error: any) {
+        console.error('❌ Erro ao buscar parceiros:', error);
+        throw this.handleError(error);
     }
+  }
 
   // Buscar conta por ID
   async findOne(id: string): Promise<AccountResponse> {
