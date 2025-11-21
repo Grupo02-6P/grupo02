@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nest_app_foods
+    container_name: nest_app_contabilize
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
