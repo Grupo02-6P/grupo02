@@ -112,7 +112,7 @@ export class PrismaAccountRepository implements IAccountRepository {
         account: true,
         journalEntry: {
           include: {
-            tittle: {
+            title: {
               select: {
                 description: true,
               },
