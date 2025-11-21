@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateTitleDto } from '../../types/Title';
 import { titleService } from '../../services/title';
 import { typeMovementService } from '../../services/typeMovement';
+import { typeEntryService } from '../../services/typeEntry';
 import { partnerService } from '../../services/partner';
 import { InfoModal } from '../../components/modal/InfoModal';
 import type { ConfirmModalProps } from '../../components/modal/InfoModal';
@@ -21,6 +22,12 @@ interface PartnerOption {
   cnpj: string;
 }
 
+interface TypeEntryOption {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 const EditarTitle: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -31,11 +38,13 @@ const EditarTitle: React.FC = () => {
     date: '',
     value: 0,
     movementId: '',
+    typeEntryId: '',
     partnerId: '',
     status: 'ACTIVE',
   });
 
   const [typeMovements, setTypeMovements] = useState<TypeMovementOption[]>([]);
+  const [typeEntries, setTypeEntries] = useState<TypeEntryOption[]>([]);
   const [partners, setPartners] = useState<PartnerOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -64,13 +73,15 @@ const EditarTitle: React.FC = () => {
 
       try {
         setLoadingData(true);
-        const [titleResponse, movementsResponse, partnersResponse] = await Promise.all([
+        const [titleResponse, movementsResponse, entriesResponse, partnersResponse] = await Promise.all([
           titleService.findOne(id),
-          typeMovementService.findAll({ limit: -1 }),
-          partnerService.findAll({ limit: -1 })
+          typeMovementService.findAll({ limit: -1, status: 'ACTIVE' }),
+          typeEntryService.findAll({ limit: -1, status: 'ACTIVE' }),
+          partnerService.findAll({ limit: -1, status: 'ACTIVE' })
         ]);
 
         setTypeMovements(movementsResponse.data || []);
+        setTypeEntries(entriesResponse.data || []);
         setPartners(partnersResponse.data || []);
 
         // Preencher formulário com dados do título
@@ -80,6 +91,7 @@ const EditarTitle: React.FC = () => {
           date: titleResponse.date.split('T')[0],
           value: titleResponse.value,
           movementId: titleResponse.movementId,
+          typeEntryId: titleResponse.typeEntryId,
           partnerId: titleResponse.partnerId || '',
           status: titleResponse.status,
         });
@@ -148,6 +160,7 @@ const EditarTitle: React.FC = () => {
         ...(formData.date && { date: formData.date }),
         ...(formData.value !== undefined && { value: Number(formData.value) }),
         ...(formData.movementId && { movementId: formData.movementId }),
+        ...(formData.typeEntryId && { typeEntryId: formData.typeEntryId }),
         ...(formData.partnerId && { partnerId: formData.partnerId || undefined }),
         ...(formData.status && { status: formData.status }),
       };
@@ -260,6 +273,27 @@ const EditarTitle: React.FC = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="typeEntryId" className="text-sm font-medium text-gray-700">
+                    Tipo de Entrada
+                  </label>
+                  <select
+                    id="typeEntryId"
+                    value={formData.typeEntryId || ''}
+                    onChange={e => handleInputChange('typeEntryId', e.target.value)}
+                    className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
+                  >
+                    <option value="">Selecione um tipo de entrada</option>
+                    {typeEntries.map(entry => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.name} {entry.description && `- ${entry.description}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="flex flex-col space-y-2">
                 <label htmlFor="partnerId" className="text-sm font-medium text-gray-700">
                   Parceiro (Opcional)
@@ -311,6 +345,7 @@ const EditarTitle: React.FC = () => {
                 <li>• Campos vazios não serão atualizados</li>
                 <li>• O código deve ser único se alterado</li>
                 <li>• O valor deve ser maior que zero</li>
+                <li>• Alterações no tipo de movimento ou entrada afetam as contas contábeis</li>
                 <li>• Alterações no status podem afetar relatórios</li>
               </ul>
             </div>

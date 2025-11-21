@@ -35,6 +35,11 @@ export class TitleController {
     return this.titleService.inactivate(id);
   }
 
+  @Patch(':id/pay')
+  pay(@Param('id') id: string) {
+    return this.titleService.pay(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.titleService.findOne(id);

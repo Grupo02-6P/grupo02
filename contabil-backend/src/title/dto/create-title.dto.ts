@@ -23,10 +23,13 @@ export class CreateTitleDto {
 
   @IsOptional()
   @IsString()
-  status?: 'ACTIVE' | 'INACTIVE';
+  status?: 'ACTIVE' | 'INACTIVE' | 'PAID';
 
   @IsUUID()
   movementId: string;
+
+  @IsUUID()
+  typeEntryId?: string;
 
   @IsOptional()
   @IsUUID()

@@ -4,8 +4,9 @@ export interface Title {
   description?: string;
   date: string;
   value: number;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: 'ACTIVE' | 'INACTIVE' | 'PAID';
   movementId: string;
+  typeEntryId: string;
   partnerId?: string;
   createdAt: string;
   updatedAt: string;
@@ -13,6 +14,11 @@ export interface Title {
 
 export interface TitleResponse extends Title {
   movement?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  typeEntry?: {
     id: string;
     name: string;
     description?: string;
@@ -30,8 +36,9 @@ export interface CreateTitleDto {
   date?: string;
   value: number;
   movementId: string;
+  typeEntryId: string;
   partnerId?: string;
-  status?: 'ACTIVE' | 'INACTIVE';
+  status?: 'ACTIVE' | 'INACTIVE' | 'PAID';
 }
 
 export interface UpdateTitleDto {
@@ -40,8 +47,9 @@ export interface UpdateTitleDto {
   date?: string;
   value?: number;
   movementId?: string;
+  typeEntryId?: string;
   partnerId?: string;
-  status?: 'ACTIVE' | 'INACTIVE';
+  status?: 'ACTIVE' | 'INACTIVE' | 'PAID';
 }
 
 export interface TitleListResponse {

@@ -25,16 +25,16 @@ export class DRECalculator implements IReportCalculator {
       trialBalanceData,
     );
 
-    const totalReceitas = treeReceitas.balance;
-    const totalDespesas = treeDespesas.balance;
+    const totalReceitas = treeReceitas?.balance || 0;
+    const totalDespesas = treeDespesas?.balance || 0;
     const lucroPrejuizo = totalReceitas - totalDespesas;
 
     const dreReport: DREReportDto = {
       totalReceitas,
       totalDespesas,
       lucroPrejuizo,
-      treeReceitas,
-      treeDespesas,
+      treeReceitas: treeReceitas || this.createEmptyTreeNode('4', 'RECEITAS'),
+      treeDespesas: treeDespesas || this.createEmptyTreeNode('5', 'DESPESAS'),
     };
 
     return {
@@ -47,7 +47,7 @@ export class DRECalculator implements IReportCalculator {
   private buildTree(
     allAccounts: Account[],
     balances: TrialBalanceLineDto[],
-  ): { treeReceitas: DRELineDto; treeDespesas: DRELineDto } {
+  ): { treeReceitas: DRELineDto | null; treeDespesas: DRELineDto | null } {
     const map = new Map<string, DRELineDto & { parentId: string | null }>();
 
     // 1. Create nodes for all accounts
@@ -98,9 +98,19 @@ export class DRECalculator implements IReportCalculator {
 
     roots.forEach(calculateRollup);
 
-    const treeReceitas = roots.find(r => r.accountCode === '4')!;
-    const treeDespesas = roots.find(r => r.accountCode === '5')!;
+    const treeReceitas = roots.find(r => r.accountCode === '4') || null;
+    const treeDespesas = roots.find(r => r.accountCode === '5') || null;
 
     return { treeReceitas, treeDespesas };
+  }
+
+  private createEmptyTreeNode(code: string, name: string): DRELineDto {
+    return {
+      accountCode: code,
+      accountName: name,
+      balance: 0,
+      isSynthetic: true,
+      children: [],
+    };
   }
 }

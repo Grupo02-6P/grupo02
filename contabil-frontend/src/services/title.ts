@@ -170,6 +170,26 @@ class TitleService {
     }
   };
 
+  async pay(id: string): Promise<void> {
+    try {
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('Token não encontrado');
+      }
+
+      await api.patch(`${this.baseUrl}/${id}/pay`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+    } catch (error: any) {
+      console.error('❌ Erro ao inativar Título:', error)
+      throw this.handleError(error)
+    }
+  };
+
   // Handler de erros
   private handleError(error: any): Error {
     if (error instanceof Error) {
