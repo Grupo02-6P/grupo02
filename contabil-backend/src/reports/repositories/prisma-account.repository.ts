@@ -117,11 +117,6 @@ export class PrismaAccountRepository implements IAccountRepository {
                 description: true,
               },
             },
-            entry: {
-              select: {
-                description: true,
-              },
-            },
           },
         },
       },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X, Receipt } from 'lucide-react';
+import { Plus, Edit, X, Receipt, CheckCircle } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { titleService } from '../../services/title';
@@ -31,6 +31,7 @@ const VisualizarTitle: React.FC = () => {
 
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState(false);
+  const [payModal, setPayModal] = useState(false);
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
     title: '',
@@ -76,6 +77,12 @@ const VisualizarTitle: React.FC = () => {
       cell: ({ row }) => row.original.movement?.name || '-',
     },
     {
+      accessorKey: 'typeEntry.name',
+      header: 'Tipo de Entrada',
+      enableSorting: false,
+      cell: ({ row }) => row.original.typeEntry?.name || '-',
+    },
+    {
       accessorKey: 'partner.name',
       header: 'Parceiro',
       enableSorting: false,
@@ -86,12 +93,39 @@ const VisualizarTitle: React.FC = () => {
       header: 'Status',
       enableSorting: true,
       cell: ({ row }) => {
-        const status = row.original.status === 'ACTIVE' ? 'Ativo' : 'Inativo';
-        const color = row.original.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+        let status, color;
+        switch (row.original.status) {
+          case 'ACTIVE':
+            status = 'Ativo';
+            color = 'bg-blue-100 text-blue-800';
+            break;
+          case 'INACTIVE':
+            status = 'Inativo';
+            color = 'bg-red-100 text-red-800';
+            break;
+          case 'PAID':
+            status = 'Pago';
+            color = 'bg-green-100 text-green-800';
+            break;
+          default:
+            status = 'Desconhecido';
+            color = 'bg-gray-100 text-gray-800';
+        }
 
         return (
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${color}`}>{status}</span>
         );
+      },
+    },
+    {
+      accessorKey: 'paidAt',
+      header: 'Data de Pagamento',
+      enableSorting: true,
+      cell: ({ row }) => {
+        if (row.original.status === 'PAID' && row.original.paidAt) {
+          return new Date(row.original.paidAt).toLocaleDateString('pt-BR');
+        }
+        return '-';
       },
     },
     {
@@ -100,13 +134,24 @@ const VisualizarTitle: React.FC = () => {
       cell: ({ row }) => {
         const actions = [
           createViewAction(() => handleViewDetails(row.original.id)),
-          createEditAction(() => handleEditClick(row.original.id), titlePermissions.canUpdate),
+          createEditAction(() => handleEditClick(row.original.id), titlePermissions.canUpdate && row.original.status !== 'PAID'),
           createDeleteAction(
             () => handleInactivateClick(row.original.id),
             titlePermissions.canDelete,
-            row.original.status !== 'INACTIVE'
+            row.original.status !== 'INACTIVE' && row.original.status !== 'PAID'
           ),
         ];
+
+        // Adicionar ação de pagamento para títulos ativos
+        if (titlePermissions.canUpdate && row.original.status === 'ACTIVE') {
+          actions.push({
+            type: 'custom',
+            icon: <CheckCircle className="w-5 h-5 text-green-700" />,
+            title: 'Realizar baixa',
+            onClick: () => handlePayClick(row.original.id),
+            className: 'p-2 rounded hover:bg-green-100 transition-colors',
+          });
+        }
 
         return <ActionsColumn actions={actions} />;
       },
@@ -145,6 +190,11 @@ const VisualizarTitle: React.FC = () => {
     setConfirmModal(true);
   };
 
+  const handlePayClick = (id: string) => {
+    setSelectedTitleId(id);
+    setPayModal(true);
+  };
+
   const handleInactivateConfirm = async () => {
     if (!selectedTitleId) return;
     try {
@@ -158,6 +208,23 @@ const VisualizarTitle: React.FC = () => {
       const errorMessage = err instanceof Error && 'response' in err 
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao inativar título'
         : 'Erro ao inativar título';
+      setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
+    }
+  };
+
+  const handlePayConfirm = async () => {
+    if (!selectedTitleId) return;
+    try {
+      await titleService.pay(selectedTitleId);
+      setPayModal(false);
+      setSelectedTitleId(null);
+      setRefreshKey(prev => prev + 1);
+      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Baixa do título realizada com sucesso!', type: 'success' });
+    } catch (err: unknown) {
+      setPayModal(false);
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao dar baixa no título'
+        : 'Erro ao dar baixa no título';
       setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
     }
   };
@@ -229,6 +296,17 @@ const VisualizarTitle: React.FC = () => {
         type="danger"
       />
 
+      <ConfirmModal
+        isOpen={payModal}
+        onCancel={() => { setPayModal(false); setSelectedTitleId(null); }}
+        onConfirm={handlePayConfirm}
+        title="Confirmar baixa do título?"
+        message="O título será marcado como PAGO e não poderá mais ser editado ou inativado. Esta ação não pode ser desfeita."
+        confirmText="Sim, dar baixa"
+        cancelText="Cancelar"
+        type="info"
+      />
+
       <InfoModal
         isOpen={infoModal.isOpen}
         title={infoModal.title}
@@ -292,11 +370,47 @@ const VisualizarTitle: React.FC = () => {
                       <div>
                         <label className="text-sm font-medium text-gray-600">Status:</label>
                         <div className="mt-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.title.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {detailsModal.title.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
-                          </span>
+                          {(() => {
+                            let status, color;
+                            switch (detailsModal.title.status) {
+                              case 'ACTIVE':
+                                status = 'Ativo';
+                                color = 'bg-blue-100 text-blue-800';
+                                break;
+                              case 'INACTIVE':
+                                status = 'Inativo';
+                                color = 'bg-red-100 text-red-800';
+                                break;
+                              case 'PAID':
+                                status = 'Pago';
+                                color = 'bg-green-100 text-green-800';
+                                break;
+                              default:
+                                status = 'Desconhecido';
+                                color = 'bg-gray-100 text-gray-800';
+                            }
+                            return (
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>
+                                {status}
+                              </span>
+                            );
+                          })()}
                         </div>
                       </div>
+                      {detailsModal.title.status === 'PAID' && detailsModal.title.paidAt && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Data de Pagamento:</label>
+                          <p className="text-gray-900 mt-1 font-medium text-green-700">
+                            {new Date(detailsModal.title.paidAt).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      )}
                       <div className="md:col-span-2">
                         <label className="text-sm font-medium text-gray-600">Descrição:</label>
                         <p className="text-gray-900 mt-1">{detailsModal.title.description || '-'}</p>
@@ -305,6 +419,12 @@ const VisualizarTitle: React.FC = () => {
                         <div>
                           <label className="text-sm font-medium text-gray-600">Tipo de Movimento:</label>
                           <p className="text-gray-900 mt-1">{detailsModal.title.movement.name}</p>
+                        </div>
+                      )}
+                      {detailsModal.title.typeEntry && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Tipo de Entrada:</label>
+                          <p className="text-gray-900 mt-1">{detailsModal.title.typeEntry.name}</p>
                         </div>
                       )}
                       {detailsModal.title.partner && (

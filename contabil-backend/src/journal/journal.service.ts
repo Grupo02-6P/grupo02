@@ -14,7 +14,6 @@ export class JournalService {
           },
         },
         title: true,
-        entry: true,
       },
       orderBy: { date: 'desc' },
     });
@@ -28,7 +27,6 @@ export class JournalService {
           include: { account: true },
         },
         title: true,
-        entry: true,
       },
     });
 

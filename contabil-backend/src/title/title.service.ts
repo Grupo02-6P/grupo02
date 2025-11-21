@@ -49,6 +49,7 @@ export class TitleService {
           status: data.status ?? 'ACTIVE',
           partnerId: data.partnerId,
           movementId: data.movementId,
+          typeEntryId: data.typeEntryId,
         },
       });
 
@@ -147,6 +148,7 @@ export class TitleService {
         include: {
           movement: true,
           partner: true,
+          typeEntry: true,
         },
         orderBy: {
           [sortBy]: sortOrder,
@@ -197,6 +199,7 @@ export class TitleService {
       include: {
         movement: true,
         partner: true,
+        typeEntry: true,
         journalEntries: {
           include: { lines: { include: { account: true } } },
         },
@@ -209,6 +212,19 @@ export class TitleService {
 
     if (!ability.can('update', 'Title')) {
       throw new UnauthorizedException('Ação não permitida');
+    }
+
+    // Verificar se o título existe
+    const title = await this.prisma.title.findUnique({
+      where: { id },
+    });
+
+    if (!title) {
+      throw new NotFoundException('Título não encontrado');
+    }
+
+    if( title.status === 'PAID') {
+      throw new ConflictException('Títulos pagos não podem ser inativados');
     }
 
     try {
@@ -236,11 +252,17 @@ export class TitleService {
     if (!ability.can('delete', 'Title')) {
       throw new UnauthorizedException('Ação não permitida');
     }
-
-    // Remove os lançamentos contábeis relacionados
-    await this.prisma.journalEntry.deleteMany({
-      where: { titleId: id },
+    // Verificar se o título existe
+    const title = await this.prisma.title.findUnique({
+      where: { id },
     });
+
+    if (!title) {
+      throw new NotFoundException('Título não encontrado');
+    }
+    if( title.status === 'PAID') {
+      throw new ConflictException('Títulos pagos não podem ser inativados');
+    }
 
     return this.prisma.title.delete({ where: { id } });
   }
@@ -261,9 +283,74 @@ export class TitleService {
       throw new NotFoundException('Título não encontrado');
     }
 
+    if( title.status === 'PAID') {
+      throw new ConflictException('Títulos pagos não podem ser inativados');
+    }
+
     return this.prisma.title.update({
       where: { id },
       data: { status: 'INACTIVE' },
+    });
+  }
+
+  async pay(id: string) {
+    const ability = this.abilityService.ability;
+
+    if (!ability.can('update', 'Title')) {
+      throw new UnauthorizedException('Ação não permitida');
+    }
+
+    // Verificar se o título existe
+    const title = await this.prisma.title.findUnique({
+      where: { id },
+      include: {
+        movement: true,
+        typeEntry: true,
+      },
+    });
+
+    if (!title) {
+      throw new NotFoundException('Título não encontrado');
+    }
+
+    const debitAccountId = title.movement.creditAccountId;
+    const creditAccountId = title.typeEntry?.accountClearedId;
+
+    if (!debitAccountId || !creditAccountId) {
+      throw new ConflictException(
+        'Contas contábeis para baixa não estão configuradas corretamente',
+      );
+    }
+
+    // 📘 Cria o lançamento contábil (JournalEntry + Lines)
+      const journal = await this.prisma.journalEntry.create({
+        data: {
+          titleId: title.id,
+          originType: 'TITLE',
+          originId: title.id,
+          lines: {
+            create: [
+              {
+                accountId: debitAccountId,
+                type: 'DEBIT',
+                amount: title.value,
+              },
+              {
+                accountId: creditAccountId,
+                type: 'CREDIT',
+                amount: title.value,
+              },
+            ],
+          },
+        },
+        include: {
+          lines: { include: { account: true } },
+        },
+      });
+
+    return this.prisma.title.update({
+      where: { id },
+      data: { status: 'PAID', paidAt: new Date() },
     });
   }
 }

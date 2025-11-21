@@ -50,37 +50,21 @@ const Navbar: React.FC = () => {
   // MOVIDO ANTES DO RETURN CONDICIONAL
   const navigationItems = React.useMemo<NavigationItem[]>(() => [
     { path: '/home', label: 'Início', icon: <MdDashboard size={20} /> },
-    { 
-      label: 'Usuários', 
-      icon: <FaUsers  size={20} />,
-      permission: { resource: 'User', action: 'read' },
+    {
+      label: 'Lançamentos de Título', 
+      icon: <Receipt  size={20} />,
+      permission: { resource: 'Title', action: 'read' },
       subItems: [
         { 
-          path: '/usuarios/visualizar', 
-          label: 'Visualizar Usuário',
-          permission: { resource: 'User', action: 'read' }
+          path: '/titulo/visualizar', 
+          label: 'Visualizar Títulos',
+          permission: { resource: 'Title', action: 'read' }
         },
         { 
-          path: '/usuarios/cadastrar', 
-          label: 'Cadastrar Usuário',
-          permission: { resource: 'User', action: 'create' }
+          path: '/titulo/cadastrar', 
+          label: 'Cadastrar Títulos',
+          permission: { resource: 'Title', action: 'create' }
         },
-        {
-          label: 'Permissões',
-          permission: { resource: 'Permission', action: 'read' },
-          subItems: [
-            { 
-              path: '/usuarios/permissoes/visualizar', 
-              label: 'Visualizar Permissão',
-              permission: { resource: 'Role', action: 'read' }
-            },
-            { 
-              path: '/usuarios/permissoes/cadastrar', 
-              label: 'Cadastrar Permissão',
-              permission: { resource: 'Role', action: 'create' }
-            },
-          ]
-        }
       ]
     },
     { 
@@ -145,7 +129,7 @@ const Navbar: React.FC = () => {
           permission: { resource: 'TypeEntry', action: 'create' }
         },
       ]
-    },
+    },    
     { 
       label: 'Relatórios', 
       icon: <TbReportAnalytics  size={20} />,
@@ -158,16 +142,37 @@ const Navbar: React.FC = () => {
         }
       ]
     },
-    {
-      label: 'Lançamentos de Título', 
-      icon: <Receipt  size={20} />,
-      permission: { resource: 'Title', action: 'read' },
+    { 
+      label: 'Usuários', 
+      icon: <FaUsers  size={20} />,
+      permission: { resource: 'User', action: 'read' },
       subItems: [
         { 
-          path: '/titulo/visualizar', 
-          label: 'Visualizar Lançamentos de Título',
-          permission: { resource: 'Title', action: 'read' }
+          path: '/usuarios/visualizar', 
+          label: 'Visualizar Usuário',
+          permission: { resource: 'User', action: 'read' }
         },
+        { 
+          path: '/usuarios/cadastrar', 
+          label: 'Cadastrar Usuário',
+          permission: { resource: 'User', action: 'create' }
+        },
+        {
+          label: 'Permissões',
+          permission: { resource: 'Permission', action: 'read' },
+          subItems: [
+            { 
+              path: '/usuarios/permissoes/visualizar', 
+              label: 'Visualizar Permissão',
+              permission: { resource: 'Role', action: 'read' }
+            },
+            { 
+              path: '/usuarios/permissoes/cadastrar', 
+              label: 'Cadastrar Permissão',
+              permission: { resource: 'Role', action: 'create' }
+            },
+          ]
+        }
       ]
     },
   ], []);

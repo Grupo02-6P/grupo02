@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { CreateTitleDto } from '../../types/Title';
 import { titleService } from '../../services/title';
 import { typeMovementService } from '../../services/typeMovement';
+import { typeEntryService } from '../../services/typeEntry';
 import { partnerService } from '../../services/partner';
 import { InfoModal } from '../../components/modal/InfoModal';
 import type { ConfirmModalProps } from '../../components/modal/InfoModal';
@@ -21,6 +22,12 @@ interface PartnerOption {
   cnpj: string;
 }
 
+interface TypeEntryOption {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 const CadastrarTitle: React.FC = () => {
   const navigate = useNavigate();
 
@@ -30,10 +37,12 @@ const CadastrarTitle: React.FC = () => {
     date: new Date().toISOString().split('T')[0],
     value: 0,
     movementId: '',
+    typeEntryId: '',
     partnerId: '',
   });
 
   const [typeMovements, setTypeMovements] = useState<TypeMovementOption[]>([]);
+  const [typeEntries, setTypeEntries] = useState<TypeEntryOption[]>([]);
   const [partners, setPartners] = useState<PartnerOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -52,12 +61,14 @@ const CadastrarTitle: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoadingData(true);
-        const [movementsResponse, partnersResponse] = await Promise.all([
-          typeMovementService.findAll({ limit: -1 }),
-          partnerService.findAll({ limit: -1 })
+        const [movementsResponse, entriesResponse, partnersResponse] = await Promise.all([
+          typeMovementService.findAll({ limit: -1, status: 'ACTIVE' }),
+          typeEntryService.findAll({ limit: -1, status: 'ACTIVE' }),
+          partnerService.findAll({ limit: -1, status: 'ACTIVE' })
         ]);
 
         setTypeMovements(movementsResponse.data || []);
+        setTypeEntries(entriesResponse.data || []);
         setPartners(partnersResponse.data || []);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -65,7 +76,7 @@ const CadastrarTitle: React.FC = () => {
           ...prev,
           isOpen: true,
           title: 'Erro',
-          message: 'Erro ao carregar tipos de movimento e parceiros',
+          message: 'Erro ao carregar tipos de movimento, tipos de entrada e parceiros',
           confirmText: 'Fechar',
           type: 'danger',
           onConfirm: () => setInfoModal(p => ({ ...p, isOpen: false }))
@@ -105,6 +116,10 @@ const CadastrarTitle: React.FC = () => {
       newErrors.movementId = 'Tipo de movimento é obrigatório';
     }
 
+    if (!formData.typeEntryId) {
+      newErrors.typeEntryId = 'Tipo de entrada é obrigatório';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -126,6 +141,7 @@ const CadastrarTitle: React.FC = () => {
         date: formData.date,
         value: Number(formData.value),
         movementId: formData.movementId,
+        typeEntryId: formData.typeEntryId,
         partnerId: formData.partnerId || undefined,
       };
 
@@ -249,6 +265,31 @@ const CadastrarTitle: React.FC = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="typeEntryId" className="text-sm font-medium text-gray-700">
+                    Tipo de Entrada <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="typeEntryId"
+                    value={formData.typeEntryId}
+                    onChange={e => handleInputChange('typeEntryId', e.target.value)}
+                    className={`border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] ${
+                      errors.typeEntryId ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    required
+                  >
+                    <option value="">Selecione um tipo de entrada</option>
+                    {typeEntries.map(entry => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.name} {entry.description && `- ${entry.description}`}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.typeEntryId && <p className="text-red-500 text-sm mt-1">{errors.typeEntryId}</p>}
+                </div>
+              </div>
+
               <div className="flex flex-col space-y-2">
                 <label htmlFor="partnerId" className="text-sm font-medium text-gray-700">
                   Parceiro (Opcional)
@@ -285,6 +326,7 @@ const CadastrarTitle: React.FC = () => {
                 <li>• O código do título será gerado automaticamente</li>
                 <li>• O valor deve ser maior que zero</li>
                 <li>• Selecione o tipo de movimento que define as contas contábeis</li>
+                <li>• Selecione o tipo de entrada que define a conta a ser movimentada</li>
                 <li>• O parceiro é opcional mas recomendado para rastreabilidade</li>
                 <li>• A descrição é opcional mas ajuda na identificação do título</li>
               </ul>
