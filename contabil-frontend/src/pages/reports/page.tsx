@@ -3,8 +3,6 @@
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { FileText, Download, Calendar } from 'lucide-react';
-import Button from '@/components/button/Button';
-import Input from '@/components/input/Input';
 import { useDebounce } from '@/hooks/useDebounce';
 
 import {
@@ -100,108 +98,152 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Geração de Relatórios</h1>
-
-      <div className="space-y-6 max-w-lg bg-white p-6 rounded-lg shadow">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <strong className="font-bold">Erro: </strong>
-            <span className="block sm:inline">{error}</span>
+    <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-[#0c4c6e] px-8 py-6">
+            <div className="flex items-center space-x-4">
+              <FileText size={44} className="text-white" />
+              <div>
+                <h1 className="text-3xl font-bold text-white">Geração de Relatórios</h1>
+                <p className="text-white mt-1">Gere relatórios contábeis personalizados</p>
+              </div>
+            </div>
           </div>
-        )}
 
-        <div>
-          <label htmlFor="reportType" className="block text-sm font-medium text-gray-800 mb-1">
-            Tipo de Relatório
-          </label>
-          <select
-            id="reportType"
-            value={reportType}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setReportType(e.target.value as CreateReportDto['type'])
-            }
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="TRIAL_BALANCE">Balancete de Verificação</option>
-            <option value="DRE">Demonstração do Resultado (DRE)</option>
-            <option value="BALANCO">Balanço Patrimonial</option>
-            <option value="LEDGER">Livro Razão</option>
-          </select>
-        </div>
-
-        {reportType === 'LEDGER' && (
-          <div className="relative">
-            <label htmlFor="accountId" className="block text-sm font-medium text-gray-800 mb-1">
-              Conta (para Livro Razão)
-            </label>
-            <input
-              id="accountId"
-              type="text"
-              value={searchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              onFocus={() => searchTerm && setShowAccounts(true)}
-              placeholder="Pesquisar conta por nome"
-              className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            {showAccounts && accounts.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-auto">
-                {accounts.map(account => (
-                  <li
-                    key={account.id}
-                    onClick={() => handleAccountSelect(account)}
-                    className="p-3 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {account.name}
-                  </li>
-                ))}
-              </ul>
+          <div className="p-8">
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                <strong className="font-bold">Erro: </strong>
+                <span className="block sm:inline">{error}</span>
+              </div>
             )}
+
+            <div className="space-y-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="reportType" className="text-sm font-medium text-gray-700">
+                    Tipo de Relatório:
+                  </label>
+                  <select
+                    id="reportType"
+                    value={reportType}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      setReportType(e.target.value as CreateReportDto['type'])
+                    }
+                    className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
+                  >
+                    <option value="TRIAL_BALANCE">Balancete de Verificação</option>
+                    <option value="DRE">Demonstração do Resultado (DRE)</option>
+                    <option value="BALANCO">Balanço Patrimonial</option>
+                    <option value="LEDGER">Livro Razão</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="format" className="text-sm font-medium text-gray-700">
+                    Formato de Saída:
+                  </label>
+                  <select
+                    id="format"
+                    value={format}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      setFormat(e.target.value as CreateReportDto['format'])
+                    }
+                    className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
+                  >
+                    <option value="PDF">PDF</option>
+                    <option value="CSV">CSV</option>
+                  </select>
+                </div>
+              </div>
+
+              {reportType === 'LEDGER' && (
+                <div className="relative">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-gray-700 mb-2">
+                    Conta (para Livro Razão):
+                  </label>
+                  <input
+                    id="accountId"
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    onFocus={() => searchTerm && setShowAccounts(true)}
+                    placeholder="Pesquisar conta por nome"
+                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
+                  />
+                  {showAccounts && accounts.length > 0 && (
+                    <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-auto shadow-lg">
+                      {accounts.map(account => (
+                        <li
+                          key={account.id}
+                          onClick={() => handleAccountSelect(account)}
+                          className="p-3 hover:bg-gray-100 cursor-pointer transition-colors"
+                        >
+                          {account.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar size={16} className="inline mr-1" />
+                  Período:
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="startDate" className="text-xs font-medium text-gray-600">
+                      Data de Início:
+                    </label>
+                    <input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="endDate" className="text-xs font-medium text-gray-600">
+                      Data de Fim:
+                    </label>
+                    <input
+                      id="endDate"
+                      type="date"
+                      value={endDate}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Informações sobre os Relatórios</h3>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• <strong>Balancete de Verificação:</strong> Lista todas as contas com seus saldos em um período específico</li>
+                <li>• <strong>DRE:</strong> Demonstração do Resultado do Exercício mostra receitas, despesas e lucro/prejuízo</li>
+                <li>• <strong>Balanço Patrimonial:</strong> Apresenta a situação patrimonial da empresa em uma data específica</li>
+                <li>• <strong>Livro Razão:</strong> Histórico detalhado de movimentações de uma conta específica</li>
+              </ul>
+            </div>
+
+            <div className="flex space-x-4 pt-6 border-t border-gray-200">
+              <button
+                onClick={handleGenerateReport}
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg shadow-lg"
+              >
+                <Download size={20} />
+                <span>{isLoading ? 'Gerando Relatório...' : 'Gerar Relatório'}</span>
+              </button>
+            </div>
           </div>
-        )}
-
-        <div>
-          <label htmlFor="format" className="block text-sm font-medium text-gray-800 mb-1">
-            Formato de Saída
-          </label>
-          <select
-            id="format"
-            value={format}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setFormat(e.target.value as CreateReportDto['format'])
-            }
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="PDF">PDF</option>
-            <option value="CSV">CSV</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-800 mb-1">Período</label>
-          <div className="flex items-center space-x-4 mt-1">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
-              placeholder="Data de Início"
-              className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <span className="text-gray-500">até</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
-              placeholder="Data de Fim"
-              className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-        </div>
-
-        <div className="pt-4">
-          <Button onClick={handleGenerateReport} disabled={isLoading} className="w-full">
-            {isLoading ? 'Gerando Relatório...' : 'Gerar Relatório'}
-          </Button>
         </div>
       </div>
     </div>
