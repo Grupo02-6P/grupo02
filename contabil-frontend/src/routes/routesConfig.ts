@@ -21,6 +21,9 @@ import CadastrarTypeEntry from '../pages/type-entry/CadastrarTypeEntry';
 import VisualizarTypeEntry from '../pages/type-entry/VisualizarTypeEntry';
 import EditarTypeEntry from '../pages/type-entry/EditarTypeEntry';
 import ReportsPage from '../pages/reports/page';
+import VisualizarTitle from '../pages/title/VisualizarTitle';
+import CadastrarTitle from '../pages/title/CadastrarTitle';
+import EditarTitle from '../pages/title/EditarTitle';
 
 export interface RouteConfig {
   path: string;
@@ -199,6 +202,33 @@ export const routes: RouteConfig[] = [
     isProtected: true,
     requiresPermission: true,
     resource: 'TypeEntry',
+    action: 'update'
+  },
+  { 
+    path: '/titulo/visualizar', 
+    element: VisualizarTitle, 
+    label: 'Visualizar Lançamentos de Título',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Title',
+    action: 'read'
+  },
+  { 
+    path: '/titulo/cadastrar', 
+    element: CadastrarTitle, 
+    label: 'Cadastrar Lançamento de Título',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Title',
+    action: 'create'
+  },
+  { 
+    path: '/titulo/editar/:id', 
+    element: EditarTitle, 
+    label: 'Editar Lançamento de Título',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Title',
     action: 'update'
   },
 ];

@@ -8,7 +8,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Receipt
 } from 'lucide-react';
 import { FaUsers, FaHandshake } from "react-icons/fa";
 import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
@@ -154,6 +155,18 @@ const Navbar: React.FC = () => {
           path: '/relatorios', 
           label: 'Relatórios Gerenciais',
           permission: { resource: 'Report', action: 'read' }
+        }
+      ]
+    },
+    {
+      label: 'Lançamentos de Título', 
+      icon: <Receipt  size={20} />,
+      permission: { resource: 'Title', action: 'read' },
+      subItems: [
+        { 
+          path: '/titulo/visualizar', 
+          label: 'Visualizar Lançamentos de Título',
+          permission: { resource: 'Title', action: 'read' }
         },
       ]
     },

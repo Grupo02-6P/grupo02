@@ -344,13 +344,13 @@ export function DataTable<TData>({
                     className="px-3 py-1 rounded-lg font-medium border transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed bg-white text-gray-700 border-gray-300 hover:bg-[#e6f1f7]"
                   >
                     Primeira
+                  </button>
+
                   <button
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    disabled={!table.getCanNextPage()}
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
                     className="px-3 py-1 rounded-lg font-medium border transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed bg-white text-gray-700 border-gray-300 hover:bg-[#e6f1f7]"
                   >
-                    Última
-                  </button>
                     Anterior
                   </button>
 

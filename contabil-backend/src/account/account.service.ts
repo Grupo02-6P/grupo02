@@ -12,8 +12,8 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 export class AccountService {
   constructor(
     private prisma: PrismaService,
-    private abilityService: CaslAbilityService
-  ) { }
+    private abilityService: CaslAbilityService,
+  ) {}
 
   async create(createAccountDto: CreateAccountDto) {
     const ability = this.abilityService.ability;
@@ -40,7 +40,6 @@ export class AccountService {
         throw new NotFoundException('Conta pai não encontrada');
       }
 
-
       console.log('Parent Account ID:', createAccountDto.parentAccountId);
     } else {
       // Definir explicitamente como null se não fornecido
@@ -61,15 +60,15 @@ export class AccountService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         childAccounts: {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -84,7 +83,7 @@ export class AccountService {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var {
+    let {
       page = 1,
       limit = 10,
       search,
@@ -97,7 +96,7 @@ export class AccountService {
       active,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -107,7 +106,7 @@ export class AccountService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').Account]
+      AND: [accessibleBy(ability, 'read').Account],
     };
 
     // Filtro de busca geral
@@ -115,7 +114,7 @@ export class AccountService {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } }
+        { code: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -178,24 +177,24 @@ export class AccountService {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           childAccounts: {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           createdAt: true,
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      this.prisma.account.count({ where })
+      this.prisma.account.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -208,8 +207,8 @@ export class AccountService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -223,8 +222,8 @@ export class AccountService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -298,7 +297,7 @@ export class AccountService {
     }
     return this.prisma.account.update({
       where: { id },
-      data: { active: Status.INACTIVE }
+      data: { active: Status.INACTIVE },
     });
   }
 
@@ -326,4 +325,3 @@ export class AccountService {
     };
   }
 }
-

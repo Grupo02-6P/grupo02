@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TypeMovementService } from './type-movement.service';
 import { CreateTypeMovementDto } from './dto/create-type-movement.dto';
 import { UpdateTypeMovementDto } from './dto/update-type-movement.dto';
@@ -26,7 +36,10 @@ export class TypeMovementController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeMovementDto: UpdateTypeMovementDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTypeMovementDto: UpdateTypeMovementDto,
+  ) {
     return this.typeMovementService.update(id, updateTypeMovementDto);
   }
 
