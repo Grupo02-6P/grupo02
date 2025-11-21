@@ -241,6 +241,7 @@ const VisualizarTitle: React.FC = () => {
         <option value="">Todos os status</option>
         <option value="ACTIVE">Ativo</option>
         <option value="INACTIVE">Inativo</option>
+        <option value="PAID">Baixado</option>
       </select>
     </div>
   );

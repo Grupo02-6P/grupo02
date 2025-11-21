@@ -46,6 +46,16 @@ export class AccountController {
     return this.accountService.findAll(filterDto);
   }
 
+  @Get('/with-balance')
+  @ApiOperation({ summary: 'Listar contas contábeis com saldo' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de contas contábeis com saldo'
+  })
+  findAllWithBalance(@Query() filterDto: FilterAccountDto) {
+    return this.accountService.findAllWithBalance(filterDto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Buscar conta por ID' })
   @ApiParam({ name: 'id', description: 'ID da conta contábil' })

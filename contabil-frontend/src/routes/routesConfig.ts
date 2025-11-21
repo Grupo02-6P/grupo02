@@ -24,6 +24,7 @@ import ReportsPage from '../pages/reports/page';
 import VisualizarTitle from '../pages/title/VisualizarTitle';
 import CadastrarTitle from '../pages/title/CadastrarTitle';
 import EditarTitle from '../pages/title/EditarTitle';
+import VisualizarAccounts from '@/pages/account/VisualizarAccounts';
 
 export interface RouteConfig {
   path: string;
@@ -149,7 +150,15 @@ export const routes: RouteConfig[] = [
     resource: 'Account',
     action: 'create'
   },
-
+  { 
+    path: '/contas/visualizar', 
+    element: VisualizarAccounts, 
+    label: 'Visualizar Contas',
+    isProtected: true,
+    requiresPermission: true,
+    resource: 'Account',
+    action: 'read'
+  },
   { 
     path: '/tipo-movimento/cadastrar', 
     element: CadastrarTypeMovement, 
