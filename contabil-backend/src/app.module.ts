@@ -15,6 +15,9 @@ import { TitleModule } from './title/title.module';
 import { EntryModule } from './entry/entry.module';
 import { JournalModule } from './journal/journal.module';
 import { ReportsModule } from './reports/reports.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
@@ -32,6 +35,16 @@ import { ReportsModule } from './reports/reports.module';
     EntryModule,
     JournalModule,
     ReportsModule,
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // tempo de vida (em milissegundos)
+      limit: 10,  // limite de requisições
+    }]),
+    PrometheusModule.register({
+      path: '/metrics', 
+      defaultMetrics: {
+        enabled: true, // Coleta uso de CPU, Memória, etc. automaticamente
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [

@@ -5,5 +5,4 @@ scrape_configs:
   - job_name: 'contabil-api'
     scrape_interval: 5s
     static_configs:
-      - targets: ['app:3000']
-    
+      - targets: ['nest_app_contabilize:3000']
