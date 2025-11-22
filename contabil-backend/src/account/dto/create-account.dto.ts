@@ -1,27 +1,62 @@
-import { Status } from "@prisma/client"
-import { IsNotEmpty, IsString } from "class-validator"
+import { Status } from '@prisma/client';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAccountDto {
-    @IsString()
-    @IsNotEmpty()
-    code: string
+  @ApiProperty({
+    description: 'Código da conta contábil',
+    example: '1.01.001',
+    minLength: 1
+  })
+  @IsString()
+  @IsNotEmpty()
+  code: string;
 
-    @IsString()
-    @IsNotEmpty()
-    name: string
+  @ApiProperty({
+    description: 'Nome da conta contábil',
+    example: 'Caixa',
+    minLength: 1
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    description: string
+  @ApiProperty({
+    description: 'Descrição detalhada da conta',
+    example: 'Conta para controle de dinheiro em caixa'
+  })
+  @IsString()
+  description: string;
 
-    @IsNotEmpty()
-    level: number
+  @ApiProperty({
+    description: 'Nível hierárquico da conta',
+    example: 3,
+    minimum: 1
+  })
+  @IsNotEmpty()
+  level: number;
 
-    @IsNotEmpty()
-    acceptsPosting: boolean
+  @ApiProperty({
+    description: 'Indica se a conta aceita lançamentos diretos',
+    example: true
+  })
+  @IsNotEmpty()
+  acceptsPosting: boolean;
 
-    @IsNotEmpty()
-    active: Status
+  @ApiProperty({
+    description: 'Status da conta',
+    enum: Status,
+    example: Status.ACTIVE
+  })
+  @IsNotEmpty()
+  active: Status;
 
-    @IsString()
-    parentAccountId: string | null
+  @ApiProperty({
+    description: 'ID da conta pai (para contas filhas)',
+    example: 'uuid-da-conta-pai',
+    nullable: true,
+    required: false
+  })
+  @IsString()
+  parentAccountId: string | null;
 }

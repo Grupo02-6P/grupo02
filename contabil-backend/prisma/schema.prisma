@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ----------------------------------------
+// PRISMA SCHEMA - CONTABILIDADE DUPLA
+// ----------------------------------------
 
 generator client {
   provider = "prisma-client-js"
@@ -13,22 +11,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String @id @default(cuid())
-  name     String
-  email    String @unique
-  status   StatusUsers @default(ACTIVE)
-  password String
-  roleId    String
-  role      Role     @relation(fields: [roleId], references: [id])
+// ----------------------------------------
+// MODELOS DE USUÁRIO E PERMISSÃO
+// ----------------------------------------
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id        String      @id @default(cuid())
+  name      String
+  email     String      @unique
+  status    StatusUsers @default(ACTIVE)
+  password  String
+
+  roleId    String
+  role      Role        @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model Resource {
-  id          String       @id @default(uuid())
-  name        String       @unique
+  id          String        @id @default(uuid())
+  name        String        @unique
   description String?
   permissions Permission[]
 }
@@ -44,14 +47,14 @@ model Permission {
 }
 
 model Role {
-  id           String           @id @default(uuid())
-  name         String           @unique
-  description  String?
-  isDefault    Boolean          @default(true)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime?         @updatedAt
-  rolePermissions RolePermission[]
-  users        User[]
+  id               String           @id @default(uuid())
+  name             String           @unique
+  description      String?
+  isDefault        Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime?        @updatedAt
+  rolePermissions  RolePermission[]
+  users            User[]
 }
 
 model RolePermission {
@@ -62,69 +65,172 @@ model RolePermission {
   permission    Permission   @relation(fields: [permissionId], references: [id])
 }
 
+// ----------------------------------------
+// MODELO DE PARCEIRO (CLIENTE/FORNECEDOR)
+// ----------------------------------------
+
 model Partner {
   id        String   @id @default(uuid())
   name      String
   address   String
   cnpj      String   @unique
-  
-  status    Status @default(ACTIVE)
+  status    Status   @default(ACTIVE)
+
+  titles    Title[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// ----------------------------------------
+// PLANO DE CONTAS
+// ----------------------------------------
+
 model Account {
-  id                String    @id @default(uuid())
-  code              String    @unique
+  id                String      @id @default(uuid())
+  code              String      @unique
   name              String
   description       String?
   level             Int
-  acceptsPosting    Boolean   @default(false)
-  active            Status   @default(ACTIVE)
+  acceptsPosting    Boolean     @default(false)
+  active            Status      @default(ACTIVE)
   
   parentAccountId   String?
-  parentAccount     Account?  @relation("ChildAccounts", fields: [parentAccountId], references: [id])
-  childAccounts     Account[] @relation("ChildAccounts")
+  parentAccount     Account?    @relation("ChildAccounts", fields: [parentAccountId], references: [id])
+  childAccounts     Account[]   @relation("ChildAccounts")
   
   typeMovementAsCredit  typeMovement[] @relation("CreditAccount")
   typeMovementAsDebit   typeMovement[] @relation("DebitAccount")
 
-  typeEntryAsCleared    typeEntry[]     @relation("ClearedAccount")
+  typeEntryAsCleared    typeEntry[]    @relation("ClearedAccount")
+
+  journalLines          JournalLine[]
 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
 
+// ----------------------------------------
+// TIPOS DE MOVIMENTO E ENTRADA
+// ----------------------------------------
+
 model typeMovement {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  description String?
+  id              String    @id @default(uuid())
+  name            String    @unique
+  description     String?
 
-  creditAccountId  String
-  debitAccountId   String
-  creditAccount   Account  @relation("CreditAccount", fields: [creditAccountId], references: [id])
-  debitAccount    Account  @relation("DebitAccount", fields: [debitAccountId], references: [id])
+  creditAccountId String
+  debitAccountId  String
 
-  status    Status @default(ACTIVE)
+  creditAccount   Account   @relation("CreditAccount", fields: [creditAccountId], references: [id])
+  debitAccount    Account   @relation("DebitAccount", fields: [debitAccountId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  titles          Title[]  
+
+  status          Status    @default(ACTIVE)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model typeEntry {
-  id            String       @id @default(uuid())
-  name          String
-  description   String?
+  id              String     @id @default(uuid())
+  name            String
+  description     String?
 
-  accountClearedId  String
-  accountCleared   Account  @relation("ClearedAccount", fields: [accountClearedId], references: [id])
+  accountClearedId String
+  accountCleared   Account   @relation("ClearedAccount", fields: [accountClearedId], references: [id])
 
-  status        Status       @default(ACTIVE)
+  // entries         Entry[]
+  titles         Title[]
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  status          Status     @default(ACTIVE)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 }
+
+// ----------------------------------------
+// LANÇAMENTO (TÍTULO) E ENTRADA (BAIXA)
+// ----------------------------------------
+
+model Title {
+  id          String     @id @default(uuid())
+  code        String     @unique
+  description String?
+  date        DateTime   @default(now())
+  value       Float
+  status      StatusTitle     @default(ACTIVE)
+
+  movementId  String
+  movement    typeMovement @relation(fields: [movementId], references: [id])
+
+  typeEntryId String?
+  typeEntry   typeEntry?   @relation(fields: [typeEntryId], references: [id])
+
+  partnerId   String?
+  partner     Partner?     @relation(fields: [partnerId], references: [id])
+
+  journalEntries JournalEntry[]
+  // entries        Entry[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paidAt      DateTime?
+}
+
+model JournalEntry {
+  id          String        @id @default(uuid())
+  date        DateTime      @default(now())
+  originType  JournalOrigin?
+  originId    String?
+
+  titleId    String?
+  title      Title?        @relation(fields: [titleId], references: [id])
+
+  // entryId     String?
+  // entry       Entry?         @relation(fields: [entryId], references: [id])
+
+  lines       JournalLine[]
+  createdAt   DateTime      @default(now())
+}
+
+
+model JournalLine {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id])
+  accountId      String
+  account        Account      @relation(fields: [accountId], references: [id])
+  type           LineType
+  amount         Float
+}
+
+// ----------------------------------------
+// ENTRADAS (BAIXAS DE TÍTULO)
+// ----------------------------------------
+
+// model Entry {
+//   id           String      @id @default(uuid())
+//   code         String      @unique
+//   description  String?
+//   date         DateTime    @default(now())
+//   value        Float
+//   status       Status      @default(ACTIVE)
+
+//   titleId      String
+//   title        Title       @relation(fields: [titleId], references: [id])
+
+//   entryTypeId  String
+//   entryType    typeEntry   @relation(fields: [entryTypeId], references: [id])
+
+//   journalEntries JournalEntry[]
+
+//   createdAt    DateTime    @default(now())
+//   updatedAt    DateTime    @updatedAt
+// }
+
+// ----------------------------------------
+// ENUMS
+// ----------------------------------------
 
 enum PermAction {
   manage
@@ -142,4 +248,22 @@ enum StatusUsers {
 enum Status {
   ACTIVE
   INACTIVE
+}
+
+enum StatusTitle {
+  ACTIVE
+  INACTIVE
+  PAID
+}
+
+enum LineType {
+  DEBIT
+  CREDIT
+}
+
+enum JournalOrigin {
+  TITLE     // lançamento principal
+  ENTRY      // baixa, liquidação
+  ADJUSTMENT // ajuste contábil manual
+  TRANSFER   // transferência interna
 }

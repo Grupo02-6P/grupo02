@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,9 +11,9 @@ import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 @Injectable()
 export class AccountService {
   constructor(
-      private prisma: PrismaService,
-      private abilityService: CaslAbilityService
-    ) {}
+    private prisma: PrismaService,
+    private abilityService: CaslAbilityService,
+  ) {}
 
   async create(createAccountDto: CreateAccountDto) {
     const ability = this.abilityService.ability;
@@ -21,26 +21,31 @@ export class AccountService {
     if (!ability.can('create', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
-    
+
     console.log('CreateAccountDto:', createAccountDto);
-    
+
+    // Verificar se já existe conta com mesmo código para evitar erro P2002
+    const existingByCode = await this.prisma.account.findUnique({ where: { code: createAccountDto.code } });
+    if (existingByCode) {
+      throw new BadRequestException('Código de conta já existe');
+    }
+
     // Validar se a conta pai existe quando parentAccountId é fornecido
     if (createAccountDto.parentAccountId) {
       const parentExists = await this.prisma.account.findUnique({
         where: { id: createAccountDto.parentAccountId },
       });
-      
+
       if (!parentExists) {
         throw new NotFoundException('Conta pai não encontrada');
       }
-
 
       console.log('Parent Account ID:', createAccountDto.parentAccountId);
     } else {
       // Definir explicitamente como null se não fornecido
       createAccountDto.parentAccountId = null;
     }
-    
+
     return this.prisma.account.create({
       data: createAccountDto,
       select: {
@@ -55,15 +60,15 @@ export class AccountService {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         childAccounts: {
           select: {
             id: true,
             name: true,
-            code: true
-          }
+            code: true,
+          },
         },
         createdAt: true,
         updatedAt: true,
@@ -73,16 +78,16 @@ export class AccountService {
 
   async findAll(filterDto: FilterAccountDto): Promise<PaginatedResponse<any>> {
     const ability = this.abilityService.ability;
-    
+
     if (!ability.can('read', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    var { 
-      page = 1, 
-      limit = 10, 
-      search, 
-      sortBy, 
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
       sortOrder = 'desc',
       name,
       description,
@@ -91,7 +96,7 @@ export class AccountService {
       active,
       dateFrom,
       dateTo,
-      status
+      status,
     } = filterDto;
 
     // Se limit for -1, buscar todos os registros
@@ -101,7 +106,7 @@ export class AccountService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').Account]
+      AND: [accessibleBy(ability, 'read').Account],
     };
 
     // Filtro de busca geral
@@ -109,7 +114,7 @@ export class AccountService {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } }
+        { code: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -125,15 +130,15 @@ export class AccountService {
     if (name) {
       where.name = { contains: name, mode: 'insensitive' };
     }
-    
+
     if (description) {
       where.description = { contains: description, mode: 'insensitive' };
     }
-    
+
     if (level !== undefined) {
       where.level = level;
     }
-    
+
     if (acceptsPosting !== undefined) {
       where.acceptsPosting = acceptsPosting == 'true' ? true : false;
     }
@@ -172,24 +177,24 @@ export class AccountService {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           childAccounts: {
             select: {
               id: true,
               name: true,
-              code: true
-            }
+              code: true,
+            },
           },
           createdAt: true,
           updatedAt: true,
         },
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          code: 'asc',
+        },
       }),
-      this.prisma.account.count({ where })
+      this.prisma.account.count({ where }),
     ]);
 
     // Se estiver buscando todos os registros, ajustar metadados de paginação
@@ -202,8 +207,8 @@ export class AccountService {
           total,
           totalPages: 1,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -217,8 +222,179 @@ export class AccountService {
         total,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async findAllWithBalance(filterDto: FilterAccountDto): Promise<PaginatedResponse<any>> {
+    const ability = this.abilityService.ability;
+
+    if (!ability.can('read', 'Account')) {
+      throw new UnauthorizedException('Ação não permitida');
+    }
+
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy,
+      sortOrder = 'desc',
+      name,
+      description,
+      level,
+      acceptsPosting,
+      active,
+      dateFrom,
+      dateTo,
+      status,
+    } = filterDto;
+
+    // Se limit for -1, buscar todos os registros
+    const getAllRecords = limit === -1;
+    const skip = getAllRecords ? 0 : (page - 1) * limit;
+    const take = getAllRecords ? undefined : limit;
+
+    // Construir filtros dinâmicos
+    const where: any = {
+      AND: [accessibleBy(ability, 'read').Account],
+    };
+
+    // Filtro de busca geral
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Filtros específicos
+    if (status) {
+      where.active = status;
+    }
+
+    if (active) {
+      where.active = active;
+    }
+
+    if (name) {
+      where.name = { contains: name, mode: 'insensitive' };
+    }
+
+    if (description) {
+      where.description = { contains: description, mode: 'insensitive' };
+    }
+
+    if (level !== undefined) {
+      where.level = level;
+    }
+
+    if (acceptsPosting !== undefined) {
+      where.acceptsPosting = acceptsPosting == 'true' ? true : false;
+    }
+
+    if (sortBy === undefined) {
+      sortBy = 'createdAt';
+    }
+
+    // Filtros de data
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) {
+        where.createdAt.gte = new Date(dateFrom);
       }
+      if (dateTo) {
+        where.createdAt.lte = new Date(dateTo);
+      }
+    }
+
+    // Executar consultas em paralelo para melhor performance
+    const [data, total] = await Promise.all([
+      this.prisma.account.findMany({
+        where,
+        skip,
+        ...(take !== undefined && { take }),
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          description: true,
+          level: true,
+          acceptsPosting: true,
+          active: true,
+          parentAccountId: true,
+          parentAccount: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          childAccounts: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          journalLines: {
+            select: {
+              type: true,
+              amount: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          code: 'asc',
+        },
+      }),
+      this.prisma.account.count({ where }),
+    ]);
+
+    for (const account of data) {
+      const totalDebit = account.journalLines
+        .filter(line => line.type === 'DEBIT')
+        .reduce((sum, line) => sum + line.amount, 0);
+
+      const totalCredit = account.journalLines
+        .filter(line => line.type === 'CREDIT')
+        .reduce((sum, line) => sum + line.amount, 0);
+
+      account['balance'] = totalDebit - totalCredit;
+
+      account['totalDebit'] = totalDebit;
+      account['totalCredit'] = totalCredit;
+    }
+    // Se estiver buscando todos os registros, ajustar metadados de paginação
+    if (getAllRecords) {
+      return {
+        data,
+        pagination: {
+          page: 1,
+          limit: total,
+          total,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+    }
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -234,17 +410,43 @@ export class AccountService {
     });
   }
 
-  update(id: string, updateAccountDto: UpdateAccountDto) {
+  async update(id: string, updateAccountDto: UpdateAccountDto) {
     const ability = this.abilityService.ability;
 
     if (!ability.can('update', 'Account')) {
       throw new UnauthorizedException('Ação não permitida');
     }
 
-    return this.prisma.account.update({
-      where: { id },
-      data: updateAccountDto,
-    });
+    // Valida duplicidade de código caso esteja sendo alterado
+    if (updateAccountDto.code) {
+      const exists = await this.prisma.account.findUnique({ where: { code: updateAccountDto.code } });
+      if (exists && exists.id !== id) {
+        throw new BadRequestException('Código de conta já existe');
+      }
+    }
+
+    // Valida existência da conta pai, se informado
+    if (updateAccountDto.parentAccountId) {
+      if (updateAccountDto.parentAccountId === id) {
+        throw new BadRequestException('Conta pai não pode ser a própria conta');
+      }
+      const parent = await this.prisma.account.findUnique({ where: { id: updateAccountDto.parentAccountId } });
+      if (!parent) {
+        throw new NotFoundException('Conta pai não encontrada');
+      }
+    }
+
+    try {
+      return await this.prisma.account.update({
+        where: { id },
+        data: updateAccountDto,
+      });
+    } catch (err: any) {
+      if (err?.code === 'P2002' && Array.isArray(err?.meta?.target) && err.meta.target.includes('code')) {
+        throw new BadRequestException('Código de conta já existe');
+      }
+      throw err;
+    }
   }
 
   remove(id: string) {
@@ -266,7 +468,31 @@ export class AccountService {
     }
     return this.prisma.account.update({
       where: { id },
-      data: { active: Status.INACTIVE }
+      data: { active: Status.INACTIVE },
     });
+  }
+
+  async getAccountBalance(accountId: string) {
+    const debitSum = await this.prisma.journalLine.aggregate({
+      where: { accountId, type: 'DEBIT' },
+      _sum: { amount: true },
+    });
+
+    const creditSum = await this.prisma.journalLine.aggregate({
+      where: { accountId, type: 'CREDIT' },
+      _sum: { amount: true },
+    });
+
+    const totalDebit = debitSum._sum.amount ?? 0;
+    const totalCredit = creditSum._sum.amount ?? 0;
+    const balance = totalDebit - totalCredit;
+
+    return {
+      accountId,
+      totalDebit,
+      totalCredit,
+      balance,
+      type: balance >= 0 ? 'DEBIT' : 'CREDIT',
+    };
   }
 }

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
-    "axios": "^1.12.1",
+    "axios": "^1.13.2",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@types/node": "^24.10.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.8",
     "@vitejs/plugin-react": "^5.0.0",

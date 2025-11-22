@@ -11,10 +11,10 @@ import { PartnerModule } from './partner/partner.module';
 import { AccountModule } from './account/account.module';
 import { TypeMovementModule } from './type-movement/type-movement.module';
 import { TypeEntryModule } from './type-entry/type-entry.module';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-
+import { TitleModule } from './title/title.module';
+import { EntryModule } from './entry/entry.module';
+import { JournalModule } from './journal/journal.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -28,13 +28,10 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     AccountModule,
     TypeMovementModule,
     TypeEntryModule,
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 60 segundos = 60000 milissegundos
-        limit: 10,  // Limite de requisições por TTL para cada IP
-      }
-    ]),
-    PrometheusModule.register(),
+    TitleModule,
+    EntryModule,
+    JournalModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -8,10 +8,12 @@ import {
   Menu,
   X,
   ChevronRight,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Receipt
 } from 'lucide-react';
 import { FaUsers, FaHandshake } from "react-icons/fa";
 import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { TbReportAnalytics } from "react-icons/tb";
 
 interface NavigationSubItem {
   path?: string;
@@ -48,37 +50,21 @@ const Navbar: React.FC = () => {
   // MOVIDO ANTES DO RETURN CONDICIONAL
   const navigationItems = React.useMemo<NavigationItem[]>(() => [
     { path: '/home', label: 'Início', icon: <MdDashboard size={20} /> },
-    { 
-      label: 'Usuários', 
-      icon: <FaUsers  size={20} />,
-      permission: { resource: 'User', action: 'read' },
+    {
+      label: 'Lançamentos de Título', 
+      icon: <Receipt  size={20} />,
+      permission: { resource: 'Title', action: 'read' },
       subItems: [
         { 
-          path: '/usuarios/visualizar', 
-          label: 'Visualizar Usuário',
-          permission: { resource: 'User', action: 'read' }
+          path: '/titulo/visualizar', 
+          label: 'Visualizar Títulos',
+          permission: { resource: 'Title', action: 'read' }
         },
         { 
-          path: '/usuarios/cadastrar', 
-          label: 'Cadastrar Usuário',
-          permission: { resource: 'User', action: 'create' }
+          path: '/titulo/cadastrar', 
+          label: 'Cadastrar Títulos',
+          permission: { resource: 'Title', action: 'create' }
         },
-        {
-          label: 'Permissões',
-          permission: { resource: 'Permission', action: 'read' },
-          subItems: [
-            { 
-              path: '/usuarios/permissoes/visualizar', 
-              label: 'Visualizar Permissão',
-              permission: { resource: 'Role', action: 'read' }
-            },
-            { 
-              path: '/usuarios/permissoes/cadastrar', 
-              label: 'Cadastrar Permissão',
-              permission: { resource: 'Role', action: 'create' }
-            },
-          ]
-        }
       ]
     },
     { 
@@ -104,9 +90,14 @@ const Navbar: React.FC = () => {
       permission: { resource: 'Account', action: 'read' },
       subItems: [
         { 
+          path: '/contas/visualizar', 
+          label: 'Visualizar Contas',
+          permission: { resource: 'Account', action: 'read' }
+        },
+        { 
           path: '/contas/gerenciar', 
           label: 'Gerenciar Contas',
-          permission: { resource: 'Account', action: 'read' }
+          permission: { resource: 'Account', action: 'create' }
         },
       ]
     },
@@ -142,6 +133,51 @@ const Navbar: React.FC = () => {
           label: 'Cadastrar Tipo de Entrada',
           permission: { resource: 'TypeEntry', action: 'create' }
         },
+      ]
+    },    
+    { 
+      label: 'Relatórios', 
+      icon: <TbReportAnalytics  size={20} />,
+      permission: { resource: 'Report', action: 'read' },
+      subItems: [
+        { 
+          path: '/relatorios', 
+          label: 'Relatórios Gerenciais',
+          permission: { resource: 'Report', action: 'read' }
+        }
+      ]
+    },
+    { 
+      label: 'Usuários', 
+      icon: <FaUsers  size={20} />,
+      permission: { resource: 'User', action: 'read' },
+      subItems: [
+        { 
+          path: '/usuarios/visualizar', 
+          label: 'Visualizar Usuário',
+          permission: { resource: 'User', action: 'read' }
+        },
+        { 
+          path: '/usuarios/cadastrar', 
+          label: 'Cadastrar Usuário',
+          permission: { resource: 'User', action: 'create' }
+        },
+        {
+          label: 'Permissões',
+          permission: { resource: 'Permission', action: 'read' },
+          subItems: [
+            { 
+              path: '/usuarios/permissoes/visualizar', 
+              label: 'Visualizar Permissão',
+              permission: { resource: 'Role', action: 'read' }
+            },
+            { 
+              path: '/usuarios/permissoes/cadastrar', 
+              label: 'Cadastrar Permissão',
+              permission: { resource: 'Role', action: 'create' }
+            },
+          ]
+        }
       ]
     },
   ], []);

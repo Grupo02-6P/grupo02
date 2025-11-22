@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { FaArrowRight, FaUsers, FaHandshake } from "react-icons/fa";
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Receipt } from 'lucide-react';
 import { MdOutlineAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
+import { TbReportAnalytics } from "react-icons/tb";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -61,6 +62,26 @@ const Home: React.FC = () => {
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
       permission: { resource: 'TypeEntry', action: 'read' }
+    },
+    {
+      title: 'Gerar Relatórios',
+      description: 'Gere relatórios gerenciais',
+      icon: <TbReportAnalytics size={24} />,
+      href: '/relatorios',
+      borderColor: 'border-yellow-400',
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-600',
+      permission: { resource: 'Report', action: 'read' }
+    },
+    {
+      title: 'Visualizar Lançamentos de Título',
+      description: 'Gerenciar lançamentos de título',
+      icon: <Receipt size={24} />,
+      href: '/titulo/visualizar',
+      borderColor: 'border-orange-400',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600',
+      permission: { resource: 'Title', action: 'read' }
     },
   ]
 
@@ -120,6 +141,7 @@ const Home: React.FC = () => {
                 </div>
               ))}
             </div>
+            
           ) : (
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">🔒</div>
@@ -131,6 +153,28 @@ const Home: React.FC = () => {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Dashboard Power BI */}
+        <div className="mb-12">
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Dashboard Contábil</h2>
+              <p className="text-gray-600">Visualize os principais indicadores financeiros em tempo real</p>
+            </div>
+            
+            <div className="w-full bg-gray-50 rounded-xl overflow-hidden">
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+                <iframe 
+                  title="DashboardContabilize" 
+                  className="absolute top-0 left-0 w-full h-full border-0" 
+                  src="https://app.powerbi.com/view?r=eyJrIjoiMDhiOTE2M2QtOWU0MS00MzkyLTljZjMtNGYwMGIxY2QzNWM1IiwidCI6IjRmODUzZjYzLTBlNjUtNGU0Ny05M2Q4LTFhMjk3YzQxODRmOCJ9" 
+                  frameBorder="0" 
+                  allowFullScreen={true}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
