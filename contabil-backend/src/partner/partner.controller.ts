@@ -28,8 +28,8 @@ export class PartnerController {
   @ApiOperation({ summary: 'Criar novo parceiro (cliente/fornecedor)' })
   @ApiResponse({ status: 201, description: 'Parceiro criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  create(@Body() createPartnerDto: CreatePartnerDto) {
-    return this.partnerService.create(createPartnerDto);
+  create(@Body() createPartnerDto: CreatePartnerDto, @Req() req: any) {
+    return this.partnerService.create(createPartnerDto, req.user);
   }
 
   @Get()
@@ -62,28 +62,28 @@ export class PartnerController {
   @ApiOperation({ summary: 'Atualizar parceiro' })
   @ApiParam({ name: 'id', description: 'ID do parceiro' })
   @ApiResponse({ status: 200, description: 'Parceiro atualizado com sucesso' })
-  update(@Param('id') id: string, @Body() updatePartnerDto: UpdatePartnerDto) {
-    return this.partnerService.update(id, updatePartnerDto);
+  update(@Param('id') id: string, @Body() updatePartnerDto: UpdatePartnerDto, @Req() req: any) {
+    return this.partnerService.update(id, updatePartnerDto, req.user);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Remover parceiro' })
   @ApiParam({ name: 'id', description: 'ID do parceiro' })
   @ApiResponse({ status: 200, description: 'Parceiro removido com sucesso' })
-  remove(@Param('id') id: string, @Req() req) {
+  remove(@Param('id') id: string, @Req() req: any) {
     const user = req.user;
     const companyId = user.companyId;
     if (companyId && user.role.name !== 'ADMIN') {
-      return this.partnerService.remove(id, companyId);
+      return this.partnerService.remove(id, req.user ,companyId);
     }
-    return this.partnerService.remove(id);
+    return this.partnerService.remove(id, req.user);
   }
 
   @Patch(':id/inactivate')
   @ApiOperation({ summary: 'Inativar parceiro' })
   @ApiParam({ name: 'id', description: 'ID do parceiro' })
   @ApiResponse({ status: 200, description: 'Parceiro inativado com sucesso' })
-  inactive(@Param('id') id: string) {
-    return this.partnerService.inactivate(id);
+  inactive(@Param('id') id: string, @Req() req: any) {
+    return this.partnerService.inactivate(id, req.user);
   }
 }

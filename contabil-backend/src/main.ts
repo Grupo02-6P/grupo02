@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AuditService } from './audit/audit.service';
+import { AuditExceptionFilter } from './common/filters/audit.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -43,5 +45,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
+
+  const auditService = app.get(AuditService);
+  app.useGlobalFilters(new AuditExceptionFilter(auditService));
 }
 bootstrap();
