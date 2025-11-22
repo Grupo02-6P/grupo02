@@ -6,18 +6,45 @@ import { CaslAbilityService } from 'src/casl/casl-ability/casl-ability.service';
 import { FilterPartnerDto } from './dto/filter-partner.dto';
 import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 import { Status } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class PartnerService {
   constructor(
     private prisma: PrismaService,
     private abilityService: CaslAbilityService,
-  ) {}
-  create(createPartnerDto: CreatePartnerDto) {
+    private auditService: AuditService,
+  ) { }
+
+  async create(createPartnerDto: CreatePartnerDto, currentUser: any) {
+    console.log('--- AUDITORIA DEBUG ---');
+    console.log('1. USUÁRIO RECEBIDO (PAYLOAD JWT):', currentUser);
+    console.log('---------------------------');
     const ability = this.abilityService.ability;
 
     if (!ability.can('create', 'Partner')) {
       throw new UnauthorizedException('Ação não permitida');
+    }
+
+    const newPartner = await this.prisma.partner.create({
+      data: createPartnerDto,
+
+    });
+
+    try {
+      await this.auditService.create({
+        action: 'CREATE',
+        entity: 'Partner',
+        entityId: newPartner.id,
+        oldValues: undefined,
+        newValues: newPartner as any,
+        user: { connect: { id: currentUser.id } },
+        ipAddress: 'N/A', // Garante que não é null
+        userAgent: 'N/A',
+      });
+    } catch (error) {
+      // Se der erro na auditoria, apenas loga no terminal, mas NÃO trava o request
+      console.error('⚠️ Falha ao registrar auditoria:', error);
     }
 
     return this.prisma.partner.create({
@@ -158,12 +185,33 @@ export class PartnerService {
     });
   }
 
-  update(id: string, updatePartnerDto: UpdatePartnerDto) {
+  async update(id: string, updatePartnerDto: UpdatePartnerDto, currentUser: any) {
     const ability = this.abilityService.ability;
 
     if (!ability.can('update', 'Partner')) {
       throw new UnauthorizedException('Ação não permitida');
     }
+
+    const oldPartner = await this.prisma.partner.findUnique({ where: { id } });
+
+
+    if (!oldPartner) {
+      throw new UnauthorizedException('Parceiro não encontrado.');
+    }
+
+    const updatedPartner = await this.prisma.partner.update({
+      where: { id },
+      data: updatePartnerDto,
+    });
+
+    this.auditService.create({
+      action: 'UPDATE',
+      entity: 'Partner',
+      entityId: id,
+      oldValues: oldPartner as any,
+      newValues: updatedPartner as any,
+      user: { connect: { id: currentUser.id } },
+    }).catch(console.error);
 
     return this.prisma.partner.update({
       where: { id },
@@ -171,11 +219,31 @@ export class PartnerService {
     });
   }
 
-  remove(id: string, companyId?: string) {
+  async remove(id: string, currentUser: any, companyId?: string) {
     const ability = this.abilityService.ability;
 
     if (!ability.can('delete', 'Partner')) {
       throw new UnauthorizedException('Ação não permitida');
+    }
+
+    const partnerToDelete = await this.prisma.partner.findUnique({ where: { id } });
+
+    const deleteResult = await this.prisma.partner.deleteMany({
+      where: {
+        id,
+        ...(companyId && { companyId }),
+      },
+    });
+
+    if (partnerToDelete) {
+      this.auditService.create({
+        action: 'DELETE',
+        entity: 'Partner',
+        entityId: id,
+        oldValues: partnerToDelete as any,
+        newValues: undefined, // Usar undefined para Json opcional vazio
+        user: { connect: { id: currentUser.id } },
+      }).catch(console.error);
     }
 
     return this.prisma.partner.deleteMany({
@@ -186,11 +254,29 @@ export class PartnerService {
     });
   }
 
-  inactivate(id: string) {
+  async inactivate(id: string, currentUser: any) {
     const ability = this.abilityService.ability;
+
     if (!ability.can('delete', 'Partner')) {
       throw new UnauthorizedException('Ação não permitida');
     }
+
+    const oldPartner = await this.prisma.partner.findUnique({ where: { id } });
+
+    const updatedPartner = await this.prisma.partner.update({
+      where: { id },
+      data: { status: Status.INACTIVE },
+    });
+
+    this.auditService.create({
+      action: 'INACTIVATE',
+      entity: 'Partner',
+      entityId: id,
+      oldValues: oldPartner as any,
+      newValues: updatedPartner as any,
+      user: { connect: { id: currentUser.id } },
+    }).catch(console.error);
+
     return this.prisma.partner.update({
       where: { id },
       data: { status: Status.INACTIVE },
