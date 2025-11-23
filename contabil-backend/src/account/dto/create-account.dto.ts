@@ -1,5 +1,5 @@
 import { Status } from '@prisma/client';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAccountDto {
@@ -26,7 +26,8 @@ export class CreateAccountDto {
     example: 'Conta para controle de dinheiro em caixa'
   })
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @ApiProperty({
     description: 'Nível hierárquico da conta',
@@ -58,5 +59,6 @@ export class CreateAccountDto {
     required: false
   })
   @IsString()
-  parentAccountId: string | null;
+  @IsOptional()
+  parentAccountId?: string | null;
 }

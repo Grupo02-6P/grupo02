@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { TitleService } from './title.service';
@@ -15,13 +16,14 @@ import { CreateTitleDto } from './dto/create-title.dto';
 import { UpdateTitleDto } from './dto/update-title.dto';
 import { BaseFilterDto } from 'src/common/dto/base-filter.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { ReverseTitleDto } from './dto/reverse-title.dto';
 
 @ApiTags('titles')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('title')
 export class TitleController {
-  constructor(private readonly titleService: TitleService) {}
+  constructor(private readonly titleService: TitleService) { }
 
   @Post()
   @ApiOperation({ summary: 'Criar novo título a pagar/receber' })
@@ -77,5 +79,17 @@ export class TitleController {
   @ApiResponse({ status: 200, description: 'Título removido com sucesso' })
   remove(@Param('id') id: string) {
     return this.titleService.remove(id);
+  }
+
+  @Post(':id/reverse')
+  @ApiOperation({ summary: 'Estornar pagamento de título' })
+  @ApiParam({ name: 'id', description: 'ID do título' })
+  @ApiResponse({ status: 201, description: 'Estorno realizado com sucesso' })
+  reverse(
+    @Param('id') id: string,
+    @Body() reverseDto: ReverseTitleDto,
+    @Req() req: any
+  ) {
+    return this.titleService.reversePayment(id, reverseDto, req.user);
   }
 }

@@ -260,6 +260,7 @@ enum StatusTitle {
   ACTIVE
   INACTIVE
   PAID
+  REVERSED
 }
 
 enum LineType {
@@ -272,6 +273,7 @@ enum JournalOrigin {
   ENTRY      // baixa, liquidação
   ADJUSTMENT // ajuste contábil manual
   TRANSFER   // transferência interna
+  REVERSAL // estorno
 }
 
 model AuditLog {

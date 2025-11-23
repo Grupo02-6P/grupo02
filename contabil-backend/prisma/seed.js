@@ -31,7 +31,16 @@ async function main() {
   console.log(`✅ Usuário criado: ${adminUser.email}`);
   
   // --- 2. CONFIGURAÇÃO DE PERMISSÕES (CASL) ---
-  const resources = ['User', 'Role', 'Partner', 'Account', 'Title', 'typeMovement', 'typeEntry', 'JournalEntry'];
+  const resources = [
+    'User', 
+    'Role', 
+    'Partner', 
+    'Account', 
+    'Title', 
+    'JournalEntry',
+    'typeMovement', 'TypeMovement', // <--- Garante as duas formas
+    'typeEntry',    'TypeEntry'     // <--- Garante as duas formas
+  ];
   
   for (const resourceName of resources) {
     // 1. Cria ou obtém o Resource
