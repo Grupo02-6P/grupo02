@@ -27,6 +27,8 @@ model User {
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+
+  auditLogs AuditLog[]
 }
 
 model Resource {
@@ -44,6 +46,8 @@ model Permission {
   resourceId  String
   resource    Resource         @relation(fields: [resourceId], references: [id])
   roles       RolePermission[]
+
+  @@unique([resourceId, action])
 }
 
 model Role {
@@ -63,6 +67,8 @@ model RolePermission {
   permissionId  String
   role          Role         @relation(fields: [roleId], references: [id])
   permission    Permission   @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
 }
 
 // ----------------------------------------
@@ -266,4 +272,22 @@ enum JournalOrigin {
   ENTRY      // baixa, liquidação
   ADJUSTMENT // ajuste contábil manual
   TRANSFER   // transferência interna
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String   // Ex: LOGIN_FAILED, CREATE_USER
+  entity      String   // Ex: System, User, Partner
+  entityId    String?  // ID do objeto afetado (opcional)
+  oldValues   Json?    // Snapshot antes
+  newValues   Json?    // Snapshot depois
+  userId      String?  // Quem fez (opcional, pois pode ser anónimo)
+  user        User?    @relation(fields: [userId], references: [id])
+  ipAddress   String?  // IP de origem
+  userAgent   String?  // Navegador/Cliente
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

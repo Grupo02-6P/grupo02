@@ -15,6 +15,7 @@ import { TitleModule } from './title/title.module';
 import { EntryModule } from './entry/entry.module';
 import { JournalModule } from './journal/journal.module';
 import { ReportsModule } from './reports/reports.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ReportsModule } from './reports/reports.module';
     EntryModule,
     JournalModule,
     ReportsModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
