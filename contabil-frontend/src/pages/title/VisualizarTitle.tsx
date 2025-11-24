@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X, Receipt, CheckCircle } from 'lucide-react';
+import { Plus, Edit, X, Receipt, CheckCircle, Undo2 } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { titleService } from '../../services/title';
@@ -32,6 +32,10 @@ const VisualizarTitle: React.FC = () => {
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState(false);
   const [payModal, setPayModal] = useState(false);
+  const [reverseModal, setReverseModal] = useState({
+    isOpen: false,
+    justification: '',
+  });
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
     title: '',
@@ -123,7 +127,13 @@ const VisualizarTitle: React.FC = () => {
       enableSorting: true,
       cell: ({ row }) => {
         if (row.original.status === 'PAID' && row.original.paidAt) {
-          return new Date(row.original.paidAt).toLocaleDateString('pt-BR');
+          const paidDate = new Date(row.original.paidAt);
+          return paidDate.toLocaleDateString('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
         }
         return '-';
       },
@@ -153,10 +163,32 @@ const VisualizarTitle: React.FC = () => {
           });
         }
 
+        // Adicionar ação de estorno para títulos pagos há menos de 7 dias
+        if (titlePermissions.canUpdate && row.original.status === 'PAID' && canReverse(row.original.paidAt)) {
+          actions.push({
+            type: 'custom',
+            icon: <Undo2 className="w-5 h-5 text-orange-700" />,
+            title: 'Estornar pagamento',
+            onClick: () => handleReverseClick(row.original.id),
+            className: 'p-2 rounded hover:bg-orange-100 transition-colors',
+          });
+        }
+
         return <ActionsColumn actions={actions} />;
       },
     },
   ];
+
+  // Verificar se o título pode ser estornado (pago há menos de 7 dias)
+  const canReverse = (paidAt: string | null | undefined): boolean => {
+    if (!paidAt) return false;
+    
+    const paidDate = new Date(paidAt);
+    const currentDate = new Date();
+    const diffInDays = Math.floor((currentDate.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return diffInDays <= 7;
+  };
 
   // Buscar títulos (integração com API)
   const fetchTitles = async (params: Record<string, string | number | undefined>) => {
@@ -195,6 +227,11 @@ const VisualizarTitle: React.FC = () => {
     setPayModal(true);
   };
 
+  const handleReverseClick = (id: string) => {
+    setSelectedTitleId(id);
+    setReverseModal({ isOpen: true, justification: '' });
+  };
+
   const handleInactivateConfirm = async () => {
     if (!selectedTitleId) return;
     try {
@@ -225,6 +262,30 @@ const VisualizarTitle: React.FC = () => {
       const errorMessage = err instanceof Error && 'response' in err 
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao dar baixa no título'
         : 'Erro ao dar baixa no título';
+      setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
+    }
+  };
+
+  const handleReverseConfirm = async () => {
+    if (!selectedTitleId || !reverseModal.justification.trim()) {
+      setInfoModal({ isOpen: true, title: 'Erro!', message: 'A justificativa do estorno é obrigatória!', type: 'error' });
+      return;
+    }
+    if (reverseModal.justification.trim().length < 5) {
+      setInfoModal({ isOpen: true, title: 'Erro!', message: 'A justificativa deve ter pelo menos 5 caracteres!', type: 'error' });
+      return;
+    }
+    try {
+      await titleService.reverse(selectedTitleId, reverseModal.justification.trim());
+      setReverseModal({ isOpen: false, justification: '' });
+      setSelectedTitleId(null);
+      setRefreshKey(prev => prev + 1);
+      setInfoModal({ isOpen: true, title: 'Sucesso!', message: 'Estorno do pagamento realizado com sucesso!', type: 'success' });
+    } catch (err: unknown) {
+      setReverseModal({ isOpen: false, justification: '' });
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Erro ao estornar o pagamento'
+        : 'Erro ao estornar o pagamento';
       setInfoModal({ isOpen: true, title: 'Erro!', message: errorMessage, type: 'error' });
     }
   };
@@ -307,6 +368,82 @@ const VisualizarTitle: React.FC = () => {
         cancelText="Cancelar"
         type="info"
       />
+
+      {/* Modal de Estorno */}
+      {reverseModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+            {/* Header do Modal */}
+            <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white p-6 flex items-center justify-between rounded-t-2xl">
+              <div>
+                <h2 className="text-xl font-bold text-white">Estornar Pagamento</h2>
+                <p className="text-orange-100 text-sm mt-1">Esta ação irá reverter o pagamento do título</p>
+              </div>
+              <button
+                onClick={() => {
+                  setReverseModal({ isOpen: false, justification: '' });
+                  setSelectedTitleId(null);
+                }}
+                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div className="p-6">
+              <div className="mb-6">
+                <p className="text-gray-700 mb-4">
+                  <strong>Atenção:</strong> O estorno do pagamento irá alterar o status do título de volta para "Ativo". 
+                  Esta ação não pode ser desfeita e requer uma justificativa.
+                </p>
+                <p className="text-sm text-gray-600">
+                  Esta operação só é permitida para títulos pagos há menos de 7 dias.
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Justificativa do Estorno <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={reverseModal.justification}
+                  onChange={(e) => setReverseModal({ ...reverseModal, justification: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Descreva o motivo do estorno do pagamento..."
+                  rows={4}
+                  required
+                />
+                <p className={`text-xs mt-1 ${
+                  reverseModal.justification.length < 5 ? 'text-red-500' : 'text-gray-500'
+                }`}>
+                  Caracteres: {reverseModal.justification.length}/5 (mínimo)
+                </p>
+              </div>
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-2xl">
+              <button
+                onClick={() => {
+                  setReverseModal({ isOpen: false, justification: '' });
+                  setSelectedTitleId(null);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleReverseConfirm}
+                disabled={!reverseModal.justification.trim() || reverseModal.justification.trim().length < 5}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Confirmar Estorno
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <InfoModal
         isOpen={infoModal.isOpen}
@@ -401,8 +538,9 @@ const VisualizarTitle: React.FC = () => {
                       {detailsModal.title.status === 'PAID' && detailsModal.title.paidAt && (
                         <div>
                           <label className="text-sm font-medium text-gray-600">Data de Pagamento:</label>
-                          <p className="text-gray-900 mt-1 font-medium text-green-700">
-                            {new Date(detailsModal.title.paidAt).toLocaleDateString('pt-BR', {
+                          <p className="mt-1 font-medium text-green-700">
+                            {new Date(detailsModal.title.paidAt).toLocaleString('pt-BR', {
+                              timeZone: 'America/Sao_Paulo',
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
@@ -452,7 +590,7 @@ const VisualizarTitle: React.FC = () => {
               >
                 Fechar
               </button>
-              {titlePermissions.canUpdate && (
+              {titlePermissions.canUpdate && detailsModal.title?.status !== 'PAID' && (
                 <button
                   onClick={() => {
                     setDetailsModal({ isOpen: false, title: null, isLoading: false });

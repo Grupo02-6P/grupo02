@@ -185,7 +185,30 @@ class TitleService {
       });
 
     } catch (error: any) {
-      console.error('❌ Erro ao inativar Título:', error)
+      console.error('❌ Erro ao baixar Título:', error)
+      throw this.handleError(error)
+    }
+  };
+
+  async reverse(id: string, justification: string): Promise<void> {
+    try {
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('Token não encontrado');
+      }
+
+      await api.post(`${this.baseUrl}/${id}/reverse`, 
+        { justification }, // Dados do corpo da requisição
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+    } catch (error: any) {
+      console.error('❌ Erro ao reverter pagamento de Título:', error)
       throw this.handleError(error)
     }
   };

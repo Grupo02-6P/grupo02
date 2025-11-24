@@ -41,21 +41,26 @@ const buildTree = (accounts: AccountWithBalanceResponse[]) => {
       // Primeiro, calcula recursivamente para todos os filhos
       node.children.forEach((child: any) => calculateAccumulatedBalances(child));
       
-      // Em seguida, soma os saldos dos filhos para esta conta pai
-      let totalBalance = 0;
-      let totalDebit = 0;
-      let totalCredit = 0;
+      // Preserva os valores originais da conta pai
+      const originalBalance = node.balance || 0;
+      const originalDebit = node.totalDebit || 0;
+      const originalCredit = node.totalCredit || 0;
+      
+      // Soma os saldos dos filhos
+      let childrenBalance = 0;
+      let childrenDebit = 0;
+      let childrenCredit = 0;
       
       node.children.forEach((child: any) => {
-        totalBalance += child.balance || 0;
-        totalDebit += child.totalDebit || 0;
-        totalCredit += child.totalCredit || 0;
+        childrenBalance += child.balance || 0;
+        childrenDebit += child.totalDebit || 0;
+        childrenCredit += child.totalCredit || 0;
       });
       
-      // Atualiza os valores da conta pai com os totais acumulados
-      node.balance = totalBalance;
-      node.totalDebit = totalDebit;
-      node.totalCredit = totalCredit;
+      // Atualiza os valores da conta pai somando os valores originais + filhos
+      node.balance = originalBalance + childrenBalance;
+      node.totalDebit = originalDebit + childrenDebit;
+      node.totalCredit = originalCredit + childrenCredit;
     }
     // Se não tem filhos, mantém os valores originais da conta
   };
