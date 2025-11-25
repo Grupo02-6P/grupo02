@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: react_app_foods
+    container_name: react_app_contabilize
     env_file:
       - .env
     ports:
