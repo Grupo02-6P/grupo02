@@ -39,7 +39,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     AuditModule,
     ThrottlerModule.forRoot([{
       ttl: 60000, // tempo de vida (em milissegundos)
-      limit: 10,  // limite de requisições
+      limit: 200,  // limite de requisições
     }]),
     PrometheusModule.register({
       path: '/metrics', 
