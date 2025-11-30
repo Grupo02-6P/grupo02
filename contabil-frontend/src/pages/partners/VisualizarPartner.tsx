@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X, Building } from 'lucide-react';
+import { Plus, Building } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { partnerService } from '../../services/partner';
@@ -11,6 +11,11 @@ import { ActionsColumn, useDefaultActions } from '../../components/table/Actions
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
 import { FaHandshake } from 'react-icons/fa';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { DetailsModal } from '../../components/modal/DetailsModal';
+import { DetailSection } from '../../components/details/DetailSection';
+import { DetailField } from '../../components/details/DetailField';
+import { useDetailsModal } from '../../hooks/useDetailsModal';
 
 
 const VisualizarPartner: React.FC = () => {
@@ -41,11 +46,7 @@ const VisualizarPartner: React.FC = () => {
     type: undefined as 'success' | 'error' | undefined,
   });
   const [refreshKey, setRefreshKey] = useState(0);
-  const [detailsModal, setDetailsModal] = useState({
-    isOpen: false,
-    partner: null as PartnerResponse | null,
-    isLoading: false,
-  });
+  const detailsModal = useDetailsModal<PartnerResponse>();
 
   
 
@@ -110,13 +111,13 @@ const VisualizarPartner: React.FC = () => {
 
   // Handlers
   const handleViewDetails = async (id: string) => {
-    setDetailsModal({ isOpen: true, partner: null, isLoading: true });
+    detailsModal.openModal();
 
     try {
       const response = await partnerService.findOne(id);
-      setDetailsModal({ isOpen: true, partner: response, isLoading: false });
+      detailsModal.setData(response);
     } catch (error) {
-      setDetailsModal({ isOpen: false, partner: null, isLoading: false });
+      detailsModal.setError();
       setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do parceiro', type: 'error' });
     }
   };
@@ -163,27 +164,17 @@ const VisualizarPartner: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className='flex mr-4 items-center'>
-              <FaHandshake size={44} className="text-[#0c4c6e] mr-3"/>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Parceiros</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os parceiros do sistema</p>
-              </div>
-            </div>
-            {partnerPermissions.canCreate && (
-              <button
-                onClick={() => navigate('/parceiros/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-              >
-                <Plus size={20} />
-                <span>Novo Parceiro</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<FaHandshake size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Parceiros"
+          description="Gerencie todos os parceiros do sistema"
+          actionButton={{
+            label: 'Novo Parceiro',
+            onClick: () => navigate('/parceiros/cadastrar'),
+            icon: <Plus size={20} />,
+            show: partnerPermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -220,95 +211,47 @@ const VisualizarPartner: React.FC = () => {
         type={infoModal.type}
       />
 
-      {/* Modal de Detalhes do Parceiro */}
-      {detailsModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header do Modal */}
-            <div className="bg-gradient-to-r from-[#0c4c6e] to-[#083f5d] text-white p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {detailsModal.isLoading ? 'Carregando...' : detailsModal.partner?.name || 'Detalhes do Parceiro'}
-                </h2>
-                <p className="text-green-100 text-sm mt-1">Visualize as informações vinculadas ao parceiro</p>
-              </div>
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, partner: null, isLoading: false })}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Conteúdo do Modal */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {detailsModal.isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0c4c6e]"></div>
-                    <p className="text-gray-600">Carregando informações...</p>
-                  </div>
-                </div>
-              ) : detailsModal.partner ? (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                      <Building className="w-5 h-5 mr-2 text-[#0c4c6e]" />
-                      Informações do Parceiro
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Nome:</label>
-                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.partner.name}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">CNPJ:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.partner.cnpj}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Endereço:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.partner.address}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Status:</label>
-                        <div className="mt-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.partner.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {detailsModal.partner.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Erro ao carregar informações do parceiro</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer do Modal */}
-            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, partner: null, isLoading: false })}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors mr-3"
-              >
-                Fechar
-              </button>
-              <button
-                onClick={() => {
-                  setDetailsModal({ isOpen: false, partner: null, isLoading: false });
-                  handleEditClick(detailsModal.partner?.id || '');
-                }}
-                className="px-6 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition-colors flex items-center space-x-2"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Editar</span>
-              </button>
-            </div>
+      <DetailsModal
+        isOpen={detailsModal.isOpen}
+        isLoading={detailsModal.isLoading}
+        title={detailsModal.data?.name || 'Detalhes do Parceiro'}
+        subtitle="Visualize as informações vinculadas ao parceiro"
+        onClose={detailsModal.closeModal}
+        onEdit={() => {
+          detailsModal.closeModal();
+          handleEditClick(detailsModal.data?.id || '');
+        }}
+        showEditButton={!!detailsModal.data}
+      >
+        {detailsModal.data ? (
+          <DetailSection
+            title="Informações do Parceiro"
+            icon={<Building className="w-5 h-5 text-[#0c4c6e]" />}
+          >
+            <DetailField label="Nome" value={<span className="font-medium">{detailsModal.data.name}</span>} />
+            <DetailField label="CNPJ" value={detailsModal.data.cnpj} />
+            <DetailField label="Endereço" value={detailsModal.data.address} />
+            <DetailField
+              label="Status"
+              value={
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    detailsModal.data.status === 'ACTIVE'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {detailsModal.data.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                </span>
+              }
+            />
+          </DetailSection>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Erro ao carregar informações do parceiro</p>
           </div>
-        </div>
-      )}
+        )}
+      </DetailsModal>
     </div>
   );
 };

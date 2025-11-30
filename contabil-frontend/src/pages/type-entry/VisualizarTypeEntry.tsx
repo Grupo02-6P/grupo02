@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { typeEntryService } from '../../services/typeEntry';
@@ -11,6 +11,11 @@ import { ActionsColumn, useDefaultActions } from '../../components/table/Actions
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { PageHeader } from '../../components/layout/PageHeader';
+import { DetailsModal } from '../../components/modal/DetailsModal';
+import { DetailSection } from '../../components/details/DetailSection';
+import { DetailField } from '../../components/details/DetailField';
+import { useDetailsModal } from '../../hooks/useDetailsModal';
 
 
 const VisualizarTypeEntry: React.FC = () => {
@@ -40,11 +45,7 @@ const VisualizarTypeEntry: React.FC = () => {
     type: undefined as 'success' | 'error' | undefined,
   });
   const [refreshKey, setRefreshKey] = useState(0);
-  const [detailsModal, setDetailsModal] = useState({
-    isOpen: false,
-    typeEntry: null as TypeEntryResponse | null,
-    isLoading: false,
-  });
+  const detailsModal = useDetailsModal<TypeEntryResponse>();
 
   // Colunas da tabela
   const columns: ColumnDef<TypeEntryResponse>[] = [
@@ -111,13 +112,13 @@ const VisualizarTypeEntry: React.FC = () => {
 
   // Handlers
   const handleViewDetails = async (id: string) => {
-    setDetailsModal({ isOpen: true, typeEntry: null, isLoading: true });
+    detailsModal.openModal();
 
     try {
       const response = await typeEntryService.findOne(id);
-      setDetailsModal({ isOpen: true, typeEntry: response, isLoading: false });
+      detailsModal.setData(response);
     } catch (error) {
-      setDetailsModal({ isOpen: false, typeEntry: null, isLoading: false });
+      detailsModal.setError();
       setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do tipo de entrada', type: 'error' });
     }
   };
@@ -164,27 +165,17 @@ const VisualizarTypeEntry: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className='flex mr-4 items-center'>
-              <MdOutlineAccountBalanceWallet size={44} className="text-[#0c4c6e] mr-3"/>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Tipos de Entrada</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os tipos de entrada contábil</p>
-              </div>
-            </div>
-            {typeEntryPermissions.canCreate && (
-              <button
-                onClick={() => navigate('/tipo-entrada/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-              >
-                <Plus size={20} />
-                <span>Novo Tipo de Entrada</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<MdOutlineAccountBalanceWallet size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Tipos de Entrada"
+          description="Gerencie todos os tipos de entrada contábil"
+          actionButton={{
+            label: 'Novo Tipo de Entrada',
+            onClick: () => navigate('/tipo-entrada/cadastrar'),
+            icon: <Plus size={20} />,
+            show: typeEntryPermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -221,117 +212,66 @@ const VisualizarTypeEntry: React.FC = () => {
         type={infoModal.type}
       />
 
-      {/* Modal de Detalhes do Tipo de Entrada */}
-      {detailsModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header do Modal */}
-            <div className="bg-gradient-to-r from-[#0c4c6e] to-[#083f5d] text-white p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {detailsModal.isLoading ? 'Carregando...' : detailsModal.typeEntry?.name || 'Detalhes do Tipo de Entrada'}
-                </h2>
-                <p className="text-green-100 text-sm mt-1">Visualize as informações do tipo de entrada</p>
-              </div>
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, typeEntry: null, isLoading: false })}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      <DetailsModal
+        isOpen={detailsModal.isOpen}
+        isLoading={detailsModal.isLoading}
+        title={detailsModal.data?.name || 'Detalhes do Tipo de Entrada'}
+        subtitle="Visualize as informações do tipo de entrada"
+        onClose={detailsModal.closeModal}
+        onEdit={() => {
+          detailsModal.closeModal();
+          handleEditClick(detailsModal.data?.id || '');
+        }}
+        showEditButton={!!detailsModal.data}
+      >
+        {detailsModal.data ? (
+          <>
+            <DetailSection
+              title="Informações do Tipo de Entrada"
+              icon={<MdOutlineAccountBalanceWallet className="w-5 h-5 text-[#0c4c6e]" />}
+            >
+              <DetailField label="Nome" value={<span className="font-medium">{detailsModal.data.name}</span>} />
+              <DetailField label="Descrição" value={detailsModal.data.description || 'Sem descrição'} />
+              <DetailField
+                label="Status"
+                value={
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      detailsModal.data.status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {detailsModal.data.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                  </span>
+                }
+              />
+            </DetailSection>
 
-            {/* Conteúdo do Modal */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {detailsModal.isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0c4c6e]"></div>
-                    <p className="text-gray-600">Carregando informações...</p>
-                  </div>
-                </div>
-              ) : detailsModal.typeEntry ? (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                      <MdOutlineAccountBalanceWallet className="w-5 h-5 mr-2 text-[#0c4c6e]" />
-                      Informações do Tipo de Entrada
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Nome:</label>
-                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.typeEntry.name}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Descrição:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.typeEntry.description || 'Sem descrição'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Status:</label>
-                        <div className="mt-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.typeEntry.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {detailsModal.typeEntry.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <DetailSection title="Conta Associada" bgColor="bg-blue-50" columns={1}>
+              <DetailField
+                label="Conta de Compensação"
+                value={`${detailsModal.data.accountCleared?.name} (${detailsModal.data.accountCleared?.code})`}
+              />
+            </DetailSection>
 
-                  <div className="bg-blue-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Conta Associada</h3>
-                    <div className="grid grid-cols-1 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Conta de Compensação:</label>
-                        <p className="text-gray-900 mt-1 font-medium">
-                          {detailsModal.typeEntry.accountCleared?.name} ({detailsModal.typeEntry.accountCleared?.code})
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações Adicionais</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Criado em:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.typeEntry.createdAt).toLocaleString('pt-BR')}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Atualizado em:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.typeEntry.updatedAt).toLocaleString('pt-BR')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Erro ao carregar informações do tipo de entrada</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer do Modal */}
-            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, typeEntry: null, isLoading: false })}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors mr-3"
-              >
-                Fechar
-              </button>
-              <button
-                onClick={() => {
-                  setDetailsModal({ isOpen: false, typeEntry: null, isLoading: false });
-                  handleEditClick(detailsModal.typeEntry?.id || '');
-                }}
-                className="px-6 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition-colors flex items-center space-x-2"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Editar</span>
-              </button>
-            </div>
+            <DetailSection title="Informações Adicionais">
+              <DetailField
+                label="Criado em"
+                value={new Date(detailsModal.data.createdAt).toLocaleString('pt-BR')}
+              />
+              <DetailField
+                label="Atualizado em"
+                value={new Date(detailsModal.data.updatedAt).toLocaleString('pt-BR')}
+              />
+            </DetailSection>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Erro ao carregar informações do tipo de entrada</p>
           </div>
-        </div>
-      )}
+        )}
+      </DetailsModal>
     </div>
   );
 };
