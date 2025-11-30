@@ -342,7 +342,7 @@ const Navbar: React.FC = () => {
       
       <aside className={`${
         isCollapsed ? 'w-16' : 'w-64'
-      } h-screen bg-gradient-to-b from-gray-400 to-[#0c4c6e] text-white shadow-xl fixed left-0 top-0 z-50 transition-all duration-300 ${
+      } h-screen bg-gradient-to-b from-[#A1C1EA] to-[#0c4c6e] text-white shadow-xl fixed left-0 top-0 z-50 transition-all duration-300 ${
         // Em desktop, sempre visível. Em mobile, esconde quando colapsado
         isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
       }`}>
