@@ -9,7 +9,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CaslAbilityService } from 'src/casl/casl-ability/casl-ability.service';
 import { FilterTypeEntryDto } from './dto/filter-type-entry.dto';
 import { Status } from '@prisma/client';
-import { accessibleBy } from '@casl/prisma';
 import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 
 @Injectable()
@@ -76,7 +75,6 @@ export class TypeEntryService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').TypeEntry],
     };
 
     // Filtro de busca geral
