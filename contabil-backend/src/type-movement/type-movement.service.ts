@@ -10,7 +10,6 @@ import { FilterTypeMovementDto } from './dto/filter-type-movement.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CaslAbilityService } from 'src/casl/casl-ability/casl-ability.service';
 import { Status } from '@prisma/client';
-import { accessibleBy } from '@casl/prisma';
 import { PaginatedResponse } from 'src/common/interfaces/pagination.interface';
 
 @Injectable()
@@ -94,7 +93,6 @@ export class TypeMovementService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').typeMovement],
     };
 
     // Filtro de busca geral
@@ -215,8 +213,7 @@ export class TypeMovementService {
 
     return this.prisma.typeMovement.findUnique({
       where: {
-        id,
-        AND: [accessibleBy(ability, 'read').typeMovement],
+        id
       },
       select: {
         id: true,
@@ -264,8 +261,7 @@ export class TypeMovementService {
 
     const typeMovement = await this.prisma.typeMovement.findUnique({
       where: {
-        id,
-        AND: [accessibleBy(ability, 'update').typeMovement],
+        id
       },
       select: {
         id: true,
@@ -321,8 +317,7 @@ export class TypeMovementService {
     // Verificar se o tipo de movimento existe e se o usuário tem acesso
     const typeMovement = await this.prisma.typeMovement.findUnique({
       where: {
-        id,
-        AND: [accessibleBy(ability, 'delete').typeMovement],
+        id
       },
     });
 
