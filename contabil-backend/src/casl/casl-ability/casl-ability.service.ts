@@ -25,6 +25,15 @@ const resourceMap = {
   Account: 'Account',
   TypeMovement: 'TypeMovement',
   TypeEntry: 'TypeEntry',
+  user: 'User',
+  role: 'Role',
+  resource: 'Resource',
+  permission: 'Permission',
+  partner: 'Partner',
+  account: 'Account',
+  typeMovement: 'TypeMovement',
+  typeEntry: 'TypeEntry',
+  title: 'Title',
   all: 'all',
 } as const;
 
