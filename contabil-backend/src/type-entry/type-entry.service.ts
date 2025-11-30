@@ -76,7 +76,7 @@ export class TypeEntryService {
 
     // Construir filtros dinâmicos
     const where: any = {
-      AND: [accessibleBy(ability, 'read').typeEntry],
+      AND: [accessibleBy(ability, 'read').TypeEntry],
     };
 
     // Filtro de busca geral
