@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
+import { FaHandshake } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import type { CreatePartnerDto } from '../../types/Partner';
 import { partnerService } from '../../services/partner';
@@ -61,7 +62,7 @@ const CadastrarPartner: React.FC = () => {
       weight = weight === 9 ? 2 : weight + 1;
     }
     let remainder = sum % 11;
-    let digit1 = remainder < 2 ? 0 : 11 - remainder;
+    const digit1 = remainder < 2 ? 0 : 11 - remainder;
     if (parseInt(numbers[12]) !== digit1) return false;
 
     sum = 0;
@@ -71,7 +72,7 @@ const CadastrarPartner: React.FC = () => {
       weight = weight === 9 ? 2 : weight + 1;
     }
     remainder = sum % 11;
-    let digit2 = remainder < 2 ? 0 : 11 - remainder;
+    const digit2 = remainder < 2 ? 0 : 11 - remainder;
     return parseInt(numbers[13]) === digit2;
   };
 
@@ -152,6 +153,7 @@ const CadastrarPartner: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
+              <FaHandshake size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Novo Parceiro</h1>
                 <p className="text-white mt-1">Cadastre um novo parceiro no sistema</p>
@@ -220,6 +222,13 @@ const CadastrarPartner: React.FC = () => {
             </div>
 
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => navigate('/parceiros/visualizar')}
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
+              >
+                Cancelar
+              </button>
               <button
                 type="submit"
                 disabled={loading}

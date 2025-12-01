@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { MdAccountBalanceWallet } from 'react-icons/md';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { typeEntryService } from '../../services/typeEntry';
@@ -10,7 +11,6 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import { ActionsColumn, useDefaultActions } from '../../components/table/ActionsColumn';
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
-import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DetailsModal } from '../../components/modal/DetailsModal';
 import { DetailSection } from '../../components/details/DetailSection';
@@ -166,7 +166,7 @@ const VisualizarTypeEntry: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
-          icon={<MdOutlineAccountBalanceWallet size={44} className="text-[#0c4c6e] mr-3" />}
+          icon={<MdAccountBalanceWallet size={44} className="text-[#0c4c6e] mr-3" />}
           title="Tipos de Entrada"
           description="Gerencie todos os tipos de entrada contábil"
           actionButton={{
@@ -228,7 +228,7 @@ const VisualizarTypeEntry: React.FC = () => {
           <>
             <DetailSection
               title="Informações do Tipo de Entrada"
-              icon={<MdOutlineAccountBalanceWallet className="w-5 h-5 text-[#0c4c6e]" />}
+              icon={<MdAccountBalanceWallet className="w-5 h-5 text-[#0c4c6e]" />}
             >
               <DetailField label="Nome" value={<span className="font-medium">{detailsModal.data.name}</span>} />
               <DetailField label="Descrição" value={detailsModal.data.description || 'Sem descrição'} />

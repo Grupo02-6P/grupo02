@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Shield, Settings, Users, Save, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { FaUserShield } from 'react-icons/fa6';
 import { LoadingSpinner } from '../../../components/loading/LoadingSpinner';
 import { InfoModal } from '../../../components/modal/InfoModal';
 import { roleService } from '../../../services/role';
 import { resourceService } from '../../../services/resource';
 import type { UpdateRoleDto, permissions, RoleResponse } from '../../../types/Role';
 import type { ResourceResponse } from '../../../types/Resource';
+import { Plus, Save, Settings, Users, Trash2 } from 'lucide-react';
 
 // Constantes para as ações disponíveis
 const ACTIONS = [
@@ -393,21 +394,12 @@ const EditarRole: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-[#0c4c6e] px-6 py-4">
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
-              <Shield className="w-6 h-6 text-white" />
+          <div className="bg-[#0c4c6e] px-8 py-6">
+            <div className="flex items-center space-x-4">
+                <FaUserShield size={44} className="text-white" />
               <div>
-                <h1 className="text-2xl font-bold text-white">Editar Função</h1>
-                <p className="text-white text-sm opacity-90">
-                  Edite a função "{originalRole?.name}" e suas respectivas permissões
-                </p>
+                <h1 className="text-3xl font-bold text-white">Editar Função</h1>
+                <p className="text-white mt-1">Edite a função "{originalRole?.name}" e suas respectivas permissões</p>
               </div>
             </div>
           </div>
@@ -480,7 +472,7 @@ const EditarRole: React.FC = () => {
               <div className="space-y-3">
                 {resourcePermissions.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <Shield className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                    <FaUserShield className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm">Nenhuma permissão definida</p>
                     <p className="text-xs text-gray-400">Clique em "Adicionar Permissão" para começar</p>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Save, X, Eye, EyeOff } from 'lucide-react';
+import { FaUsers } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateUserDto, UserResponse } from '../../types/User';
 import { userService } from '../../services/users';
@@ -208,13 +209,7 @@ const EditarUsers: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
+              <FaUsers size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Usuário</h1>
                 <p className="text-white mt-1">

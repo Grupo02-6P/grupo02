@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, ArrowLeftRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { typeMovementService } from '../../services/typeMovement';
@@ -15,6 +15,7 @@ import { DetailsModal } from '../../components/modal/DetailsModal';
 import { DetailSection } from '../../components/details/DetailSection';
 import { DetailField } from '../../components/details/DetailField';
 import { useDetailsModal } from '../../hooks/useDetailsModal';
+import { FaExchangeAlt } from 'react-icons/fa';
 
 const VisualizarTypeMovement: React.FC = () => {
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
@@ -173,7 +174,7 @@ const VisualizarTypeMovement: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
-          icon={<ArrowLeftRight size={44} className="text-[#0c4c6e] mr-3" />}
+          icon={<FaExchangeAlt size={44} className="text-[#0c4c6e] mr-3" />}
           title="Tipos de Movimento"
           description="Gerencie todos os tipos de movimento contábil"
           actionButton={{
@@ -235,7 +236,7 @@ const VisualizarTypeMovement: React.FC = () => {
           <>
             <DetailSection
               title="Informações do Tipo de Movimento"
-              icon={<ArrowLeftRight className="w-5 h-5 text-[#0c4c6e]" />}
+              icon={<FaExchangeAlt className="w-5 h-5 text-[#0c4c6e]" />}
             >
               <DetailField label="Nome" value={<span className="font-medium">{detailsModal.data.name}</span>} />
               <DetailField label="Descrição" value={detailsModal.data.description || 'Sem descrição'} />

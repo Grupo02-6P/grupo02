@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Save, X, ArrowLeft } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateTypeMovementDto } from '../../types/TypeMovement';
 import { typeMovementService } from '../../services/typeMovement';
@@ -9,6 +9,7 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import type { ConfirmModalProps } from '../../components/modal/InfoModal';
 import Input from '../../components/input/Input';
 import { LoadingSpinner } from '../../components/loading/LoadingSpinner';
+import { FaExchangeAlt } from 'react-icons/fa';
 
 const EditarTypeMovement: React.FC = () => {
   const navigate = useNavigate();
@@ -184,13 +185,7 @@ const EditarTypeMovement: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
+                <FaExchangeAlt size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Tipo de Movimento</h1>
                 <p className="text-white mt-1">Atualize as informações do tipo de movimento contábil</p>

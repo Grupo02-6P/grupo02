@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronRight, ChevronDown, Building2 } from 'lucide-react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
+import { MdAccountBalance } from 'react-icons/md';
+import { FaCog } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { accountService } from '../../services/account';
 import type { AccountWithBalanceResponse } from '../../types/Account';
 import { InfoModal } from '../../components/modal/InfoModal';
@@ -76,6 +79,7 @@ const buildTree = (accounts: AccountWithBalanceResponse[]) => {
 };
 
 const VisualizarAccounts: React.FC = () => {
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState<AccountWithBalanceResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -231,10 +235,10 @@ const VisualizarAccounts: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className='flex mr-4 items-center'>
-              <Building2 size={44} className="text-[#0c4c6e] mr-3"/>
+              <MdAccountBalance size={44} className="text-[#0c4c6e] mr-3"/>
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Visualizar Contas Contábeis</h1>
                 <p className="text-gray-600 mt-1">Visualize o plano de contas com saldos e movimentações</p>
@@ -254,9 +258,16 @@ const VisualizarAccounts: React.FC = () => {
               </button>
               <button
                 onClick={() => setExpanded({})}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
               >
                 Recolher Todos
+              </button>
+              <button
+                onClick={() => navigate('/contas/gerenciar')}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-lg"
+              >
+                <FaCog size={16} />
+                <span>Gerenciar Contas</span>
               </button>
             </div>
           </div>
@@ -297,7 +308,7 @@ const VisualizarAccounts: React.FC = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <MdAccountBalance className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600 text-lg">Nenhuma conta contábil encontrada</p>
                 <p className="text-gray-500 mt-1">Cadastre contas contábeis para começar</p>
               </div>
@@ -329,7 +340,7 @@ const VisualizarAccounts: React.FC = () => {
           <>
             <DetailSection
               title="Informações da Conta"
-              icon={<Building2 className="w-5 h-5 text-[#0c4c6e]" />}
+              icon={<MdAccountBalance className="w-5 h-5 text-[#0c4c6e]" />}
             >
               <DetailField 
                 label="Código" 

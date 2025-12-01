@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { FaArrowLeft } from 'react-icons/fa6';
+import { useNavigate } from 'react-router-dom';
 import { accountService } from '../../services/account';
 import type { AccountResponse, CreateAccountDto, UpdateAccountDto } from '../../types/Account';
 import Input from '../../components/input/Input';
@@ -44,6 +46,7 @@ const buildTree = (accounts: AccountResponse[]) => {
 };
 
 const GerenciarAccounts: React.FC = () => {
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState<AccountResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -321,15 +324,23 @@ const GerenciarAccounts: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="bg-[#0c4c6e] rounded-full p-3 text-white">
-              <MdAccountBalance />
+        {/* Header */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className='flex mr-4 items-center'>
+              <MdAccountBalance size={44} className="text-[#0c4c6e] mr-3"/>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">Gerenciar Contas</h1>
+                <p className="text-gray-600 mt-1">Visualize a hierarquia de contas e cadastre novas contas contábeis</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Gerenciar Contas</h1>
-              <p className="text-gray-600">Visualize a hierarquia de contas e cadastre novas contas contábeis</p>
-            </div>
+            <button
+              onClick={() => navigate('/contas/visualizar')}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400 transition text-sm font-medium"
+            >
+              <FaArrowLeft size={16} />
+              <span>Voltar</span>
+            </button>
           </div>
         </div>
 
@@ -345,7 +356,7 @@ const GerenciarAccounts: React.FC = () => {
                 {tree.map(node => renderNode(node))}
               </div>
             )}
-          </div>
+                </div>
 
           {/* RIGHT: Formulário */}
           <div className="col-span-6 bg-white rounded-2xl shadow p-6">
@@ -381,8 +392,8 @@ const GerenciarAccounts: React.FC = () => {
                     <option value="true">Sim</option>
                     <option value="false">Não</option>
                   </select>
-                </div>
-              </div>
+            </div>
+          </div>
 
               <div>
                 <label className="text-sm font-medium text-gray-700">Conta Pai (opcional)</label>

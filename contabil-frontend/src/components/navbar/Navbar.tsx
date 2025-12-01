@@ -3,18 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { usePermissions } from '../../context/PermissionContext';
-import { 
-  LogOut,
-  Menu,
-  X,
-  ChevronRight,
-  ArrowLeftRight,
-  Receipt,
-  Shield
-} from 'lucide-react';
-import { FaUsers, FaHandshake } from "react-icons/fa";
-import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
-import { TbReportAnalytics } from "react-icons/tb";
+import { LogOut, Menu, X } from 'lucide-react';
+import { FaUsers, FaHandshake, FaFileInvoiceDollar, FaUserShield, FaChevronRight } from "react-icons/fa6";
+import { FaExchangeAlt } from 'react-icons/fa';
+import { MdDashboard, MdAccountBalance, MdAccountBalanceWallet} from "react-icons/md";
+import { BiSolidReport } from "react-icons/bi";
 
 interface NavigationSubItem {
   path?: string;
@@ -54,7 +47,7 @@ const Navbar: React.FC = () => {
     { 
       path: '/titulo/visualizar',
       label: 'Títulos', 
-      icon: <Receipt size={20} />,
+      icon: <FaFileInvoiceDollar size={20} />,
       permission: { resource: 'Title', action: 'read' }
     },
     { 
@@ -72,19 +65,19 @@ const Navbar: React.FC = () => {
     { 
       path: '/tipo-movimento/visualizar',
       label: 'Tipos de Movimento', 
-      icon: <ArrowLeftRight size={20} />,
+      icon: <FaExchangeAlt size={20} />,
       permission: { resource: 'TypeMovement', action: 'read' }
     },
     { 
       path: '/tipo-entrada/visualizar',
       label: 'Tipos de Entrada', 
-      icon: <MdOutlineAccountBalanceWallet size={20} />,
+      icon: <MdAccountBalanceWallet size={20} />,
       permission: { resource: 'TypeEntry', action: 'read' }
     },    
     { 
       path: '/relatorios',
       label: 'Relatórios', 
-      icon: <TbReportAnalytics size={20} />,
+      icon: <BiSolidReport size={20} />,
       permission: { resource: 'Report', action: 'read' }
     },
     { 
@@ -96,7 +89,7 @@ const Navbar: React.FC = () => {
     { 
       path: '/usuarios/permissoes/visualizar',
       label: 'Permissões', 
-      icon: <Shield size={20} />,
+      icon: <FaUserShield size={20} />,
       permission: { resource: 'Role', action: 'read' }
     },
   ], []);
@@ -232,7 +225,7 @@ const Navbar: React.FC = () => {
                     <span className={`transition-transform duration-200 ${
                       isItemExpanded(`${subItem.label}-${level}`) ? 'rotate-90' : ''
                     }`}>
-                      <ChevronRight size={chevronSize} />
+                      <FaChevronRight size={chevronSize} />
                     </span>
                   )}
                 </button>
@@ -359,7 +352,7 @@ const Navbar: React.FC = () => {
                       <span className={`transition-transform duration-200 ${
                         isItemExpanded(item.label) ? 'rotate-90' : ''
                       }`}>
-                        <ChevronRight size={16} />
+                        <FaChevronRight size={16} />
                       </span>
                     )}
                   </button>

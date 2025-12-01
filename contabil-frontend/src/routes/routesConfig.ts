@@ -20,7 +20,7 @@ import EditarTypeMovement from '../pages/type-movement/EditarTypeMovement';
 import CadastrarTypeEntry from '../pages/type-entry/CadastrarTypeEntry';
 import VisualizarTypeEntry from '../pages/type-entry/VisualizarTypeEntry';
 import EditarTypeEntry from '../pages/type-entry/EditarTypeEntry';
-import ReportsPage from '../pages/reports/page';
+import ReportsPage from '../pages/reports/Reports';
 import VisualizarTitle from '../pages/title/VisualizarTitle';
 import CadastrarTitle from '../pages/title/CadastrarTitle';
 import EditarTitle from '../pages/title/EditarTitle';

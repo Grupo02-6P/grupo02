@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Eye, EyeOff } from 'lucide-react';
+import { FaUsers } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import type { CreateUserDto } from '../../types/User';
 import { userService } from '../../services/users';
@@ -138,6 +139,7 @@ const CadastrarUsers: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
+              <FaUsers size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Novo Usuário</h1>
                 <p className="text-white mt-1">Cadastre um novo usuário no sistema</p>
@@ -248,7 +250,13 @@ const CadastrarUsers: React.FC = () => {
 
             {/* Botões de ação */}
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
-              
+              <button
+                type="button"
+                onClick={() => navigate('/usuarios/visualizar')}
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
+              >
+                Cancelar
+              </button>
               <button
                 type="submit"
                 disabled={loading}

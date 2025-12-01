@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Receipt, CheckCircle, Undo2, X } from 'lucide-react';
+import { Plus, CheckCircle, Undo2, X } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { titleService } from '../../services/title';
@@ -15,6 +15,7 @@ import { DetailsModal } from '../../components/modal/DetailsModal';
 import { DetailSection } from '../../components/details/DetailSection';
 import { DetailField } from '../../components/details/DetailField';
 import { useDetailsModal } from '../../hooks/useDetailsModal';
+import { FaFileInvoiceDollar } from 'react-icons/fa6';
 
 const VisualizarTitle: React.FC = () => {
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
@@ -312,7 +313,7 @@ const VisualizarTitle: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
-          icon={<Receipt size={44} className="text-[#0c4c6e] mr-3" />}
+          icon={<FaFileInvoiceDollar size={44} className="text-[#0c4c6e] mr-3" />}
           title="Lançamentos de Título"
           description="Gerencie todos os lançamentos de título do sistema"
           actionButton={{
@@ -460,7 +461,7 @@ const VisualizarTitle: React.FC = () => {
         {detailsModal.data ? (
           <DetailSection
             title="Informações do Título"
-            icon={<Receipt className="w-5 h-5 text-[#0c4c6e]" />}
+            icon={<FaFileInvoiceDollar className="w-5 h-5 text-[#0c4c6e]" />}
           >
             <DetailField label="Código" value={<span className="font-medium">{detailsModal.data.code}</span>} />
             <DetailField label="Data" value={new Date(detailsModal.data.date).toLocaleDateString('pt-BR')} />

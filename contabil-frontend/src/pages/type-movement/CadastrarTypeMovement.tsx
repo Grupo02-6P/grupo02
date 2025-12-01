@@ -9,6 +9,7 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import type { ConfirmModalProps } from '../../components/modal/InfoModal';
 import Input from '../../components/input/Input';
 import { LoadingSpinner } from '../../components/loading/LoadingSpinner';
+import { FaExchangeAlt } from 'react-icons/fa';
 
 const CadastrarTypeMovement: React.FC = () => {
   const navigate = useNavigate();
@@ -96,6 +97,7 @@ const CadastrarTypeMovement: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
+              <FaExchangeAlt size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Novo Tipo de Movimento</h1>
                 <p className="text-white mt-1">Cadastre um novo tipo de movimento contábil</p>
@@ -168,7 +170,14 @@ const CadastrarTypeMovement: React.FC = () => {
             </div>
 
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
-              <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg">
+              <button
+                type="button"
+                onClick={() => navigate('/tipo-movimento/visualizar')}
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
+              >
+                Cancelar
+              </button>
+              <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg shadow-lg">
                 <Save size={20} />
                 <span>{loading ? 'Salvando...' : 'Salvar Tipo de Movimento'}</span>
               </button>

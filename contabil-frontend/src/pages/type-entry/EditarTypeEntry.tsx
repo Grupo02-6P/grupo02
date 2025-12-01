@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Save, X, ArrowLeft } from 'lucide-react';
+import { Save, X } from 'lucide-react';
+import { MdAccountBalanceWallet } from 'react-icons/md';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateTypeEntryDto } from '../../types/TypeEntry';
 import { typeEntryService } from '../../services/typeEntry';
@@ -176,13 +177,7 @@ const EditarTypeEntry: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
+              <MdAccountBalanceWallet size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Tipo de Entrada</h1>
                 <p className="text-white mt-1">Atualize as informações do tipo de entrada contábil</p>

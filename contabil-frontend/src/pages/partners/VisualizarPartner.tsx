@@ -10,7 +10,7 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import { ActionsColumn, useDefaultActions } from '../../components/table/ActionsColumn';
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
-import { FaHandshake } from 'react-icons/fa';
+import { FaHandshake } from 'react-icons/fa6';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { DetailsModal } from '../../components/modal/DetailsModal';
 import { DetailSection } from '../../components/details/DetailSection';

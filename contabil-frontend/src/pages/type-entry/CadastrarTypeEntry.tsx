@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
+import { MdAccountBalanceWallet } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import type { CreateTypeEntryDto } from '../../types/TypeEntry';
 import { typeEntryService } from '../../services/typeEntry';
@@ -124,6 +125,7 @@ const CadastrarTypeEntry: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
+              <MdAccountBalanceWallet size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Novo Tipo de Entrada</h1>
                 <p className="text-white mt-1">Cadastre um novo tipo de entrada contábil</p>
@@ -200,9 +202,16 @@ const CadastrarTypeEntry: React.FC = () => {
             </div>
 
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
-              <button 
-                type="submit" 
-                disabled={loading} 
+              <button
+                type="button"
+                onClick={() => navigate('/tipo-entrada/visualizar')}
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
                 className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg shadow-lg"
               >
                 <Save size={20} />

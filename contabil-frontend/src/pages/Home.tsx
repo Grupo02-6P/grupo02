@@ -1,11 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowRight, FaUsers, FaHandshake } from "react-icons/fa";
+import { FaArrowRight, FaUsers, FaHandshake, FaFileInvoiceDollar } from "react-icons/fa6";
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
-import { ArrowLeftRight, Receipt } from 'lucide-react';
-import { MdOutlineAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
-import { TbReportAnalytics } from "react-icons/tb";
+import { FaExchangeAlt } from 'react-icons/fa';
+import { MdAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
+import { BiSolidReport } from "react-icons/bi";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
     {
       title: 'Visualizar Tipos de Movimento',
       description: 'Gerenciar tipos de movimento',
-      icon: <ArrowLeftRight size={24} />,
+      icon: <FaExchangeAlt size={24} />,
       href: '/tipo-movimento/visualizar',
       borderColor: 'border-purple-400',
       bgColor: 'bg-purple-50',
@@ -56,7 +56,7 @@ const Home: React.FC = () => {
     {
       title: 'Visualizar Tipos de Entrada',
       description: 'Gerenciar tipos de entrada',
-      icon: <MdOutlineAccountBalanceWallet size={24} />,
+      icon: <MdAccountBalanceWallet size={24} />,
       href: '/tipo-entrada/visualizar',
       borderColor: 'border-blue-400',
       bgColor: 'bg-blue-50',
@@ -66,7 +66,7 @@ const Home: React.FC = () => {
     {
       title: 'Gerar Relatórios',
       description: 'Gere relatórios gerenciais',
-      icon: <TbReportAnalytics size={24} />,
+      icon: <BiSolidReport size={24} />,
       href: '/relatorios',
       borderColor: 'border-yellow-400',
       bgColor: 'bg-yellow-50',
@@ -76,7 +76,7 @@ const Home: React.FC = () => {
     {
       title: 'Visualizar Lançamentos de Título',
       description: 'Gerenciar lançamentos de título',
-      icon: <Receipt size={24} />,
+      icon: <FaFileInvoiceDollar size={24} />,
       href: '/titulo/visualizar',
       borderColor: 'border-orange-400',
       bgColor: 'bg-orange-50',

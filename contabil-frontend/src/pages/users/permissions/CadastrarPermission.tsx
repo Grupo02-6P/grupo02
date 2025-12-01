@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, Plus, Trash2, Shield, Settings, Users } from 'lucide-react';
+import { Save, Plus, Trash2, Settings, Users } from 'lucide-react';
 import { roleService } from '../../../services/role';
 import { resourceService } from '../../../services/resource';
 import type { CreateRoleDto, permissions } from '../../../types/Role';
 import type { ResourceResponse } from '../../../types/Resource';
 import { LoadingSpinner } from '../../../components/loading/LoadingSpinner';
 import { InfoModal } from '../../../components/modal/InfoModal';
+import { FaUserShield } from 'react-icons/fa6';
 
 const ACTIONS = [
   { value: 'manage', label: 'Gerenciar (Todas as ações)', color: 'bg-purple-500' },
@@ -314,12 +315,12 @@ const CadastrarRole: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-[#0c4c6e] px-6 py-4">
-            <div className="flex items-center space-x-3">
-              <Shield className="w-6 h-6 text-white" />
+          <div className="bg-[#0c4c6e] px-8 py-4">
+            <div className="flex items-center space-x-4">
+              <FaUserShield size={44} className="text-white" />
               <div>
-                <h1 className="text-2xl font-bold text-white">Cadastrar Função</h1>
-                <p className="text-white text-sm opacity-90">Crie uma nova função com suas respectivas permissões</p>
+                <h1 className="text-3xl font-bold text-white">Cadastrar Função</h1>
+                <p className="text-white mt-1">Crie uma nova função com suas respectivas permissões</p>
               </div>
             </div>
           </div>
@@ -391,7 +392,7 @@ const CadastrarRole: React.FC = () => {
               <div className="space-y-3">
                 {resourcePermissions.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <Shield className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                    <FaUserShield className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm">Nenhuma permissão definida</p>
                     <p className="text-xs text-gray-400">Clique em "Adicionar Permissão" para começar</p>
                   </div>
@@ -539,7 +540,14 @@ const CadastrarRole: React.FC = () => {
             </div>
 
             {/* Botões de Ação */}
-            <div className="flex justify-end pt-4 border-t border-gray-200">
+            <div className="flex justify-between pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => window.location.href = '/usuarios/visualizar'}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                <span>Cancelar</span>
+              </button>
               <button
                 type="submit"
                 className="flex items-center space-x-2 px-4 py-2 bg-[#0c4c6e] text-white rounded-md hover:bg-[#083f5d] transition-colors disabled:opacity-50"

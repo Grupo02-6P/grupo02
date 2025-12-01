@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Save, X, ArrowLeft } from 'lucide-react';
+import { Save, X } from 'lucide-react';
+import { FaHandshake } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdatePartnerDto } from '../../types/Partner';
 import { partnerService } from '../../services/partner';
@@ -107,7 +108,7 @@ const EditarPartner: React.FC = () => {
       weight = weight === 9 ? 2 : weight + 1;
     }
     let remainder = sum % 11;
-    let digit1 = remainder < 2 ? 0 : 11 - remainder;
+    const digit1 = remainder < 2 ? 0 : 11 - remainder;
     if (parseInt(numbers[12]) !== digit1) return false;
 
     sum = 0;
@@ -117,7 +118,7 @@ const EditarPartner: React.FC = () => {
       weight = weight === 9 ? 2 : weight + 1;
     }
     remainder = sum % 11;
-    let digit2 = remainder < 2 ? 0 : 11 - remainder;
+    const digit2 = remainder < 2 ? 0 : 11 - remainder;
     return parseInt(numbers[13]) === digit2;
   };
 
@@ -214,13 +215,7 @@ const EditarPartner: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
+              <FaHandshake size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Parceiro</h1>
                 <p className="text-white mt-1">Atualize as informações do parceiro</p>

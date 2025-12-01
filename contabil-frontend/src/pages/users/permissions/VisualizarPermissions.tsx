@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Shield } from 'lucide-react';
+import { FaUserShield } from 'react-icons/fa6';
+import { Plus } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { roleService } from '../../../services/role';
 import type { RoleResponse } from '../../../types/Role';
@@ -13,10 +14,13 @@ import { DetailsModal } from '../../../components/modal/DetailsModal';
 import { DetailSection } from '../../../components/details/DetailSection';
 import { DetailField } from '../../../components/details/DetailField';
 import { useDetailsModal } from '../../../hooks/useDetailsModal';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { useNavigate } from 'react-router-dom';
 
 const VisualizarPermissions: React.FC = () => {
   const rolePermissions = useResourcePermissions('Role');
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
+  const navigate = useNavigate();
 
   const {
     filters,
@@ -48,7 +52,6 @@ const VisualizarPermissions: React.FC = () => {
       enableSorting: true,
       cell: ({ row }) => (
         <div className="flex items-center">
-          <Shield className="w-4 h-4 text-[#148553] mr-2" />
           <span className="font-medium">{row.original.name}</span>
         </div>
       ),
@@ -223,24 +226,17 @@ const VisualizarPermissions: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Funções e Permissões</h1>
-              <p className="text-gray-600 mt-1">Gerencie todas as funções e suas respectivas permissões</p>
-            </div>
-            {rolePermissions.canCreate && (
-                <button
-                onClick={() => (window.location.href = '/usuarios/permissoes/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-                >
-                <Plus size={20} />
-                <span>Nova Função</span>
-                </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<FaUserShield size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Funções e Permissões"
+          description="Gerencie todas as funções e suas respectivas permissões"
+          actionButton={{
+            label: 'Nova Função',
+            onClick: () => navigate('/usuarios/permissoes/cadastrar'),
+            icon: <Plus size={20} />,
+            show: rolePermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -298,7 +294,7 @@ const VisualizarPermissions: React.FC = () => {
           <>
             <DetailSection
               title="Informações Básicas"
-              icon={<Shield className="w-5 h-5 text-[#0c4c6e]" />}
+              icon={<FaUserShield className="w-5 h-5 text-[#0c4c6e]" />}
             >
               <DetailField 
                 label="Nome" 
