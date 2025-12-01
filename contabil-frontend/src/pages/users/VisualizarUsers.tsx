@@ -304,7 +304,7 @@ const VisualizarUsers: React.FC = () => {
             <DetailField
               label="Função"
               icon={<Shield className="w-4 h-4" />}
-              value={<span className="px-3 py-1 rounded-full text-sm font-medium">{detailsModal.data.role?.name || detailsModal.data.role}</span>}
+              value={<span className="px-3 py-1 rounded-full text-sm font-medium">{detailsModal.data.role?.name || 'Não definido'}</span>}
             />
             <DetailField
               label="Status"
