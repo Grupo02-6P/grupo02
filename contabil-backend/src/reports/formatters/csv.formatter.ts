@@ -15,17 +15,36 @@ export class CsvFormatter implements IReportFormatter {
     switch (reportData.title) {
       case 'Balancete de Verificação':
         const trialBalanceData = reportData.data as TrialBalanceReportLineDto[];
-        dataToParse = trialBalanceData.map(l => ({
-          'Código': l.accountCode,
-          'Conta': l.accountName,
-          'Débito': l.totalDebit,
-          'Crédito': l.totalCredit,
-          'S. Devedor': l.saldoDevedor,
-          'S. Credor': l.saldoCredor,
-        }));
+        dataToParse = [
+          ['Código', 'Conta', 'Débito', 'Crédito', 'S. Devedor', 'S. Credor'],
+          ...trialBalanceData.map(l => [
+            l.accountCode,
+            l.accountName,
+            l.totalDebit,
+            l.totalCredit,
+            l.saldoDevedor,
+            l.saldoCredor,
+          ])
+        ];
         break;
       case 'Livro Razão':
-        dataToParse = (reportData.data as LedgerReportDto).lines;
+        const ledgerData = reportData.data as LedgerReportDto;
+        dataToParse = [
+          ['Conta', ledgerData.accountName],
+          ['Código', ledgerData.accountCode],
+          ['Saldo Inicial', ledgerData.initialBalance],
+          [],
+          ['Data', 'Descrição', 'Débito', 'Crédito', 'Saldo'],
+          ...ledgerData.lines.map(l => [
+            new Date(l.date).toLocaleDateString('pt-BR'),
+            l.description,
+            l.debit,
+            l.credit,
+            l.runningBalance,
+          ]),
+          [],
+          ['Saldo Final', ledgerData.finalBalance],
+        ];
         break;
       case 'Demonstração do Resultado':
         const dreData = reportData.data as DREReportDto;
