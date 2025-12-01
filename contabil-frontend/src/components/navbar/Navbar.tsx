@@ -3,17 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { usePermissions } from '../../context/PermissionContext';
-import { 
-  LogOut,
-  Menu,
-  X,
-  ChevronRight,
-  ArrowLeftRight,
-  Receipt
-} from 'lucide-react';
-import { FaUsers, FaHandshake } from "react-icons/fa";
-import { MdDashboard, MdAccountBalance, MdOutlineAccountBalanceWallet } from "react-icons/md";
-import { TbReportAnalytics } from "react-icons/tb";
+import { LogOut, Menu, X } from 'lucide-react';
+import { FaUsers, FaHandshake, FaFileInvoiceDollar, FaUserShield, FaChevronRight } from "react-icons/fa6";
+import { FaExchangeAlt } from 'react-icons/fa';
+import { MdDashboard, MdAccountBalance, MdAccountBalanceWallet} from "react-icons/md";
+import { BiSolidReport } from "react-icons/bi";
 
 interface NavigationSubItem {
   path?: string;
@@ -50,135 +44,53 @@ const Navbar: React.FC = () => {
   // MOVIDO ANTES DO RETURN CONDICIONAL
   const navigationItems = React.useMemo<NavigationItem[]>(() => [
     { path: '/home', label: 'Início', icon: <MdDashboard size={20} /> },
-    {
-      label: 'Lançamentos de Título', 
-      icon: <Receipt  size={20} />,
-      permission: { resource: 'Title', action: 'read' },
-      subItems: [
-        { 
-          path: '/titulo/visualizar', 
-          label: 'Visualizar Títulos',
-          permission: { resource: 'Title', action: 'read' }
-        },
-        { 
-          path: '/titulo/cadastrar', 
-          label: 'Cadastrar Títulos',
-          permission: { resource: 'Title', action: 'create' }
-        },
-      ]
+    { 
+      path: '/titulo/visualizar',
+      label: 'Títulos', 
+      icon: <FaFileInvoiceDollar size={20} />,
+      permission: { resource: 'Title', action: 'read' }
     },
     { 
+      path: '/parceiros/visualizar',
       label: 'Parceiros', 
-      icon: <FaHandshake  size={20} />,
-      permission: { resource: 'Partner', action: 'read' },
-      subItems: [
-        { 
-          path: '/parceiros/visualizar', 
-          label: 'Visualizar Parceiro',
-          permission: { resource: 'Partner', action: 'read' }
-        },
-        { 
-          path: '/parceiros/cadastrar', 
-          label: 'Cadastrar Parceiro',
-          permission: { resource: 'Partner', action: 'create' }
-        },
-      ]
+      icon: <FaHandshake size={20} />,
+      permission: { resource: 'Partner', action: 'read' }
     },
     { 
+      path: '/contas/visualizar',
       label: 'Contas', 
-      icon: <MdAccountBalance  size={20} />,
-      permission: { resource: 'Account', action: 'read' },
-      subItems: [
-        { 
-          path: '/contas/visualizar', 
-          label: 'Visualizar Contas',
-          permission: { resource: 'Account', action: 'read' }
-        },
-        { 
-          path: '/contas/gerenciar', 
-          label: 'Gerenciar Contas',
-          permission: { resource: 'Account', action: 'create' }
-        },
-      ]
+      icon: <MdAccountBalance size={20} />,
+      permission: { resource: 'Account', action: 'read' }
     },
     { 
+      path: '/tipo-movimento/visualizar',
       label: 'Tipos de Movimento', 
-      icon: <ArrowLeftRight  size={20} />,
-      permission: { resource: 'Account', action: 'read' },
-      subItems: [
-        { 
-          path: '/tipo-movimento/visualizar', 
-          label: 'Visualizar Tipo de Movimento',
-          permission: { resource: 'TypeMovement', action: 'read' }
-        },
-        { 
-          path: '/tipo-movimento/cadastrar', 
-          label: 'Cadastrar Tipo de Movimento',
-          permission: { resource: 'TypeMovement', action: 'create' }
-        },
-      ]
+      icon: <FaExchangeAlt size={20} />,
+      permission: { resource: 'TypeMovement', action: 'read' }
     },
     { 
+      path: '/tipo-entrada/visualizar',
       label: 'Tipos de Entrada', 
-      icon: <MdOutlineAccountBalanceWallet  size={20} />,
-      permission: { resource: 'TypeEntry', action: 'read' },
-      subItems: [
-        { 
-          path: '/tipo-entrada/visualizar', 
-          label: 'Visualizar Tipo de Entrada',
-          permission: { resource: 'TypeEntry', action: 'read' }
-        },
-        { 
-          path: '/tipo-entrada/cadastrar', 
-          label: 'Cadastrar Tipo de Entrada',
-          permission: { resource: 'TypeEntry', action: 'create' }
-        },
-      ]
+      icon: <MdAccountBalanceWallet size={20} />,
+      permission: { resource: 'TypeEntry', action: 'read' }
     },    
     { 
+      path: '/relatorios',
       label: 'Relatórios', 
-      icon: <TbReportAnalytics  size={20} />,
-      permission: { resource: 'Report', action: 'read' },
-      subItems: [
-        { 
-          path: '/relatorios', 
-          label: 'Relatórios Gerenciais',
-          permission: { resource: 'Report', action: 'read' }
-        }
-      ]
+      icon: <BiSolidReport size={20} />,
+      permission: { resource: 'Report', action: 'read' }
     },
     { 
+      path: '/usuarios/visualizar',
       label: 'Usuários', 
-      icon: <FaUsers  size={20} />,
-      permission: { resource: 'User', action: 'read' },
-      subItems: [
-        { 
-          path: '/usuarios/visualizar', 
-          label: 'Visualizar Usuário',
-          permission: { resource: 'User', action: 'read' }
-        },
-        { 
-          path: '/usuarios/cadastrar', 
-          label: 'Cadastrar Usuário',
-          permission: { resource: 'User', action: 'create' }
-        },
-        {
-          label: 'Permissões',
-          permission: { resource: 'Permission', action: 'read' },
-          subItems: [
-            { 
-              path: '/usuarios/permissoes/visualizar', 
-              label: 'Visualizar Permissão',
-              permission: { resource: 'Role', action: 'read' }
-            },
-            { 
-              path: '/usuarios/permissoes/cadastrar', 
-              label: 'Cadastrar Permissão',
-              permission: { resource: 'Role', action: 'create' }
-            },
-          ]
-        }
-      ]
+      icon: <FaUsers size={20} />,
+      permission: { resource: 'User', action: 'read' }
+    },
+    { 
+      path: '/usuarios/permissoes/visualizar',
+      label: 'Permissões', 
+      icon: <FaUserShield size={20} />,
+      permission: { resource: 'Role', action: 'read' }
     },
   ], []);
 
@@ -313,7 +225,7 @@ const Navbar: React.FC = () => {
                     <span className={`transition-transform duration-200 ${
                       isItemExpanded(`${subItem.label}-${level}`) ? 'rotate-90' : ''
                     }`}>
-                      <ChevronRight size={chevronSize} />
+                      <FaChevronRight size={chevronSize} />
                     </span>
                   )}
                 </button>
@@ -342,7 +254,7 @@ const Navbar: React.FC = () => {
       
       <aside className={`${
         isCollapsed ? 'w-16' : 'w-64'
-      } h-screen bg-gradient-to-b from-gray-400 to-[#0c4c6e] text-white shadow-xl fixed left-0 top-0 z-50 transition-all duration-300 ${
+      } h-screen bg-gradient-to-b from-[#A1C1EA] to-[#0c4c6e] text-white shadow-xl fixed left-0 top-0 z-50 transition-all duration-300 ${
         // Em desktop, sempre visível. Em mobile, esconde quando colapsado
         isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
       }`}>
@@ -440,7 +352,7 @@ const Navbar: React.FC = () => {
                       <span className={`transition-transform duration-200 ${
                         isItemExpanded(item.label) ? 'rotate-90' : ''
                       }`}>
-                        <ChevronRight size={16} />
+                        <FaChevronRight size={16} />
                       </span>
                     )}
                   </button>
@@ -518,7 +430,7 @@ const Navbar: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-white truncate">{user?.name}</div>
                 <div className="text-xs text-gray-200 truncate">
-                  {user?.role ? (typeof user.role === 'string' ? user.role : (user.role as any)?.name || 'Role') : 'Usuário'}
+                  {user?.role ? (typeof user.role === 'string' ? user.role : (user.role as { name?: string })?.name || 'Função') : 'Usuário'}
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Save, Eye, EyeOff } from 'lucide-react';
+import { FaUsers } from 'react-icons/fa6';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateUserDto, UserResponse } from '../../types/User';
 import { userService } from '../../services/users';
@@ -208,13 +209,7 @@ const EditarUsers: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBack}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                title="Voltar"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
+              <FaUsers size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Usuário</h1>
                 <p className="text-white mt-1">
@@ -329,10 +324,9 @@ const EditarUsers: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-medium text-lg shadow-lg"
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
               >
-                <X size={20} />
-                <span>Cancelar</span>
+                Cancelar
               </button>
               
               <button

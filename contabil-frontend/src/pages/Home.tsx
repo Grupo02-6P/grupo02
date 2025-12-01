@@ -1,11 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowRight, FaUsers, FaHandshake } from "react-icons/fa";
+import { FaArrowRight, FaUsers, FaHandshake, FaFileInvoiceDollar, FaUserShield } from "react-icons/fa6";
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
-import { ArrowLeftRight, Receipt } from 'lucide-react';
-import { MdOutlineAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
-import { TbReportAnalytics } from "react-icons/tb";
+import { FaExchangeAlt } from 'react-icons/fa';
+import { MdAccountBalanceWallet, MdAccountBalance } from "react-icons/md";
+import { BiSolidReport } from "react-icons/bi";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -14,27 +14,17 @@ const Home: React.FC = () => {
 
   const atalhos = [
     {
-      title: 'Visualizar Usuários',
-      description: 'Gerenciar usuários e permissões',
-      icon: <FaUsers size={24} />,
-      href: '/usuarios/visualizar',
-      borderColor: 'border-red-400',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600',
-      permission: { resource: 'User', action: 'read' }
+      title: 'Títulos',
+      description: 'Gerenciar lançamentos de título',
+      icon: <FaFileInvoiceDollar size={24} />,
+      href: '/titulo/visualizar',
+      borderColor: 'border-orange-400',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600',
+      permission: { resource: 'Title', action: 'read' }
     },
     {
-      title: 'Gerenciar Contas',
-      description: 'Gerenciar contas contábeis',
-      icon: <MdAccountBalance size={24} />,
-      href: '/contas/gerenciar',
-      borderColor: 'border-blue-400',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
-      permission: { resource: 'Account', action: 'read' }
-    },
-    {
-      title: 'Visualizar Parceiros',
+      title: 'Parceiros',
       description: 'Gerenciar parceiros de negócios',
       icon: <FaHandshake size={24} />,
       href: '/parceiros/visualizar',
@@ -44,9 +34,19 @@ const Home: React.FC = () => {
       permission: { resource: 'Partner', action: 'read' }
     },
     {
-      title: 'Visualizar Tipos de Movimento',
+      title: 'Contas',
+      description: 'Visualizar plano de contas',
+      icon: <MdAccountBalance size={24} />,
+      href: '/contas/visualizar',
+      borderColor: 'border-blue-400',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600',
+      permission: { resource: 'Account', action: 'read' }
+    },
+    {
+      title: 'Tipos de Movimento',
       description: 'Gerenciar tipos de movimento',
-      icon: <ArrowLeftRight size={24} />,
+      icon: <FaExchangeAlt size={24} />,
       href: '/tipo-movimento/visualizar',
       borderColor: 'border-purple-400',
       bgColor: 'bg-purple-50',
@@ -54,19 +54,19 @@ const Home: React.FC = () => {
       permission: { resource: 'TypeMovement', action: 'read' }
     },
     {
-      title: 'Visualizar Tipos de Entrada',
+      title: 'Tipos de Entrada',
       description: 'Gerenciar tipos de entrada',
-      icon: <MdOutlineAccountBalanceWallet size={24} />,
+      icon: <MdAccountBalanceWallet size={24} />,
       href: '/tipo-entrada/visualizar',
-      borderColor: 'border-blue-400',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      borderColor: 'border-indigo-400',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-600',
       permission: { resource: 'TypeEntry', action: 'read' }
     },
     {
-      title: 'Gerar Relatórios',
-      description: 'Gere relatórios gerenciais',
-      icon: <TbReportAnalytics size={24} />,
+      title: 'Relatórios',
+      description: 'Gerar relatórios contábeis',
+      icon: <BiSolidReport size={24} />,
       href: '/relatorios',
       borderColor: 'border-yellow-400',
       bgColor: 'bg-yellow-50',
@@ -74,14 +74,24 @@ const Home: React.FC = () => {
       permission: { resource: 'Report', action: 'read' }
     },
     {
-      title: 'Visualizar Lançamentos de Título',
-      description: 'Gerenciar lançamentos de título',
-      icon: <Receipt size={24} />,
-      href: '/titulo/visualizar',
-      borderColor: 'border-orange-400',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-600',
-      permission: { resource: 'Title', action: 'read' }
+      title: 'Usuários',
+      description: 'Gerenciar usuários do sistema',
+      icon: <FaUsers size={24} />,
+      href: '/usuarios/visualizar',
+      borderColor: 'border-red-400',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-600',
+      permission: { resource: 'User', action: 'read' }
+    },
+    {
+      title: 'Permissões',
+      description: 'Gerenciar perfis e permissões',
+      icon: <FaUserShield size={24} />,
+      href: '/usuarios/permissoes/visualizar',
+      borderColor: 'border-pink-400',
+      bgColor: 'bg-pink-50',
+      textColor: 'text-pink-600',
+      permission: { resource: 'Role', action: 'read' }
     },
   ]
 
@@ -113,47 +123,6 @@ const Home: React.FC = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="mb-12">
-          {filteredAtalhos.length > 0 ? (
-            <div className={`grid grid-cols-1 gap-4 ${
-              filteredAtalhos.length === 1 ? 'md:grid-cols-1 max-w-lg mx-auto' :
-              filteredAtalhos.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' :
-              filteredAtalhos.length <= 4 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-              filteredAtalhos.length <= 6 ? 'md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' :
-              'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-            }`}>
-              {filteredAtalhos.map((atalho) => (
-                <div
-                  key={atalho.title}
-                  onClick={() => handleCardClick(atalho.href)}
-                  className={`bg-white border-l-4 ${atalho.borderColor} rounded-lg shadow-md hover:shadow-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-102 group border-gray-100`}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-lg ${atalho.bgColor} ${atalho.textColor}`}>
-                      {atalho.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1 group-hover:text-gray-900">{atalho.title}</h3>
-                      <p className="text-gray-600 text-sm">{atalho.description}</p>
-                    </div>
-                    <FaArrowRight className="text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" size={16} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">🔒</div>
-              <h3 className="text-xl font-medium text-gray-600 mb-2">
-                Nenhuma funcionalidade disponível
-              </h3>
-              <p className="text-gray-500">
-                Você não possui permissões para acessar as funcionalidades principais.
-              </p>
-            </div>
-          )}
-        </div>
 
         {/* Dashboard Power BI */}
         <div className="mb-12">
@@ -175,6 +144,47 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+        <div className="mb-12">
+          {filteredAtalhos.length > 0 ? (
+            <div className={`grid grid-cols-1 gap-4 ${
+              filteredAtalhos.length === 1 ? 'md:grid-cols-1 max-w-lg mx-auto' :
+              filteredAtalhos.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' :
+              filteredAtalhos.length <= 4 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
+              filteredAtalhos.length <= 6 ? 'md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' :
+              'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+            }`}>
+              {filteredAtalhos.map((atalho) => (
+                <div
+                  key={atalho.title}
+                  onClick={() => handleCardClick(atalho.href)}
+                  className={`bg-white border-l-4 ${atalho.borderColor} rounded-lg shadow-md hover:shadow-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-102 group`}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-2 rounded-lg ${atalho.bgColor} ${atalho.textColor}`}>
+                      {atalho.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-semibold text-gray-800 mb-1 group-hover:text-gray-900">{atalho.title}</h3>
+                      <p className="text-gray-600 text-sm">{atalho.description}</p>
+                    </div>
+                    <FaArrowRight className="text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" size={16} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">🔒</div>
+              <h3 className="text-xl font-medium text-gray-600 mb-2">
+                Nenhuma funcionalidade disponível
+              </h3>
+              <p className="text-gray-500">
+                Você não possui permissões para acessar as funcionalidades principais.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X, ArrowLeftRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { typeMovementService } from '../../services/typeMovement';
@@ -10,6 +10,12 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import { ActionsColumn, useDefaultActions } from '../../components/table/ActionsColumn';
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { DetailsModal } from '../../components/modal/DetailsModal';
+import { DetailSection } from '../../components/details/DetailSection';
+import { DetailField } from '../../components/details/DetailField';
+import { useDetailsModal } from '../../hooks/useDetailsModal';
+import { FaExchangeAlt } from 'react-icons/fa';
 
 const VisualizarTypeMovement: React.FC = () => {
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
@@ -38,11 +44,7 @@ const VisualizarTypeMovement: React.FC = () => {
     type: undefined as 'success' | 'error' | undefined,
   });
   const [refreshKey, setRefreshKey] = useState(0);
-  const [detailsModal, setDetailsModal] = useState({
-    isOpen: false,
-    typeMovement: null as TypeMovementResponse | null,
-    isLoading: false,
-  });
+  const detailsModal = useDetailsModal<TypeMovementResponse>();
 
   // Colunas da tabela
   const columns: ColumnDef<TypeMovementResponse>[] = [
@@ -118,13 +120,13 @@ const VisualizarTypeMovement: React.FC = () => {
 
   // Handlers
   const handleViewDetails = async (id: string) => {
-    setDetailsModal({ isOpen: true, typeMovement: null, isLoading: true });
+    detailsModal.openModal();
 
     try {
       const response = await typeMovementService.findOne(id);
-      setDetailsModal({ isOpen: true, typeMovement: response, isLoading: false });
+      detailsModal.setData(response);
     } catch (error) {
-      setDetailsModal({ isOpen: false, typeMovement: null, isLoading: false });
+      detailsModal.setError();
       setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do tipo de movimento', type: 'error' });
     }
   };
@@ -171,27 +173,17 @@ const VisualizarTypeMovement: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className='flex mr-4 items-center'>
-              <ArrowLeftRight size={44} className="text-[#0c4c6e] mr-3"/>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Tipos de Movimento</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os tipos de movimento contábil</p>
-              </div>
-            </div>
-            {typeMovementPermissions.canCreate && (
-              <button
-                onClick={() => navigate('/tipo-movimento/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-              >
-                <Plus size={20} />
-                <span>Novo Tipo de Movimento</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<FaExchangeAlt size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Tipos de Movimento"
+          description="Gerencie todos os tipos de movimento contábil"
+          actionButton={{
+            label: 'Novo Tipo de Movimento',
+            onClick: () => navigate('/tipo-movimento/cadastrar'),
+            icon: <Plus size={20} />,
+            show: typeMovementPermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -228,123 +220,70 @@ const VisualizarTypeMovement: React.FC = () => {
         type={infoModal.type}
       />
 
-      {/* Modal de Detalhes do Tipo de Movimento */}
-      {detailsModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header do Modal */}
-            <div className="bg-gradient-to-r from-[#0c4c6e] to-[#083f5d] text-white p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {detailsModal.isLoading ? 'Carregando...' : detailsModal.typeMovement?.name || 'Detalhes do Tipo de Movimento'}
-                </h2>
-                <p className="text-green-100 text-sm mt-1">Visualize as informações do tipo de movimento</p>
-              </div>
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, typeMovement: null, isLoading: false })}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      <DetailsModal
+        isOpen={detailsModal.isOpen}
+        isLoading={detailsModal.isLoading}
+        title={detailsModal.data?.name || 'Detalhes do Tipo de Movimento'}
+        subtitle="Visualize as informações do tipo de movimento"
+        onClose={detailsModal.closeModal}
+        onEdit={() => {
+          detailsModal.closeModal();
+          handleEditClick(detailsModal.data?.id || '');
+        }}
+        showEditButton={!!detailsModal.data}
+      >
+        {detailsModal.data ? (
+          <>
+            <DetailSection
+              title="Informações do Tipo de Movimento"
+              icon={<FaExchangeAlt className="w-5 h-5 text-[#0c4c6e]" />}
+            >
+              <DetailField label="Nome" value={<span className="font-medium">{detailsModal.data.name}</span>} />
+              <DetailField label="Descrição" value={detailsModal.data.description || 'Sem descrição'} />
+              <DetailField
+                label="Status"
+                value={
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      detailsModal.data.status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {detailsModal.data.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                  </span>
+                }
+              />
+            </DetailSection>
 
-            {/* Conteúdo do Modal */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {detailsModal.isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0c4c6e]"></div>
-                    <p className="text-gray-600">Carregando informações...</p>
-                  </div>
-                </div>
-              ) : detailsModal.typeMovement ? (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                      <ArrowLeftRight className="w-5 h-5 mr-2 text-[#0c4c6e]" />
-                      Informações do Tipo de Movimento
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Nome:</label>
-                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.typeMovement.name}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Descrição:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.typeMovement.description || 'Sem descrição'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Status:</label>
-                        <div className="mt-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${detailsModal.typeMovement.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {detailsModal.typeMovement.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <DetailSection title="Contas Associadas" bgColor="bg-blue-50">
+              <DetailField
+                label="Conta Crédito"
+                value={`${detailsModal.data.creditAccount?.name} (${detailsModal.data.creditAccount?.code})`}
+              />
+              <DetailField
+                label="Conta Débito"
+                value={`${detailsModal.data.debitAccount?.name} (${detailsModal.data.debitAccount?.code})`}
+              />
+            </DetailSection>
 
-                  <div className="bg-blue-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Contas Associadas</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Conta Crédito:</label>
-                        <p className="text-gray-900 mt-1 font-medium">
-                          {detailsModal.typeMovement.creditAccount?.name} ({detailsModal.typeMovement.creditAccount?.code})
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Conta Débito:</label>
-                        <p className="text-gray-900 mt-1 font-medium">
-                          {detailsModal.typeMovement.debitAccount?.name} ({detailsModal.typeMovement.debitAccount?.code})
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações Adicionais</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Criado em:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.typeMovement.createdAt).toLocaleString('pt-BR')}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Atualizado em:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.typeMovement.updatedAt).toLocaleString('pt-BR')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Erro ao carregar informações do tipo de movimento</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer do Modal */}
-            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, typeMovement: null, isLoading: false })}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors mr-3"
-              >
-                Fechar
-              </button>
-              <button
-                onClick={() => {
-                  setDetailsModal({ isOpen: false, typeMovement: null, isLoading: false });
-                  handleEditClick(detailsModal.typeMovement?.id || '');
-                }}
-                className="px-6 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition-colors flex items-center space-x-2"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Editar</span>
-              </button>
-            </div>
+            <DetailSection title="Informações Adicionais">
+              <DetailField
+                label="Criado em"
+                value={new Date(detailsModal.data.createdAt).toLocaleString('pt-BR')}
+              />
+              <DetailField
+                label="Atualizado em"
+                value={new Date(detailsModal.data.updatedAt).toLocaleString('pt-BR')}
+              />
+            </DetailSection>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Erro ao carregar informações do tipo de movimento</p>
           </div>
-        </div>
-      )}
+        )}
+      </DetailsModal>
     </div>
   );
 };

@@ -2,7 +2,7 @@
 
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
-import { FileText, Download, Calendar } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
 import {
@@ -10,6 +10,7 @@ import {
   type CreateReportDto,
 } from '@/services/apiReport';
 import { type Account, getAccounts } from '@/services/apiAccount';
+import { BiSolidReport } from 'react-icons/bi';
 
 export default function ReportsPage() {
   const [reportType, setReportType] =
@@ -104,7 +105,7 @@ export default function ReportsPage() {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-              <FileText size={44} className="text-white" />
+              <BiSolidReport size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Geração de Relatórios</h1>
                 <p className="text-white mt-1">Gere relatórios contábeis personalizados</p>
@@ -189,14 +190,9 @@ export default function ReportsPage() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Calendar size={16} className="inline mr-1" />
-                  Período:
-                </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-2">
-                    <label htmlFor="startDate" className="text-xs font-medium text-gray-600">
+                    <label htmlFor="startDate" className="text-sm font-medium text-gray-700">
                       Data de Início:
                     </label>
                     <input
@@ -208,7 +204,7 @@ export default function ReportsPage() {
                     />
                   </div>
                   <div className="flex flex-col space-y-2">
-                    <label htmlFor="endDate" className="text-xs font-medium text-gray-600">
+                    <label htmlFor="endDate" className="text-sm font-medium text-gray-700">
                       Data de Fim:
                     </label>
                     <input
@@ -218,7 +214,6 @@ export default function ReportsPage() {
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0c4c6e] focus:border-[#0c4c6e]"
                     />
-                  </div>
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, X, Receipt, CheckCircle, Undo2 } from 'lucide-react';
+import { Plus, CheckCircle, Undo2, X } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { titleService } from '../../services/title';
@@ -10,6 +10,12 @@ import { InfoModal } from '../../components/modal/InfoModal';
 import { ActionsColumn, useDefaultActions } from '../../components/table/ActionsColumn';
 import { useResourcePermissions } from '../../context/PermissionContext';
 import { useDebounceFilters } from '../../hooks/useDebounceFilters';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { DetailsModal } from '../../components/modal/DetailsModal';
+import { DetailSection } from '../../components/details/DetailSection';
+import { DetailField } from '../../components/details/DetailField';
+import { useDetailsModal } from '../../hooks/useDetailsModal';
+import { FaFileInvoiceDollar } from 'react-icons/fa6';
 
 const VisualizarTitle: React.FC = () => {
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
@@ -43,11 +49,7 @@ const VisualizarTitle: React.FC = () => {
     type: undefined as 'success' | 'error' | undefined,
   });
   const [refreshKey, setRefreshKey] = useState(0);
-  const [detailsModal, setDetailsModal] = useState({
-    isOpen: false,
-    title: null as TitleResponse | null,
-    isLoading: false,
-  });
+  const detailsModal = useDetailsModal<TitleResponse>();
 
   // Colunas da tabela
   const columns: ColumnDef<TitleResponse>[] = [
@@ -202,13 +204,13 @@ const VisualizarTitle: React.FC = () => {
 
   // Handlers
   const handleViewDetails = async (id: string) => {
-    setDetailsModal({ isOpen: true, title: null, isLoading: true });
+    detailsModal.openModal();
 
     try {
       const response = await titleService.findOne(id);
-      setDetailsModal({ isOpen: true, title: response, isLoading: false });
+      detailsModal.setData(response);
     } catch {
-      setDetailsModal({ isOpen: false, title: null, isLoading: false });
+      detailsModal.setError();
       setInfoModal({ isOpen: true, title: 'Erro!', message: 'Erro ao carregar detalhes do título', type: 'error' });
     }
   };
@@ -310,27 +312,17 @@ const VisualizarTitle: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className='flex mr-4 items-center'>
-              <Receipt size={44} className="text-[#0c4c6e] mr-3"/>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Lançamentos de Título</h1>
-                <p className="text-gray-600 mt-1">Gerencie todos os lançamentos de título do sistema</p>
-              </div>
-            </div>
-            {titlePermissions.canCreate && (
-              <button
-                onClick={() => navigate('/titulo/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-              >
-                <Plus size={20} />
-                <span>Novo Lançamento de Título</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<FaFileInvoiceDollar size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Lançamentos de Título"
+          description="Gerencie todos os lançamentos de título do sistema"
+          actionButton={{
+            label: 'Novo Lançamento de Título',
+            onClick: () => navigate('/titulo/cadastrar'),
+            icon: <Plus size={20} />,
+            show: titlePermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -454,158 +446,93 @@ const VisualizarTitle: React.FC = () => {
         type={infoModal.type}
       />
 
-      {/* Modal de Detalhes do Título */}
-      {detailsModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header do Modal */}
-            <div className="bg-gradient-to-r from-[#0c4c6e] to-[#083f5d] text-white p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {detailsModal.isLoading ? 'Carregando...' : (detailsModal.title?.code ? `Título ${detailsModal.title.code}` : 'Detalhes do Título')}
-                </h2>
-                <p className="text-green-100 text-sm mt-1">Visualize as informações do título</p>
-              </div>
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, title: null, isLoading: false })}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Conteúdo do Modal */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {detailsModal.isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0c4c6e]"></div>
-                    <p className="text-gray-600">Carregando informações...</p>
-                  </div>
-                </div>
-              ) : detailsModal.title ? (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                      <Receipt className="w-5 h-5 mr-2 text-[#0c4c6e]" />
-                      Informações do Título
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Código:</label>
-                        <p className="text-gray-900 mt-1 font-medium">{detailsModal.title.code}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Data:</label>
-                        <p className="text-gray-900 mt-1">{new Date(detailsModal.title.date).toLocaleDateString('pt-BR')}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Valor:</label>
-                        <p className="text-gray-900 mt-1 font-bold text-lg">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detailsModal.title.value)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Status:</label>
-                        <div className="mt-2">
-                          {(() => {
-                            let status, color;
-                            switch (detailsModal.title.status) {
-                              case 'ACTIVE':
-                                status = 'Ativo';
-                                color = 'bg-blue-100 text-blue-800';
-                                break;
-                              case 'INACTIVE':
-                                status = 'Inativo';
-                                color = 'bg-red-100 text-red-800';
-                                break;
-                              case 'PAID':
-                                status = 'Pago';
-                                color = 'bg-green-100 text-green-800';
-                                break;
-                              default:
-                                status = 'Desconhecido';
-                                color = 'bg-gray-100 text-gray-800';
-                            }
-                            return (
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>
-                                {status}
-                              </span>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                      {detailsModal.title.status === 'PAID' && detailsModal.title.paidAt && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Data de Pagamento:</label>
-                          <p className="mt-1 font-medium text-green-700">
-                            {new Date(detailsModal.title.paidAt).toLocaleString('pt-BR', {
-                              timeZone: 'America/Sao_Paulo',
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      )}
-                      <div className="md:col-span-2">
-                        <label className="text-sm font-medium text-gray-600">Descrição:</label>
-                        <p className="text-gray-900 mt-1">{detailsModal.title.description || '-'}</p>
-                      </div>
-                      {detailsModal.title.movement && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Tipo de Movimento:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.title.movement.name}</p>
-                        </div>
-                      )}
-                      {detailsModal.title.typeEntry && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Tipo de Entrada:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.title.typeEntry.name}</p>
-                        </div>
-                      )}
-                      {detailsModal.title.partner && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Parceiro:</label>
-                          <p className="text-gray-900 mt-1">{detailsModal.title.partner.name}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Erro ao carregar informações do título</p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer do Modal */}
-            <div className="bg-gray-50 px-6 py-4 flex justify-end border-t">
-              <button
-                onClick={() => setDetailsModal({ isOpen: false, title: null, isLoading: false })}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors mr-3"
-              >
-                Fechar
-              </button>
-              {titlePermissions.canUpdate && detailsModal.title?.status !== 'PAID' && (
-                <button
-                  onClick={() => {
-                    setDetailsModal({ isOpen: false, title: null, isLoading: false });
-                    handleEditClick(detailsModal.title?.id || '');
-                  }}
-                  className="px-6 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition-colors flex items-center space-x-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span>Editar</span>
-                </button>
-              )}
-            </div>
+      <DetailsModal
+        isOpen={detailsModal.isOpen}
+        isLoading={detailsModal.isLoading}
+        title={detailsModal.data?.code ? `Título ${detailsModal.data.code}` : 'Detalhes do Título'}
+        subtitle="Visualize as informações do título"
+        onClose={detailsModal.closeModal}
+        onEdit={() => {
+          detailsModal.closeModal();
+          handleEditClick(detailsModal.data?.id || '');
+        }}
+        showEditButton={titlePermissions.canUpdate && detailsModal.data?.status !== 'PAID'}
+      >
+        {detailsModal.data ? (
+          <DetailSection
+            title="Informações do Título"
+            icon={<FaFileInvoiceDollar className="w-5 h-5 text-[#0c4c6e]" />}
+          >
+            <DetailField label="Código" value={<span className="font-medium">{detailsModal.data.code}</span>} />
+            <DetailField label="Data" value={new Date(detailsModal.data.date).toLocaleDateString('pt-BR')} />
+            <DetailField
+              label="Valor"
+              value={
+                <span className="font-bold text-lg">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detailsModal.data.value)}
+                </span>
+              }
+            />
+            <DetailField
+              label="Status"
+              value={
+                (() => {
+                  let status, color;
+                  switch (detailsModal.data.status) {
+                    case 'ACTIVE':
+                      status = 'Ativo';
+                      color = 'bg-blue-100 text-blue-800';
+                      break;
+                    case 'INACTIVE':
+                      status = 'Inativo';
+                      color = 'bg-red-100 text-red-800';
+                      break;
+                    case 'PAID':
+                      status = 'Pago';
+                      color = 'bg-green-100 text-green-800';
+                      break;
+                    default:
+                      status = 'Desconhecido';
+                      color = 'bg-gray-100 text-gray-800';
+                  }
+                  return <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>{status}</span>;
+                })()
+              }
+            />
+            {detailsModal.data.status === 'PAID' && detailsModal.data.paidAt && (
+              <DetailField
+                label="Data de Pagamento"
+                value={
+                  <span className="font-medium text-green-700">
+                    {new Date(detailsModal.data.paidAt).toLocaleString('pt-BR', {
+                      timeZone: 'America/Sao_Paulo',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                }
+              />
+            )}
+            <DetailField label="Descrição" value={detailsModal.data.description || '-'} fullWidth />
+            {detailsModal.data.movement && (
+              <DetailField label="Tipo de Movimento" value={detailsModal.data.movement.name} />
+            )}
+            {detailsModal.data.typeEntry && (
+              <DetailField label="Tipo de Entrada" value={detailsModal.data.typeEntry.name} />
+            )}
+            {detailsModal.data.partner && (
+              <DetailField label="Parceiro" value={detailsModal.data.partner.name} />
+            )}
+          </DetailSection>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Erro ao carregar informações do título</p>
           </div>
-        </div>
-      )}
+        )}
+      </DetailsModal>
     </div>
   );
 };

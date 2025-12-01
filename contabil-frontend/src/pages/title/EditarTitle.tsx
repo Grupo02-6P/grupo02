@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Receipt } from 'lucide-react';
+import { FaFileInvoiceDollar } from 'react-icons/fa6';
+import { Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateTitleDto } from '../../types/Title';
 import { titleService } from '../../services/title';
@@ -211,7 +212,7 @@ const EditarTitle: React.FC = () => {
           {/* Header */}
           <div className="bg-[#0c4c6e] px-8 py-6">
             <div className="flex items-center space-x-4">
-                <Receipt size={44} className="text-white" />
+                <FaFileInvoiceDollar size={44} className="text-white" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Editar Título</h1>
                 <p className="text-white mt-1">Atualize as informações do lançamento de título</p>

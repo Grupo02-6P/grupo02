@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Shield } from 'lucide-react';
+import { FaUserShield } from 'react-icons/fa6';
+import { Plus } from 'lucide-react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { roleService } from '../../../services/role';
 import type { RoleResponse } from '../../../types/Role';
@@ -9,10 +10,17 @@ import { InfoModal } from '../../../components/modal/InfoModal';
 import { useResourcePermissions } from '../../../context/PermissionContext';
 import { ActionsColumn, useDefaultActions } from '../../../components/table/ActionsColumn';
 import { useDebounceFilters } from '../../../hooks/useDebounceFilters';
+import { DetailsModal } from '../../../components/modal/DetailsModal';
+import { DetailSection } from '../../../components/details/DetailSection';
+import { DetailField } from '../../../components/details/DetailField';
+import { useDetailsModal } from '../../../hooks/useDetailsModal';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { useNavigate } from 'react-router-dom';
 
 const VisualizarPermissions: React.FC = () => {
   const rolePermissions = useResourcePermissions('Role');
   const { createViewAction, createEditAction, createDeleteAction } = useDefaultActions();
+  const navigate = useNavigate();
 
   const {
     filters,
@@ -26,8 +34,6 @@ const VisualizarPermissions: React.FC = () => {
     ['name', 'description']
   );
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null);
-  const [viewModal, setViewModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const [infoModal, setInfoModal] = useState({
     isOpen: false,
@@ -36,6 +42,7 @@ const VisualizarPermissions: React.FC = () => {
     type: undefined as 'success' | 'error' | undefined,
   });
   const [refreshKey, setRefreshKey] = useState(0);
+  const detailsModal = useDetailsModal<RoleResponse>();
 
   // Definir colunas da tabela
   const columns: ColumnDef<RoleResponse>[] = [
@@ -45,7 +52,6 @@ const VisualizarPermissions: React.FC = () => {
       enableSorting: true,
       cell: ({ row }) => (
         <div className="flex items-center">
-          <Shield className="w-4 h-4 text-[#148553] mr-2" />
           <span className="font-medium">{row.original.name}</span>
         </div>
       ),
@@ -169,12 +175,8 @@ const VisualizarPermissions: React.FC = () => {
   };
 
   const handleViewClick = async (role: RoleResponse) => {
-    try {
-      setSelectedRole(role);
-      setViewModal(true);
-    } catch (error) {
-      console.error('Erro ao carregar detalhes da role:', error);
-    }
+    detailsModal.openModal();
+    detailsModal.setData(role);
   };
 
   const handleDeleteClick = (id: string) => {
@@ -224,24 +226,17 @@ const VisualizarPermissions: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e2ecf1] to-[#e0eef5] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Funções e Permissões</h1>
-              <p className="text-gray-600 mt-1">Gerencie todas as funções e suas respectivas permissões</p>
-            </div>
-            {rolePermissions.canCreate && (
-                <button
-                onClick={() => (window.location.href = '/usuarios/permissoes/cadastrar')}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
-                >
-                <Plus size={20} />
-                <span>Nova Função</span>
-                </button>
-            )}
-          </div>
-        </div>
+        <PageHeader
+          icon={<FaUserShield size={44} className="text-[#0c4c6e] mr-3" />}
+          title="Funções e Permissões"
+          description="Gerencie todas as funções e suas respectivas permissões"
+          actionButton={{
+            label: 'Nova Função',
+            onClick: () => navigate('/usuarios/permissoes/cadastrar'),
+            icon: <Plus size={20} />,
+            show: rolePermissions.canCreate,
+          }}
+        />
 
         {/* Tabela com DataTable */}
         <DataTable
@@ -283,98 +278,96 @@ const VisualizarPermissions: React.FC = () => {
       />
 
       {/* Modal de Visualização de Função */}
-      {viewModal && selectedRole && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Detalhes da Função
-              </h3>
-              <button
-                onClick={() => {
-                  setViewModal(false);
-                  setSelectedRole(null);
-                }}
-                className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              {/* Informações Básicas */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-lg font-medium text-gray-900 mb-3">Informações Básicas</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Nome</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedRole.name}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Descrição</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedRole.description || 'Sem descrição'}</p>
-                  </div>
-                </div>
-              </div>
+      <DetailsModal
+        isOpen={detailsModal.isOpen}
+        isLoading={detailsModal.isLoading}
+        title={detailsModal.data?.name || 'Detalhes da Função'}
+        subtitle="Visualize as informações da função e suas permissões"
+        onClose={detailsModal.closeModal}
+        onEdit={() => {
+          detailsModal.closeModal();
+          handleEditClick(detailsModal.data?.id || '');
+        }}
+        showEditButton={!!detailsModal.data && rolePermissions.canUpdate}
+      >
+        {detailsModal.data ? (
+          <>
+            <DetailSection
+              title="Informações Básicas"
+              icon={<FaUserShield className="w-5 h-5 text-[#0c4c6e]" />}
+            >
+              <DetailField 
+                label="Nome" 
+                value={<span className="font-medium">{detailsModal.data.name}</span>} 
+              />
+              <DetailField 
+                label="Descrição" 
+                value={detailsModal.data.description || 'Sem descrição'} 
+              />
+              <DetailField
+                label="Função Padrão"
+                value={
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      detailsModal.data.isDefault
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {detailsModal.data.isDefault ? 'Sim' : 'Não'}
+                  </span>
+                }
+              />
+            </DetailSection>
 
-              {/* Permissões */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-lg font-medium text-gray-900 mb-3">
-                  Permissões ({selectedRole.rolePermissions?.length || 0})
-                </h4>
-                
-                {selectedRole.rolePermissions && selectedRole.rolePermissions.length > 0 ? (
-                  <div className="space-y-4">
-                    {(() => {
-                      // Agrupar permissões por recurso
-                      const groupedPermissions = selectedRole.rolePermissions.reduce((acc, rolePermission) => {
-                        const permission = rolePermission.permission;
-                        const resourceName = permission.resource?.name || `Resource-${permission.resourceId}`;
-                        
-                        if (!acc[resourceName]) {
-                          acc[resourceName] = [];
-                        }
-                        acc[resourceName].push(permission.action);
-                        return acc;
-                      }, {} as Record<string, string[]>);
+            <DetailSection 
+              title={`Permissões (${detailsModal.data.rolePermissions?.length || 0})`}
+              bgColor="bg-blue-50"
+              columns={1}
+            >
+              {detailsModal.data.rolePermissions && detailsModal.data.rolePermissions.length > 0 ? (
+                <div className="space-y-4">
+                  {(() => {
+                    // Agrupar permissões por recurso
+                    const groupedPermissions = detailsModal.data.rolePermissions.reduce((acc, rolePermission) => {
+                      const permission = rolePermission.permission;
+                      const resourceName = permission.resource?.name || `Resource-${permission.resourceId}`;
+                      
+                      if (!acc[resourceName]) {
+                        acc[resourceName] = [];
+                      }
+                      acc[resourceName].push(permission.action);
+                      return acc;
+                    }, {} as Record<string, string[]>);
 
-                      return Object.entries(groupedPermissions).map(([resource, actions]) => (
-                        <div key={resource} className="border border-gray-200 rounded-lg p-3">
-                          <h5 className="font-medium text-gray-900 mb-2">{resource}</h5>
-                          <div className="flex flex-wrap gap-2">
-                            {actions.map((action, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                              >
-                                {action}
-                              </span>
-                            ))}
-                          </div>
+                    return Object.entries(groupedPermissions).map(([resource, actions]) => (
+                      <div key={resource} className="border border-gray-200 rounded-lg p-3 bg-white">
+                        <h5 className="font-medium text-gray-900 mb-2">{resource}</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {actions.map((action, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {action}
+                            </span>
+                          ))}
                         </div>
-                      ));
-                    })()}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">Nenhuma permissão atribuída a esta função.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end p-6 border-t border-gray-200">
-              <button
-                onClick={() => {
-                  setViewModal(false);
-                  setSelectedRole(null);
-                }}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
-              >
-                Fechar
-              </button>
-            </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Nenhuma permissão atribuída a esta função.</p>
+              )}
+            </DetailSection>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Erro ao carregar informações da função</p>
           </div>
-        </div>
-      )}
+        )}
+      </DetailsModal>
     </div>
   );
 };

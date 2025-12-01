@@ -238,39 +238,42 @@ export function DataTable<TData>({
                 <thead className="bg-[#eaf4fb]">
                   {table.getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id}>
-                      {headerGroup.headers.map(header => (
-                        <th
-                          key={header.id}
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-700"
-                        >
-                          {header.isPlaceholder ? null : (
-                            <div
-                              className={
-                                header.column.getCanSort()
-                                  ? 'flex items-center gap-2 cursor-pointer select-none hover:text-gray-900'
-                                  : ''
-                              }
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                              {header.column.getCanSort() && (
-                                <span className="text-gray-400">
-                                  {header.column.getIsSorted() === 'asc' ? (
-                                    <ChevronUp className="w-4 h-4" />
-                                  ) : header.column.getIsSorted() === 'desc' ? (
-                                    <ChevronDown className="w-4 h-4" />
-                                  ) : (
-                                    <ChevronsUpDown className="w-4 h-4" />
-                                  )}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </th>
-                      ))}
+                      {headerGroup.headers.map(header => {
+                        const isActionsColumn = header.id === 'actions';
+                        return (
+                          <th
+                            key={header.id}
+                            className={`px-4 py-3 text-xs font-semibold text-gray-700 ${isActionsColumn ? 'text-center' : 'text-left'}`}
+                          >
+                            {header.isPlaceholder ? null : (
+                              <div
+                                className={
+                                  header.column.getCanSort()
+                                    ? `flex items-center gap-2 cursor-pointer select-none hover:text-gray-900 ${isActionsColumn ? 'justify-center' : ''}`
+                                    : isActionsColumn ? 'flex justify-center' : ''
+                                }
+                                onClick={header.column.getToggleSortingHandler()}
+                              >
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                                {header.column.getCanSort() && (
+                                  <span className="text-gray-400">
+                                    {header.column.getIsSorted() === 'asc' ? (
+                                      <ChevronUp className="w-4 h-4" />
+                                    ) : header.column.getIsSorted() === 'desc' ? (
+                                      <ChevronDown className="w-4 h-4" />
+                                    ) : (
+                                      <ChevronsUpDown className="w-4 h-4" />
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </th>
+                        );
+                      })}
                     </tr>
                   ))}
                 </thead>
@@ -333,7 +336,7 @@ export function DataTable<TData>({
                         totalRows
                       )}
                     </span>{' '}
-                    de <span className="font-medium">{totalRows}</span> resultados
+                    de <span className="font-bold">{totalRows}</span> resultados
                   </span>
                 </div>
 
@@ -351,7 +354,7 @@ export function DataTable<TData>({
                     disabled={!table.getCanPreviousPage()}
                     className="px-3 py-1 rounded-lg font-medium border transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed bg-white text-gray-700 border-gray-300 hover:bg-[#e6f1f7]"
                   >
-                    Anterior
+                    &lt;
                   </button>
 
                   {getPageNumbers().map((page, index) => (
@@ -379,7 +382,7 @@ export function DataTable<TData>({
                     disabled={!table.getCanNextPage()}
                     className="px-3 py-1 rounded-lg font-medium border transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed bg-white text-gray-700 border-gray-300 hover:bg-[#e6f1f7]"
                   >
-                    Próxima
+                    &gt;
                   </button>
 
                   <button
