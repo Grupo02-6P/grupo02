@@ -155,7 +155,7 @@ const CadastrarTypeEntry: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <select 
                     value={formData.status} 
                     onChange={e => handleInputChange('status', e.target.value as 'ACTIVE' | 'INACTIVE')} 
@@ -167,7 +167,7 @@ const CadastrarTypeEntry: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Conta de Compensação</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Conta de Compensação</label>
                   {loadingAccounts ? (
                     <div className="flex items-center justify-center p-3">
                       <LoadingSpinner />

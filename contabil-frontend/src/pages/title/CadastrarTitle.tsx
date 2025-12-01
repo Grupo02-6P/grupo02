@@ -201,7 +201,8 @@ const CadastrarTitle: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-8">
-            <div className="space-y-6 mb-8">
+            {/* Informações Básicas */}
+            <div className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="date" className="text-sm font-medium text-gray-700">
@@ -219,9 +220,7 @@ const CadastrarTitle: React.FC = () => {
                   />
                   {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="value" className="text-sm font-medium text-gray-700">
                     Valor <span className="text-red-500">*</span>
@@ -241,7 +240,12 @@ const CadastrarTitle: React.FC = () => {
                   />
                   {errors.value && <p className="text-red-500 text-sm mt-1">{errors.value}</p>}
                 </div>
+              </div>
+            </div>
 
+            {/* Classificação Contábil */}
+            <div className="mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="movementId" className="text-sm font-medium text-gray-700">
                     Tipo de Movimento <span className="text-red-500">*</span>
@@ -264,9 +268,7 @@ const CadastrarTitle: React.FC = () => {
                   </select>
                   {errors.movementId && <p className="text-red-500 text-sm mt-1">{errors.movementId}</p>}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="typeEntryId" className="text-sm font-medium text-gray-700">
                     Tipo de Entrada <span className="text-red-500">*</span>
@@ -290,34 +292,40 @@ const CadastrarTitle: React.FC = () => {
                   {errors.typeEntryId && <p className="text-red-500 text-sm mt-1">{errors.typeEntryId}</p>}
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-col space-y-2">
-                <label htmlFor="partnerId" className="text-sm font-medium text-gray-700">
-                  Parceiro (Opcional)
-                </label>
-                <select
-                  id="partnerId"
-                  value={formData.partnerId || ''}
-                  onChange={e => handleInputChange('partnerId', e.target.value)}
-                  className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
-                >
-                  <option value="">Selecione um parceiro</option>
-                  {partners.map(partner => (
-                    <option key={partner.id} value={partner.id}>
-                      {partner.name} - CNPJ: {partner.cnpj}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Informações Complementares */}
+            <div className="mb-8">
 
-              <div className="md:col-span-2">
-                <Input
-                  type="text"
-                  placeholder="Descrição do lançamento (opcional)"
-                  value={formData.description || ''}
-                  onChange={e => handleInputChange('description', e.target.value)}
-                  label="Descrição"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="partnerId" className="text-sm font-medium text-gray-700">
+                    Parceiro (Opcional)
+                  </label>
+                  <select
+                    id="partnerId"
+                    value={formData.partnerId || ''}
+                    onChange={e => handleInputChange('partnerId', e.target.value)}
+                    className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#0c4c6e]"
+                  >
+                    <option value="">Selecione um parceiro</option>
+                    {partners.map(partner => (
+                      <option key={partner.id} value={partner.id}>
+                        {partner.name} - CNPJ: {partner.cnpj}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <Input
+                    type="text"
+                    placeholder="Descrição do lançamento (opcional)"
+                    value={formData.description || ''}
+                    onChange={e => handleInputChange('description', e.target.value)}
+                    label="Descrição"
+                  />
+                </div>
               </div>
             </div>
 

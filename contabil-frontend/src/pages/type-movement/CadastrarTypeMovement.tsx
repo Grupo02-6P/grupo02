@@ -114,7 +114,7 @@ const CadastrarTypeMovement: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <select value={formData.status} onChange={e => handleInputChange('status', e.target.value as 'ACTIVE' | 'INACTIVE')} className="w-full border border-gray-300 rounded-lg p-2">
                     <option value="ACTIVE">Ativo</option>
                     <option value="INACTIVE">Inativo</option>
@@ -122,7 +122,7 @@ const CadastrarTypeMovement: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Conta Crédito</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Conta Crédito</label>
                   {loadingAccounts ? (
                     <div className="flex items-center justify-center p-3"><LoadingSpinner /></div>
                   ) : (
@@ -145,7 +145,7 @@ const CadastrarTypeMovement: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Conta Débito</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Conta Débito</label>
                   {loadingAccounts ? (
                     <div className="flex items-center justify-center p-3"><LoadingSpinner /></div>
                   ) : (
