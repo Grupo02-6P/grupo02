@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowRight, FaUsers, FaHandshake, FaFileInvoiceDollar } from "react-icons/fa6";
+import { FaArrowRight, FaUsers, FaHandshake, FaFileInvoiceDollar, FaUserShield } from "react-icons/fa6";
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/PermissionContext';
 import { FaExchangeAlt } from 'react-icons/fa';
@@ -14,27 +14,17 @@ const Home: React.FC = () => {
 
   const atalhos = [
     {
-      title: 'Visualizar Usuários',
-      description: 'Gerenciar usuários e permissões',
-      icon: <FaUsers size={24} />,
-      href: '/usuarios/visualizar',
-      borderColor: 'border-red-400',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600',
-      permission: { resource: 'User', action: 'read' }
+      title: 'Títulos',
+      description: 'Gerenciar lançamentos de título',
+      icon: <FaFileInvoiceDollar size={24} />,
+      href: '/titulo/visualizar',
+      borderColor: 'border-orange-400',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600',
+      permission: { resource: 'Title', action: 'read' }
     },
     {
-      title: 'Gerenciar Contas',
-      description: 'Gerenciar contas contábeis',
-      icon: <MdAccountBalance size={24} />,
-      href: '/contas/gerenciar',
-      borderColor: 'border-blue-400',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
-      permission: { resource: 'Account', action: 'read' }
-    },
-    {
-      title: 'Visualizar Parceiros',
+      title: 'Parceiros',
       description: 'Gerenciar parceiros de negócios',
       icon: <FaHandshake size={24} />,
       href: '/parceiros/visualizar',
@@ -44,7 +34,17 @@ const Home: React.FC = () => {
       permission: { resource: 'Partner', action: 'read' }
     },
     {
-      title: 'Visualizar Tipos de Movimento',
+      title: 'Contas',
+      description: 'Visualizar plano de contas',
+      icon: <MdAccountBalance size={24} />,
+      href: '/contas/visualizar',
+      borderColor: 'border-blue-400',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600',
+      permission: { resource: 'Account', action: 'read' }
+    },
+    {
+      title: 'Tipos de Movimento',
       description: 'Gerenciar tipos de movimento',
       icon: <FaExchangeAlt size={24} />,
       href: '/tipo-movimento/visualizar',
@@ -54,18 +54,18 @@ const Home: React.FC = () => {
       permission: { resource: 'TypeMovement', action: 'read' }
     },
     {
-      title: 'Visualizar Tipos de Entrada',
+      title: 'Tipos de Entrada',
       description: 'Gerenciar tipos de entrada',
       icon: <MdAccountBalanceWallet size={24} />,
       href: '/tipo-entrada/visualizar',
-      borderColor: 'border-blue-400',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      borderColor: 'border-indigo-400',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-600',
       permission: { resource: 'TypeEntry', action: 'read' }
     },
     {
-      title: 'Gerar Relatórios',
-      description: 'Gere relatórios gerenciais',
+      title: 'Relatórios',
+      description: 'Gerar relatórios contábeis',
       icon: <BiSolidReport size={24} />,
       href: '/relatorios',
       borderColor: 'border-yellow-400',
@@ -74,14 +74,24 @@ const Home: React.FC = () => {
       permission: { resource: 'Report', action: 'read' }
     },
     {
-      title: 'Visualizar Lançamentos de Título',
-      description: 'Gerenciar lançamentos de título',
-      icon: <FaFileInvoiceDollar size={24} />,
-      href: '/titulo/visualizar',
-      borderColor: 'border-orange-400',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-600',
-      permission: { resource: 'Title', action: 'read' }
+      title: 'Usuários',
+      description: 'Gerenciar usuários do sistema',
+      icon: <FaUsers size={24} />,
+      href: '/usuarios/visualizar',
+      borderColor: 'border-red-400',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-600',
+      permission: { resource: 'User', action: 'read' }
+    },
+    {
+      title: 'Permissões',
+      description: 'Gerenciar perfis e permissões',
+      icon: <FaUserShield size={24} />,
+      href: '/usuarios/permissoes/visualizar',
+      borderColor: 'border-pink-400',
+      bgColor: 'bg-pink-50',
+      textColor: 'text-pink-600',
+      permission: { resource: 'Role', action: 'read' }
     },
   ]
 
@@ -148,14 +158,14 @@ const Home: React.FC = () => {
                 <div
                   key={atalho.title}
                   onClick={() => handleCardClick(atalho.href)}
-                  className={`bg-white border-l-4 ${atalho.borderColor} rounded-lg shadow-md hover:shadow-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-102 group border-gray-100`}
+                  className={`bg-white border-l-4 ${atalho.borderColor} rounded-lg shadow-md hover:shadow-lg p-6 cursor-pointer transform transition-all duration-300 hover:scale-102 group`}
                 >
                   <div className="flex items-center space-x-4">
                     <div className={`p-2 rounded-lg ${atalho.bgColor} ${atalho.textColor}`}>
                       {atalho.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1 group-hover:text-gray-900">{atalho.title}</h3>
+                      <h3 className="text-base font-semibold text-gray-800 mb-1 group-hover:text-gray-900">{atalho.title}</h3>
                       <p className="text-gray-600 text-sm">{atalho.description}</p>
                     </div>
                     <FaArrowRight className="text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" size={16} />
