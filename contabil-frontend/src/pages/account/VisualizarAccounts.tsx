@@ -244,32 +244,13 @@ const VisualizarAccounts: React.FC = () => {
                 <p className="text-gray-600 mt-1">Visualize o plano de contas com saldos e movimentações</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => {
-                  const allKeys = accounts.map(acc => String(acc.code));
-                  const newExpanded: Record<string, boolean> = {};
-                  allKeys.forEach(key => newExpanded[key] = true);
-                  setExpanded(newExpanded);
-                }}
-                className="px-4 py-2 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition text-sm"
-              >
-                Expandir Todos
-              </button>
-              <button
-                onClick={() => setExpanded({})}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
-              >
-                Recolher Todos
-              </button>
-              <button
-                onClick={() => navigate('/contas/gerenciar')}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-lg"
-              >
-                <FaCog size={16} />
-                <span>Gerenciar Contas</span>
-              </button>
-            </div>
+            <button
+              onClick={() => navigate('/contas/gerenciar')}
+              className="flex items-center space-x-2 px-6 py-3 bg-[#0c4c6e] text-white rounded-lg hover:bg-[#083f5d] transition shadow-lg"
+            >
+              <FaCog size={16} />
+              <span>Gerenciar Contas</span>
+            </button>
           </div>
         </div>
 
@@ -282,16 +263,24 @@ const VisualizarAccounts: React.FC = () => {
                 <div className="w-6 h-6" /> {/* Espaço para o botão de expandir */}
                 <span className="font-medium text-gray-700">Conta</span>
               </div>
-              <div className="flex items-center space-x-6">
-                <div className="text-center min-w-0">
-                  <span className="text-sm font-medium text-gray-700">Saldo</span>
-                </div>
-                <div className="text-center min-w-0">
-                  <span className="text-sm font-medium text-gray-700">Débito</span>
-                </div>
-                <div className="text-center min-w-0">
-                  <span className="text-sm font-medium text-gray-700">Crédito</span>
-                </div>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => {
+                    const allKeys = accounts.map(acc => String(acc.code));
+                    const newExpanded: Record<string, boolean> = {};
+                    allKeys.forEach(key => newExpanded[key] = true);
+                    setExpanded(newExpanded);
+                  }}
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-3 py-1 rounded shadow-md hover:shadow-md bg-white"
+                >
+                  Expandir
+                </button>
+                <button
+                  onClick={() => setExpanded({})}
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-3 py-1 rounded shadow-md hover:shadow-md bg-white"
+                >
+                  Recolher
+                </button>
               </div>
             </div>
           </div>
