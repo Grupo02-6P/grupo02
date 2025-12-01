@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Save, X } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UpdateTypeMovementDto } from '../../types/TypeMovement';
 import { typeMovementService } from '../../services/typeMovement';
@@ -295,10 +295,9 @@ const EditarTypeMovement: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-medium text-lg shadow-lg"
+                className="flex-1 px-6 py-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium text-lg"
               >
-                <X size={20} />
-                <span>Cancelar</span>
+                Cancelar
               </button>
 
               <button
